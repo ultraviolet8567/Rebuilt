@@ -1,16 +1,14 @@
 package frc.robot.subsystems;
 
-import org.littletonrobotics.junction.Logger;
-
 import com.ctre.phoenix6.hardware.Pigeon2;
-
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveDriveOdometry;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.util.AllianceFlipUtil;
 import frc.robot.Constants.DriveConstants;
+import frc.robot.util.AllianceFlipUtil;
+import org.littletonrobotics.junction.Logger;
 
 public class Odometry extends SubsystemBase {
 	private Swerve swerve;
@@ -18,10 +16,10 @@ public class Odometry extends SubsystemBase {
 
 	private Pigeon2 gyro;
 	private SwerveDriveOdometry odometer;
-	
+
 	public Odometry(Swerve swerve) {
 		System.out.println("[Init] Creating Odometry");
-		
+
 		this.swerve = swerve;
 
 		/* Gyro */
@@ -29,7 +27,7 @@ public class Odometry extends SubsystemBase {
 		gyro.reset();
 
 		/* Odometer */
-		odometer = new SwerveDriveOdometry(DriveConstants.kDriveKinematics, getGyrometerHeading(), 
+		odometer = new SwerveDriveOdometry(DriveConstants.kDriveKinematics, getGyrometerHeading(),
 				swerve.getModulePositions(), AllianceFlipUtil.apply(new Pose2d(1.5, 5.5, new Rotation2d())));
 
 		/* Odometry */
