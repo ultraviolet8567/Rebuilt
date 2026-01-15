@@ -3,8 +3,14 @@
 // the WPILib BSD license file in the root directory of this project.
 
 package frc.robot;
+import com.pathplanner.lib.config.ModuleConfig;
+import com.pathplanner.lib.config.PIDConstants;
+import com.pathplanner.lib.config.RobotConfig;
+import com.pathplanner.lib.controllers.PPHolonomicDriveController;
+
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
+import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.util.Units;
 
 /**
@@ -27,13 +33,26 @@ public final class Constants {
 	}
 
 	public static class ModuleConstants {
-		// CHANGE LATER:
-		public static final double kDriveEncoderRot2Meter = 0.0;
-		public static final double kDriveEncoderRPM2MeterPerSec = 0.0;
-		public static final double kTurningEncoderRot2Rad = 0.0;
-		public static final double kTurningEncoderRPM2RadPerSec = 0.0;
-		public static final double kPTurning = 0.0;
+		public static final double kWheelDiameterMeters = Units.inchesToMeters(3.95);
+		public static final double kDriveMotorGearR1Ratio = 1 / 7.03;
+		public static final double kDriveMotorGearR2Ratio = 1 / 6.03;
+		public static final double kDriveMotorGearR3Ratio = 1 / 5.27;
+		public static final double kTurningMotorGearRatio = 1 / 26;
+
+		public static final double kDriveEncoderR1Rot2Meter = kDriveMotorGearR1Ratio * Math.PI * kWheelDiameterMeters;
+		public static final double kDriveEncoderR2Rot2Meter = kDriveMotorGearR2Ratio * Math.PI * kWheelDiameterMeters;
+		public static final double kDriveEncoderR3Rot2Meter = kDriveMotorGearR3Ratio * Math.PI * kWheelDiameterMeters;
+
+		public static final double kDriveEncoderR1RPM2MeterPerSec = kDriveEncoderR1Rot2Meter / 60;
+		public static final double kDriveEncoderR2RPM2MeterPerSec = kDriveEncoderR2Rot2Meter / 60;
+		public static final double kDriveEncoderR31RPM2MeterPerSec = kDriveEncoderR3Rot2Meter / 60;
+
+		public static final double kTurningEncoderRot2Rad = kTurningMotorGearRatio * 2 * Math.PI;
+		public static final double kTurningEncoderRPM2RadPerSec = kTurningEncoderRot2Rad / 60;
+
+		public static final double kPTurning = 0.25;
 	}
+
 	// CHANGE LATER:
 	public static class DriveConstants {
 
@@ -76,7 +95,32 @@ public final class Constants {
 
 		public static final double kTeleDriveMaxAccelerationUnitsPerSecond = 0.01;
 		public static final double kTeleDriveMaxAngularAccelerationUnitsPerSecond = 0.01;
+
+		public static final double kRobotMass = 51.25;
+		public static final double kRobotMOI = 7.0;
+
+		public static final ModuleConfig kRobotModuleConfig = new ModuleConfig(ModuleConstants.kWheelDiameterMeters / 2,
+				kPhysicalMaxSpeedMetersPerSecond, 1, // friction coefficient between wheel and carpet, (unsure so 1.0)
+				DCMotor.getNEO(1), 1 / ModuleConstants.kDriveMotorGearRatio, 80, 1);
+		public static final RobotConfig kRobotConfig = new RobotConfig(kRobotMass, // mass, kg
+				kRobotMOI, // moment of inertia (why), kgm^2
+				kRobotModuleConfig, // module config
+				kDriveKinematics.getModules()); // locations of modules relative of robot center
+
 	}
+
+	public static class AutoConstants {
+		// Speeds from -1 to 1
+		public static final double kAutoXDriveSpeed = 0.0;
+		public static final double kAutoYDriveSpeed = 0.5;
+
+		public static final double kAutoTurningSpeed = 0.0;
+		public static final double kAutoAlignTolerance = 0.015;
+
+		public static final PPHolonomicDriveController kHolonomicController = new PPHolonomicDriveController(
+				new PIDConstants(0.25, 0, 0), new PIDConstants(0.5, 0, 0));
+	}
+
 	// CAN = computer area network
 	public static class CAN {
 		public static final int kFrontLeftDriveMotorPort = 0;

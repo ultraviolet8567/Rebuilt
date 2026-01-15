@@ -2,9 +2,11 @@ package frc.robot.subsystems;
 
 import com.revrobotics.spark.SparkBase.PersistMode;
 import com.revrobotics.spark.SparkBase.ResetMode;
+import com.revrobotics.spark.SparkFlex;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
+import com.revrobotics.spark.config.SparkFlexConfig;
 import com.revrobotics.spark.config.SparkMaxConfig;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
@@ -18,9 +20,9 @@ import frc.robot.Constants.ModuleConstants;
 
 //Encoder: Thing that is above wheel and records how much it moves.
 public class SwerveModule {
-	private final SparkMax driveMotor;
+	private final SparkFlex driveMotor;
 	private final SparkMax turningMotor;
-	private final SparkMaxConfig driveConfig;
+	private final SparkFlexConfig driveConfig;
 	private final SparkMaxConfig turningConfig;
 	private final PIDController turningPidController;
 	public SwerveModulePosition modulePosition;
@@ -33,10 +35,10 @@ public class SwerveModule {
 		this.ConfigOffset = ConfigOffset;
 		this.ConfigReversed = ConfigReversed;
 		absoluteEncoder = new AnalogInput(absoluteEncoderID);
-		driveMotor = new SparkMax(driveMotorID, MotorType.kBrushless);
+		driveMotor = new SparkFlex(driveMotorID, MotorType.kBrushless);
 		turningMotor = new SparkMax(turningMotorID, MotorType.kBrushless);
 
-		driveConfig = new SparkMaxConfig();
+		driveConfig = new SparkFlexConfig();
 		turningConfig = new SparkMaxConfig();
 		driveMotor.configure(driveConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
 		turningMotor.configure(turningConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);

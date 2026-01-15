@@ -3,11 +3,16 @@
 // the WPILib BSD license file in the root directory of this project.
 
 package frc.robot;
+import com.pathplanner.lib.auto.AutoBuilder;
 
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
+import frc.robot.Constants.AutoConstants;
+import frc.robot.Constants.DriveConstants;
 import frc.robot.Constants.OperatorConstants;
 import frc.robot.commands.SwerveTeleOp;
 import frc.robot.subsystems.Odometry;
@@ -41,12 +46,19 @@ public class RobotContainer {
 		odometry = new Odometry(swerve);
 
 		// Configure the PathPlanner auto-builder
-		// AutoBuilder.configureHolonomic(odometry::getOdometerPose,
-		// odometry::resetOdometerPose,
-		// swerve::getRobotRelativeSpeeds, swerve::setModuleStates,
-		// DriveConstants.kHolonomicConfig, () -> {
-
-		// }, swerve)};
+		
+		AutoBuilder.configure(
+			odometry::getPose,odometry::resetPose,
+			swerve::getRobotRelativeSpeeds,swerve::setModuleStates,
+			AutoConstants.kHolonomicController, // rotational PID
+			DriveConstants.kRobotConfig, () -> {
+				if (DriverStation.getAlliance().isPresent()) {
+					return DriverStation.getAlliance().get() == Alliance.Red;
+				}
+				return false;
+			}, 
+			swerve
+		);
 
 		swerve.setDefaultCommand(new SwerveTeleOp(swerve, odometry, () -> -driverController.getLeftY(),
 				() -> -driverController.getLeftX(), () -> -driverController.getRightX(),
