@@ -4,7 +4,10 @@
 
 package frc.robot;
 import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.config.ModuleConfig;
+import com.pathplanner.lib.config.RobotConfig;
 
+import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.XboxController;
@@ -13,6 +16,7 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants.AutoConstants;
 import frc.robot.Constants.DriveConstants;
+import frc.robot.Constants.ModuleConstants;
 import frc.robot.Constants.OperatorConstants;
 import frc.robot.commands.SwerveTeleOp;
 import frc.robot.subsystems.Odometry;
@@ -42,16 +46,25 @@ public class RobotContainer {
 	public RobotContainer() {
 		// Configure the trigger bindings
 
-		swerve = new Swerve();
+		swerve = new Swerve(ModuleConstants.kDriveMotorGearing);
 		odometry = new Odometry(swerve);
 
 		// Configure the PathPlanner auto-builder
+
+		ModuleConfig robotModuleConfig = new ModuleConfig(ModuleConstants.kWheelDiameterMeters / 2,
+				DriveConstants.kPhysicalMaxSpeedMetersPerSecond, 1, // friction coefficient between wheel and carpet, (unsure so 1.0)
+				DCMotor.getNEO(1), 1 / swerve.driveGearRatio, 80, 1);
+	
+		RobotConfig robotConfig = new RobotConfig(DriveConstants.kRobotMass, // mass, kg
+				DriveConstants.kRobotMOI, // moment of inertia (why), kgm^2
+				robotModuleConfig, // module config
+				DriveConstants.kDriveKinematics.getModules()); // locations of modules relative of robot center
 		
 		AutoBuilder.configure(
 			odometry::getPose,odometry::resetPose,
 			swerve::getRobotRelativeSpeeds,swerve::setModuleStates,
 			AutoConstants.kHolonomicController, // rotational PID
-			DriveConstants.kRobotConfig, () -> {
+			robotConfig, () -> {
 				if (DriverStation.getAlliance().isPresent()) {
 					return DriverStation.getAlliance().get() == Alliance.Red;
 				}

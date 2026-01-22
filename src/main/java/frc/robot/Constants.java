@@ -33,6 +33,8 @@ public final class Constants {
 	}
 
 	public static class ModuleConstants {
+		public static final int kDriveMotorGearing = 2;
+
 		public static final double kWheelDiameterMeters = Units.inchesToMeters(3.95);
 		public static final double kDriveMotorGearR1Ratio = 1 / 7.03;
 		public static final double kDriveMotorGearR2Ratio = 1 / 6.03;
@@ -45,7 +47,7 @@ public final class Constants {
 
 		public static final double kDriveEncoderR1RPM2MeterPerSec = kDriveEncoderR1Rot2Meter / 60;
 		public static final double kDriveEncoderR2RPM2MeterPerSec = kDriveEncoderR2Rot2Meter / 60;
-		public static final double kDriveEncoderR31RPM2MeterPerSec = kDriveEncoderR3Rot2Meter / 60;
+		public static final double kDriveEncoderR3RPM2MeterPerSec = kDriveEncoderR3Rot2Meter / 60;
 
 		public static final double kTurningEncoderRot2Rad = kTurningMotorGearRatio * 2 * Math.PI;
 		public static final double kTurningEncoderRPM2RadPerSec = kTurningEncoderRot2Rad / 60;
@@ -98,15 +100,6 @@ public final class Constants {
 
 		public static final double kRobotMass = 51.25;
 		public static final double kRobotMOI = 7.0;
-
-		public static final ModuleConfig kRobotModuleConfig = new ModuleConfig(ModuleConstants.kWheelDiameterMeters / 2,
-				kPhysicalMaxSpeedMetersPerSecond, 1, // friction coefficient between wheel and carpet, (unsure so 1.0)
-				DCMotor.getNEO(1), 1 / ModuleConstants.kDriveMotorGearRatio, 80, 1);
-		public static final RobotConfig kRobotConfig = new RobotConfig(kRobotMass, // mass, kg
-				kRobotMOI, // moment of inertia (why), kgm^2
-				kRobotModuleConfig, // module config
-				kDriveKinematics.getModules()); // locations of modules relative of robot center
-
 	}
 
 	public static class AutoConstants {

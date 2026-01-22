@@ -31,7 +31,7 @@ public class SwerveModule {
 	private final boolean ConfigReversed;
 
 	public SwerveModule(int driveMotorID, int turningMotorID, boolean driveMotorReversed, boolean turningMotorReversed,
-			int absoluteEncoderID, double ConfigOffset, boolean ConfigReversed) {
+			int absoluteEncoderID, double ConfigOffset, boolean ConfigReversed,double driveGearRatio,double driveRot2Meter,double driveRPM2MeterPerSec) {
 		this.ConfigOffset = ConfigOffset;
 		this.ConfigReversed = ConfigReversed;
 		absoluteEncoder = new AnalogInput(absoluteEncoderID);
@@ -53,8 +53,8 @@ public class SwerveModule {
 		turningConfig.idleMode(IdleMode.kBrake);
 		turningConfig.inverted(turningMotorReversed);
 
-		driveConfig.encoder.positionConversionFactor(ModuleConstants.kDriveEncoderRot2Meter);
-		driveConfig.encoder.velocityConversionFactor(ModuleConstants.kDriveEncoderRPM2MeterPerSec);
+		driveConfig.encoder.positionConversionFactor(driveRot2Meter);
+		driveConfig.encoder.velocityConversionFactor(driveRPM2MeterPerSec);
 		turningConfig.encoder.positionConversionFactor(ModuleConstants.kTurningEncoderRot2Rad);
 		turningConfig.encoder.velocityConversionFactor(ModuleConstants.kTurningEncoderRPM2RadPerSec);
 
@@ -97,7 +97,7 @@ public class SwerveModule {
 		return new SwerveModuleState(getDriveVelocity(), new Rotation2d(getTurningPosition()));
 	}
 
-	public void setDesiredState(SwerveModuleState state) {
+	public void setDesiredState(SwerveModuleState state, double throttle) {
 		if (Math.abs(state.speedMetersPerSecond) < 0.001) {
 			stop();
 		} else {
