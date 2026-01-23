@@ -46,7 +46,7 @@ public class RobotContainer {
 		// Configure the trigger bindings
 
 		swerve = new Swerve(ModuleConstants.kDriveMotorGearing);
-		odometry = new Odometry(swerve);
+		//odometry = new Odometry(swerve);
 
 		// Configure the PathPlanner auto-builder
 

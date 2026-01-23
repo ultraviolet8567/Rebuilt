@@ -22,7 +22,7 @@ public class Odometry extends SubsystemBase {
 		this.swerve = swerve;
 
 		/* Gyro */
-		gyro = new Pigeon2(31);
+		gyro = new Pigeon2(30);
 		gyro.reset();
 
 		/* Odometry */
