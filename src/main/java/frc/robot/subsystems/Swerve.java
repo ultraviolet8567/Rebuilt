@@ -6,7 +6,6 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.CAN;
 import frc.robot.Constants.DriveConstants;
 import frc.robot.Constants.ModuleConstants;
-
 import java.util.Arrays;
 
 //import org.littletonrobotics.junction.Logger;
@@ -19,23 +18,23 @@ public class Swerve extends SubsystemBase {
 	public Swerve(int gearing) {
 		System.out.println("[Init] Creating Swerve");
 
-		switch(gearing) {
-			case (1):
+		switch (gearing) {
+			case (1) :
 				driveGearRatio = ModuleConstants.kDriveMotorGearR1Ratio;
 				driveRot2Meter = ModuleConstants.kDriveEncoderR1Rot2Meter;
 				driveRPM2MeterPerSec = ModuleConstants.kDriveEncoderR1RPM2MeterPerSec;
 				break;
-			case (2):
+			case (2) :
 				driveGearRatio = ModuleConstants.kDriveMotorGearR2Ratio;
 				driveRot2Meter = ModuleConstants.kDriveEncoderR2Rot2Meter;
 				driveRPM2MeterPerSec = ModuleConstants.kDriveEncoderR2RPM2MeterPerSec;
 				break;
-			case (3):	
+			case (3) :
 				driveGearRatio = ModuleConstants.kDriveMotorGearR3Ratio;
 				driveRot2Meter = ModuleConstants.kDriveEncoderR3Rot2Meter;
 				driveRPM2MeterPerSec = ModuleConstants.kDriveEncoderR3RPM2MeterPerSec;
 				break;
-			default:
+			default :
 				driveGearRatio = ModuleConstants.kDriveMotorGearR2Ratio;
 				driveRot2Meter = ModuleConstants.kDriveEncoderR2Rot2Meter;
 				driveRPM2MeterPerSec = ModuleConstants.kDriveEncoderR2RPM2MeterPerSec;
@@ -45,29 +44,29 @@ public class Swerve extends SubsystemBase {
 				DriveConstants.kFrontLeftDriveEncoderReversed, DriveConstants.kFrontLeftTurningEncoderReversed,
 				DriveConstants.kFrontLeftDriveAbsoluteEncoderPort,
 				DriveConstants.kFrontLeftDriveAbsoluteEncoderOffsetRad,
-				DriveConstants.kFrontLeftDriveAbsoluteEncoderReversed,
-				driveGearRatio,driveRot2Meter,driveRPM2MeterPerSec);
+				DriveConstants.kFrontLeftDriveAbsoluteEncoderReversed, driveGearRatio, driveRot2Meter,
+				driveRPM2MeterPerSec);
 
 		frontRight = new SwerveModule(CAN.kFrontRightDriveMotorPort, CAN.kFrontRightTurningMotorPort,
 				DriveConstants.kFrontRightDriveEncoderReversed, DriveConstants.kFrontRightTurningEncoderReversed,
 				DriveConstants.kFrontRightDriveAbsoluteEncoderPort,
 				DriveConstants.kFrontRightDriveAbsoluteEncoderOffsetRad,
-				DriveConstants.kFrontRightDriveAbsoluteEncoderReversed,
-				driveGearRatio,driveRot2Meter,driveRPM2MeterPerSec);
+				DriveConstants.kFrontRightDriveAbsoluteEncoderReversed, driveGearRatio, driveRot2Meter,
+				driveRPM2MeterPerSec);
 
 		backLeft = new SwerveModule(CAN.kBackLeftDriveMotorPort, CAN.kBackLeftTurningMotorPort,
 				DriveConstants.kBackLeftDriveEncoderReversed, DriveConstants.kBackLeftTurningEncoderReversed,
 				DriveConstants.kBackLeftDriveAbsoluteEncoderPort, DriveConstants.kBackLeftDriveAbsoluteEncoderOffsetRad,
-				DriveConstants.kBackLeftDriveAbsoluteEncoderReversed,
-				driveGearRatio,driveRot2Meter,driveRPM2MeterPerSec);
+				DriveConstants.kBackLeftDriveAbsoluteEncoderReversed, driveGearRatio, driveRot2Meter,
+				driveRPM2MeterPerSec);
 
 		backRight = new SwerveModule(CAN.kBackRightDriveMotorPort, CAN.kBackRightTurningMotorPort,
 				DriveConstants.kBackRightDriveEncoderReversed, DriveConstants.kBackRightTurningEncoderReversed,
 				DriveConstants.kBackRightDriveAbsoluteEncoderPort,
 				DriveConstants.kBackRightDriveAbsoluteEncoderOffsetRad,
-				DriveConstants.kBackRightDriveAbsoluteEncoderReversed,
-				driveGearRatio,driveRot2Meter,driveRPM2MeterPerSec);
-		
+				DriveConstants.kBackRightDriveAbsoluteEncoderReversed, driveGearRatio, driveRot2Meter,
+				driveRPM2MeterPerSec);
+
 		throttle = 1;
 	}
 

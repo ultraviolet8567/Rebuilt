@@ -31,7 +31,8 @@ public class SwerveModule {
 	private final boolean ConfigReversed;
 
 	public SwerveModule(int driveMotorID, int turningMotorID, boolean driveMotorReversed, boolean turningMotorReversed,
-			int absoluteEncoderID, double ConfigOffset, boolean ConfigReversed,double driveGearRatio,double driveRot2Meter,double driveRPM2MeterPerSec) {
+			int absoluteEncoderID, double ConfigOffset, boolean ConfigReversed, double driveGearRatio,
+			double driveRot2Meter, double driveRPM2MeterPerSec) {
 		this.ConfigOffset = ConfigOffset;
 		this.ConfigReversed = ConfigReversed;
 		absoluteEncoder = new AnalogInput(absoluteEncoderID);

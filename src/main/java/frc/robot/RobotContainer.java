@@ -6,7 +6,6 @@ package frc.robot;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.config.ModuleConfig;
 import com.pathplanner.lib.config.RobotConfig;
-
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
@@ -52,26 +51,23 @@ public class RobotContainer {
 		// Configure the PathPlanner auto-builder
 
 		ModuleConfig robotModuleConfig = new ModuleConfig(ModuleConstants.kWheelDiameterMeters / 2,
-				DriveConstants.kPhysicalMaxSpeedMetersPerSecond, 1, // friction coefficient between wheel and carpet, (unsure so 1.0)
+				DriveConstants.kPhysicalMaxSpeedMetersPerSecond, 1, // friction coefficient between wheel and carpet,
+																	// (unsure so 1.0)
 				DCMotor.getNEO(1), 1 / swerve.driveGearRatio, 80, 1);
-	
+
 		RobotConfig robotConfig = new RobotConfig(DriveConstants.kRobotMass, // mass, kg
 				DriveConstants.kRobotMOI, // moment of inertia (why), kgm^2
 				robotModuleConfig, // module config
 				DriveConstants.kDriveKinematics.getModules()); // locations of modules relative of robot center
-		
-		AutoBuilder.configure(
-			odometry::getPose,odometry::resetPose,
-			swerve::getRobotRelativeSpeeds,swerve::setModuleStates,
-			AutoConstants.kHolonomicController, // rotational PID
-			robotConfig, () -> {
-				if (DriverStation.getAlliance().isPresent()) {
-					return DriverStation.getAlliance().get() == Alliance.Red;
-				}
-				return false;
-			}, 
-			swerve
-		);
+
+		AutoBuilder.configure(odometry::getPose, odometry::resetPose, swerve::getRobotRelativeSpeeds,
+				swerve::setModuleStates, AutoConstants.kHolonomicController, // rotational PID
+				robotConfig, () -> {
+					if (DriverStation.getAlliance().isPresent()) {
+						return DriverStation.getAlliance().get() == Alliance.Red;
+					}
+					return false;
+				}, swerve);
 
 		swerve.setDefaultCommand(new SwerveTeleOp(swerve, odometry, () -> -driverController.getLeftY(),
 				() -> -driverController.getLeftX(), () -> -driverController.getRightX(),
