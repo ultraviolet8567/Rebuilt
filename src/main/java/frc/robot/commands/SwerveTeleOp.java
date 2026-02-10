@@ -12,6 +12,7 @@ import frc.robot.RobotContainer;
 import frc.robot.subsystems.Odometry;
 import frc.robot.subsystems.Swerve;
 import java.util.function.Supplier;
+import org.littletonrobotics.junction.Logger;
 
 public class SwerveTeleOp extends Command {
   private final Swerve swerve;
@@ -53,7 +54,7 @@ public class SwerveTeleOp extends Command {
     xSpeed *= (xSpeed > 0) ? (1.0 / 0.8) : (1.0 / 0.9);
     ySpeed *= (1.0 / 0.9);
 
-    if (Math.sqrt(Math.pow(xSpeed, 2)) < OIConstants.kDeadband) {
+    if (Math.sqrt(Math.pow(xSpeed, 2) + Math.pow(ySpeed, 2)) < OIConstants.kDeadband) {
       xSpeed = 0;
       ySpeed = 0;
     }
@@ -72,17 +73,21 @@ public class SwerveTeleOp extends Command {
     ySpeed = MathUtil.clamp(ySpeed, -1, 1);
     turningSpeed = MathUtil.clamp(turningSpeed, -1, 1);
 
+    Logger.recordOutput("SwerveTeleOp/SwerveTeleOp/xSpeed", xSpeed);
+    Logger.recordOutput("SwerveTeleOp/SwerveTeleOp/ySpeed", ySpeed);
+    Logger.recordOutput("SwerveTeleOp/SwerveTeleOp/turningSpeed", turningSpeed);
+
     // double teleMaxSpeed = Lights.getInstance().isDemo
     // ? DriveConstants.kDemoTeleDriveMaxSpeedMetersPerSecond
     // : DriveConstants.kTeleDriveMaxSpeedMetersPersecond;
     // double teleMaxAngularSpeed = Lights.getInstance().isDemo?
     // DriveConstants.kDemoTeleDriveMaxAngularSpeedRadiansPerSecond
     // : DriveConstants.kTeleDriveMaxAngularSpeedRadiansPerSecond;
-    double teleMaxSpeed = 0.01;
-    double teleMaxAngularSpeed = 0.01;
-    xSpeed = xLimiter.calculate(xSpeed) * teleMaxSpeed;
-    ySpeed = yLimiter.calculate(ySpeed) * teleMaxSpeed;
-    turningSpeed = turningLimiter.calculate(turningSpeed) * teleMaxAngularSpeed;
+    xSpeed = xLimiter.calculate(xSpeed) * DriveConstants.kTeleDriveMaxSpeedMetersPerSecond;
+    ySpeed = yLimiter.calculate(ySpeed) * DriveConstants.kTeleDriveMaxSpeedMetersPerSecond;
+    turningSpeed =
+        turningLimiter.calculate(turningSpeed)
+            * DriveConstants.kTeleDriveMaxAngularSpeedRadiansPerSecond;
 
     ChassisSpeeds chassisSpeeds;
     if (Constants.fieldOriented) {

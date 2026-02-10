@@ -7,8 +7,7 @@ import frc.robot.Constants.CAN;
 import frc.robot.Constants.DriveConstants;
 import frc.robot.Constants.ModuleConstants;
 import java.util.Arrays;
-
-// import org.littletonrobotics.junction.Logger;
+import org.littletonrobotics.junction.Logger;
 
 public class Swerve extends SubsystemBase {
   private final SwerveModule frontLeft, frontRight, backLeft, backRight;
@@ -95,6 +94,25 @@ public class Swerve extends SubsystemBase {
     throttle = 1;
   }
 
+  public void periodic() {
+    Logger.recordOutput("Swerve/ModuleStates", getModuleStates());
+
+    Logger.recordOutput(
+        "Swerve/FrontLeft/AbsoluteEncoderAngle", frontLeft.getAbsoluteEncoderAngle());
+    Logger.recordOutput(
+        "Swerve/FrontRight/AbsoluteEncoderAngle", frontRight.getAbsoluteEncoderAngle());
+    Logger.recordOutput("Swerve/BackLeft/AbsoluteEncoderAngle", backLeft.getAbsoluteEncoderAngle());
+    Logger.recordOutput(
+        "Swerve/BackRight/AbsoluteEncoderAngle", backRight.getAbsoluteEncoderAngle());
+
+    Logger.recordOutput("Swerve/FrontLeft/DriveVelocity", Math.abs(frontLeft.getDriveVelocity()));
+    Logger.recordOutput("Swerve/FrontRight/DriveVelocity", Math.abs(frontRight.getDriveVelocity()));
+    Logger.recordOutput("Swerve/BackLeft/DriveVelocity", Math.abs(backLeft.getDriveVelocity()));
+    Logger.recordOutput("Swerve/BackRight/DriveVelocity", Math.abs(backRight.getDriveVelocity()));
+
+    resetEncoders();
+  }
+
   public double getDriveGearRatio() {
     return driveGearRatio;
   }
@@ -129,6 +147,7 @@ public class Swerve extends SubsystemBase {
   public void setModuleStates(ChassisSpeeds chassisSpeeds) {
     SwerveModuleState[] moduleStates =
         DriveConstants.kDriveKinematics.toSwerveModuleStates(chassisSpeeds);
+    Logger.recordOutput("TargetState", moduleStates);
     setModuleStates(moduleStates);
   }
 

@@ -1,7 +1,7 @@
 package frc.robot.subsystems;
 
-import com.revrobotics.spark.SparkBase.PersistMode;
-import com.revrobotics.spark.SparkBase.ResetMode;
+import com.revrobotics.PersistMode;
+import com.revrobotics.ResetMode;
 import com.revrobotics.spark.SparkFlex;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.SparkMax;
@@ -100,6 +100,10 @@ public class SwerveModule {
     return angle * (ConfigReversed ? -1 : 1);
   }
 
+  public double getAbsoluteEncoderVoltage() {
+    return absoluteEncoder.getAverageVoltage();
+  }
+
   public void resetEncoders() {
     driveMotor.getEncoder().setPosition(0);
     turningMotor.getEncoder().setPosition(getAbsoluteEncoderAngle());
@@ -115,6 +119,7 @@ public class SwerveModule {
     } else {
       state.optimize(getState().angle);
 
+      // Logger.recordOutput("SwerveModule/" + turningMotor.getDeviceId() + "/State", state);
       driveMotor.set(state.speedMetersPerSecond / DriveConstants.kPhysicalMaxSpeedMetersPerSecond);
       turningMotor.set(
           turningPidController.calculate(getTurningPosition(), state.angle.getRadians()));

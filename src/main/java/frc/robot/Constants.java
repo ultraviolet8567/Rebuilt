@@ -34,7 +34,7 @@ public final class Constants {
     public static final double kDriveMotorGearR1Ratio = 1 / 7.03;
     public static final double kDriveMotorGearR2Ratio = 1 / 6.03;
     public static final double kDriveMotorGearR3Ratio = 1 / 5.27;
-    public static final double kTurningMotorGearRatio = 1 / 26;
+    public static final double kTurningMotorGearRatio = 1 / 26.0;
 
     public static final double kDriveEncoderR1Rot2Meter =
         kDriveMotorGearR1Ratio * Math.PI * kWheelDiameterMeters;
@@ -87,13 +87,16 @@ public final class Constants {
     public static final boolean kBackRightDriveAbsoluteEncoderReversed = false;
     public static final int kBackRightDriveAbsoluteEncoderPort = 3;
 
-    public static final double kFrontLeftDriveAbsoluteEncoderOffsetRad = 0.00;
-    public static final double kFrontRightDriveAbsoluteEncoderOffsetRad = 0.00;
-    public static final double kBackLeftDriveAbsoluteEncoderOffsetRad = 0.00;
-    public static final double kBackRightDriveAbsoluteEncoderOffsetRad = 0.00;
+    public static final double kFrontLeftDriveAbsoluteEncoderOffsetRad = -0.645 + Math.PI;
+    public static final double kFrontRightDriveAbsoluteEncoderOffsetRad = -1.497;
+    public static final double kBackLeftDriveAbsoluteEncoderOffsetRad = 1.985;
+    public static final double kBackRightDriveAbsoluteEncoderOffsetRad = -1.529 + Math.PI;
 
     public static final double kPhysicalMaxSpeedMetersPerSecond = 4.5;
-    public static final double kTeleDriveMaxSpeedMetersPerSecond = 4.5;
+    public static final double kPhysicalMaxAngularSpeedRadiansPerSecond = 3 * Math.PI;
+
+    public static final double kTeleDriveMaxSpeedMetersPerSecond = 0.5;
+    public static final double kTeleDriveMaxAngularSpeedRadiansPerSecond = 3 * Math.PI;
 
     public static final double kTeleDriveMaxAccelerationUnitsPerSecond = 3;
     public static final double kTeleDriveMaxAngularAccelerationUnitsPerSecond = 3 * Math.PI;
