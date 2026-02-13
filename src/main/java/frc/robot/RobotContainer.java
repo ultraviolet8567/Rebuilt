@@ -21,80 +21,80 @@ import frc.robot.subsystems.Swerve;
  * subsystems, commands, and trigger mappings) should be declared here.
  */
 public class RobotContainer {
-  // The robot's subsystems and commands are defined here...
-  private Swerve swerve;
-  private Odometry odometry;
+    // The robot's subsystems and commands are defined here...
+    private Swerve swerve;
+    private Odometry odometry;
 
-  // Replace with CommandPS4Controller or CommandJoystick if needed
-  private static final CommandXboxController driverController =
-      new CommandXboxController(OperatorConstants.kDriverControllerPort);
-  private static final CommandXboxController operatorController =
-      new CommandXboxController(OperatorConstants.kOperatorControllerPort);
+    // Replace with CommandPS4Controller or CommandJoystick if needed
+    private static final CommandXboxController driverController =
+            new CommandXboxController(OperatorConstants.kDriverControllerPort);
+    private static final CommandXboxController operatorController =
+            new CommandXboxController(OperatorConstants.kOperatorControllerPort);
 
-  /** The container for the robot. Contains subsystems, OI devices, and commands. */
-  public RobotContainer() {
-    // Configure the trigger bindings
+    /** The container for the robot. Contains subsystems, OI devices, and commands. */
+    public RobotContainer() {
+        // Configure the trigger bindings
 
-    swerve = new Swerve(ModuleConstants.kDriveMotorGearing);
-    odometry = new Odometry(swerve);
+        swerve = new Swerve(ModuleConstants.kDriveMotorGearing);
+        odometry = new Odometry(swerve);
 
-    // Configure the PathPlanner auto-builder
+        // Configure the PathPlanner auto-builder
 
-    /*
-    ModuleConfig robotModuleConfig = new ModuleConfig(ModuleConstants.kWheelDiameterMeters / 2,
-    		DriveConstants.kPhysicalMaxSpeedMetersPerSecond, 1, // friction coefficient between wheel and carpet,
-    															// (unsure so 1.0)
-    		DCMotor.getNEO(1), 1 / swerve.driveGearRatio, 80, 1);
+        /*
+        ModuleConfig robotModuleConfig = new ModuleConfig(ModuleConstants.kWheelDiameterMeters / 2,
+                DriveConstants.kPhysicalMaxSpeedMetersPerSecond, 1, // friction coefficient between wheel and carpet,
+                                                                    // (unsure so 1.0)
+                DCMotor.getNEO(1), 1 / swerve.driveGearRatio, 80, 1);
 
-    RobotConfig robotConfig = new RobotConfig(DriveConstants.kRobotMass, // mass, kg
-    		DriveConstants.kRobotMOI, // moment of inertia (why), kgm^2
-    		robotModuleConfig, // module config
-    		DriveConstants.kDriveKinematics.getModules()); // locations of modules relative of robot center
+        RobotConfig robotConfig = new RobotConfig(DriveConstants.kRobotMass, // mass, kg
+                DriveConstants.kRobotMOI, // moment of inertia (why), kgm^2
+                robotModuleConfig, // module config
+                DriveConstants.kDriveKinematics.getModules()); // locations of modules relative of robot center
 
-    AutoBuilder.configure(odometry::getPose, odometry::resetPose, swerve::getRobotRelativeSpeeds,
-    		swerve::setModuleStates, AutoConstants.kHolonomicController, // rotational PID
-    		robotConfig, () -> {
-    			if (DriverStation.getAlliance().isPresent()) {
-    				return DriverStation.getAlliance().get() == Alliance.Red;
-    			}
-    			return false;
-    		}, swerve);
-    */
+        AutoBuilder.configure(odometry::getPose, odometry::resetPose, swerve::getRobotRelativeSpeeds,
+                swerve::setModuleStates, AutoConstants.kHolonomicController, // rotational PID
+                robotConfig, () -> {
+                    if (DriverStation.getAlliance().isPresent()) {
+                        return DriverStation.getAlliance().get() == Alliance.Red;
+                    }
+                    return false;
+                }, swerve);
+        */
 
-    swerve.setDefaultCommand(
-        new SwerveTeleOp(
-            swerve,
-            odometry,
-            () -> -driverController.getLeftY(),
-            () -> -driverController.getLeftX(),
-            () -> -driverController.getRightX(),
-            () -> driverController.getHID().getRightBumperButton()));
+        swerve.setDefaultCommand(
+                new SwerveTeleOp(
+                        swerve,
+                        odometry,
+                        () -> -driverController.getLeftY(),
+                        () -> -driverController.getLeftX(),
+                        () -> -driverController.getRightX(),
+                        () -> driverController.getHID().getRightBumperButton()));
 
-    configureBindings();
-  }
+        configureBindings();
+    }
 
-  /**
-   * Use this method to define your trigger->command mappings. Triggers can be created via the
-   * {@link Trigger#Trigger(java.util.function.BooleanSupplier)} constructor with an arbitrary
-   * predicate, or via the named factories in {@link
-   * edu.wpi.first.wpilibj2.command.button.CommandGenericHID}'s subclasses for {@link
-   * CommandXboxController Xbox}/{@link edu.wpi.first.wpilibj2.command.button.CommandPS4Controller
-   * PS4} controllers or {@link edu.wpi.first.wpilibj2.command.button.CommandJoystick Flight
-   * joysticks}.
-   */
-  private void configureBindings() {}
+    /**
+     * Use this method to define your trigger->command mappings. Triggers can be created via the
+     * {@link Trigger#Trigger(java.util.function.BooleanSupplier)} constructor with an arbitrary
+     * predicate, or via the named factories in {@link
+     * edu.wpi.first.wpilibj2.command.button.CommandGenericHID}'s subclasses for {@link
+     * CommandXboxController Xbox}/{@link edu.wpi.first.wpilibj2.command.button.CommandPS4Controller
+     * PS4} controllers or {@link edu.wpi.first.wpilibj2.command.button.CommandJoystick Flight
+     * joysticks}.
+     */
+    private void configureBindings() {}
 
-  /**
-   * Use this to pass the autonomous command to the main {@link Robot} class.
-   *
-   * @return the command to run in autonomous
-   */
-  public Command getAutonomousCommand() {
-    // An example command will be run in autonomous
-    return null;
-  }
+    /**
+     * Use this to pass the autonomous command to the main {@link Robot} class.
+     *
+     * @return the command to run in autonomous
+     */
+    public Command getAutonomousCommand() {
+        // An example command will be run in autonomous
+        return null;
+    }
 
-  public static XboxController getDriverJoystick() {
-    return driverController.getHID();
-  }
+    public static XboxController getDriverJoystick() {
+        return driverController.getHID();
+    }
 }
