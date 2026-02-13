@@ -37,6 +37,7 @@ public class Odometry extends SubsystemBase {
     public void periodic() {
         Logger.recordOutput("Odometry/Pose", getPose());
         Logger.recordOutput("Odometry/Heading", getHeading());
+        Logger.recordOutput("Odometry/GyroHeading", getGyrometerHeading());
 
         // Odometry
         poseEstimator.update(getGyrometerHeading(), swerve.getModulePositions());

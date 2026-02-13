@@ -55,12 +55,12 @@ public class SwerveTeleOp extends Command {
         ySpeed *= (1.0 / 0.9);
 
         if (Math.abs(xSpeed) < OIConstants.kDeadband) {
-			xSpeed = 0;
-		}
-		if (Math.abs(ySpeed) < OIConstants.kDeadband) {
-			ySpeed = 0;
-		}
-		turningSpeed = Math.abs(turningSpeed) > OIConstants.kDeadband ? turningSpeed : 0;
+            xSpeed = 0;
+        }
+        if (Math.abs(ySpeed) < OIConstants.kDeadband) {
+            ySpeed = 0;
+        }
+        turningSpeed = Math.abs(turningSpeed) > OIConstants.kDeadband ? turningSpeed : 0;
 
         if (rightBumper.get()) {
             RobotContainer.getDriverJoystick().setRumble(RumbleType.kRightRumble, 0.025);
@@ -75,17 +75,13 @@ public class SwerveTeleOp extends Command {
         ySpeed = MathUtil.clamp(ySpeed, -1, 1);
         turningSpeed = MathUtil.clamp(turningSpeed, -1, 1);
 
-        Logger.recordOutput("SwerveTeleOp/SwerveTeleOp/xSpeed", xSpeed);
-        Logger.recordOutput("SwerveTeleOp/SwerveTeleOp/ySpeed", ySpeed);
-        Logger.recordOutput("SwerveTeleOp/SwerveTeleOp/turningSpeed", turningSpeed);
-
         // double teleMaxSpeed = Lights.getInstance().isDemo
         // ? DriveConstants.kDemoTeleDriveMaxSpeedMetersPerSecond
         // : DriveConstants.kTeleDriveMaxSpeedMetersPersecond;
         // double teleMaxAngularSpeed = Lights.getInstance().isDemo?
         // DriveConstants.kDemoTeleDriveMaxAngularSpeedRadiansPerSecond
         // : DriveConstants.kTeleDriveMaxAngularSpeedRadiansPerSecond;
-        
+
         xSpeed = xLimiter.calculate(xSpeed) * DriveConstants.kTeleDriveMaxSpeedMetersPerSecond;
         ySpeed = yLimiter.calculate(ySpeed) * DriveConstants.kTeleDriveMaxSpeedMetersPerSecond;
         turningSpeed =
@@ -96,10 +92,16 @@ public class SwerveTeleOp extends Command {
         if (Constants.fieldOriented) {
             chassisSpeeds =
                     ChassisSpeeds.fromFieldRelativeSpeeds(
-                            xSpeed, ySpeed, turningSpeed, odometry.getHeading());
+                            -xSpeed, -ySpeed, -turningSpeed, odometry.getHeading());
         } else {
-            chassisSpeeds = new ChassisSpeeds(xSpeed, ySpeed, turningSpeed);
+            chassisSpeeds = new ChassisSpeeds(-xSpeed, -ySpeed, -turningSpeed);
         }
+
+        Logger.recordOutput("SwerveTeleOp/SwerveTeleOp/chassisSpeeds", chassisSpeeds);
+
+        Logger.recordOutput("SwerveTeleOp/SwerveTeleOp/xSpeed", xSpeed);
+        Logger.recordOutput("SwerveTeleOp/SwerveTeleOp/ySpeed", ySpeed);
+        Logger.recordOutput("SwerveTeleOp/SwerveTeleOp/turningSpeed", turningSpeed);
 
         swerve.setModuleStates(chassisSpeeds);
     }
