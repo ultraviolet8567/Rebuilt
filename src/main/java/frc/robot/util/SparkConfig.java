@@ -16,7 +16,7 @@ public class SparkConfig {
 	 * @param type
 	 *            Type of Spark object
 	 */
-	public static void config(SparkBase spark, SparkType type, IdleMode idleMode) {
+	public static void Sparkconfig(SparkBase spark, SparkType type, IdleMode idleMode) {
 		restoreFactoryDefaults();
 		setSmartCurrentLimit(type.getCurrentLimit());
 		enableVoltageCompensation(120.0);

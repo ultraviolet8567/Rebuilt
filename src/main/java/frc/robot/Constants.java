@@ -119,126 +119,113 @@ public final class Constants {
         public static final double kRobotMass = 25;
         public static final double kRobotMOI = 7.0;
     }
-public static final class ArmConstants {
-		public static final int kArmEncoderPort = 5;
-		public static final double kArmEncoderOffset = -2.65016;
-		public static final boolean kArmEncoderReversed = true;
 
-		// Physics
-		public static final double kArmLength = 0.58;
-		public static final double kArmReduction = 144.0;
-		public static final double kArmJKgMetersSquared = 0.515;
+public static final class ShooterConstants {
 
-		// Constraints
-		public static final double kMaxArmAngle = -0.084;
-		public static final double kMinArmAngle = -1.76625;
+    public static final double shooterDemoScaleFactor = 0.25;
 
-		public static final LoggedTunableNumber kMaxSpeed = new LoggedTunableNumber("Arm/Max Speed", 4.5);
-		public static final LoggedTunableNumber kMaxAcceleration = new LoggedTunableNumber("Arm/Max Acceleration", 1);
-		public static final LoggedTunableNumber kManualVoltage = new LoggedTunableNumber("Arm/ManualVoltage", 8);
+    public static final double kFlywheelReduction = 1.0;
+    public static final double kKickerReduction = 3.0;
+    public static final double kHoodReduction = 25.0;
 
-		
+    public static final double kVelocityThreshold = 0.8;
+    public static final double kVelocityThresholdLow = 0.6;
 
-		// Control
-		public static final LoggedTunableNumber kArmPIDTolerance = new LoggedTunableNumber("Arm/PID Tolerance", 0.0001);
-		public static final double kSetpointTolerance = 0.2;
+    public static final double kFlywheelVoltage = 9;
+    public static final LoggedTunableNumber kKickerVoltage = new LoggedTunableNumber("Shooter/Kicker Voltage", 10.0);
 
-		// Arm characterization
-		public static final SysIdRoutine.Config characterizationConfig = new SysIdRoutine.Config(
-				Volts.of(2).per(Seconds.of(1)), Volts.of(5), Seconds.of(5));
-	}
-    public static final class ShooterConstants {
+    public static final LoggedTunableNumber kShooterPIDTolerance = new LoggedTunableNumber("Shooter/PID Tolerance",
+            0.5);
 
-		public static final double shooterDemoScaleFactor = 0.25;
+    // TODO: Change to computed value
+    public static final LoggedTunableNumber kAutoShooterExitVel = new LoggedTunableNumber(
+            "Auto Shooter Exit Velocity", 10);
 
-		public static final double kShooterReduction = 1.0;
+    // Constants for auto-aiming
+    public static final boolean ampUpperEntry = false;
+    public static final boolean speakerUpperEntry = true;
 
-		public static final double kVelocityThreshold = 0.8;
-		public static final double kVelocityThresholdLow = 0.6;
+    public static final double ampHoriEntryRange = Math.PI / 6;
+    public static final double speakerHoriEntryRange = Math.PI / 2;
+            // PID values
+            public static final double kFlywheelP = 0.0;
+    public static final double kFlywheelI = 0.0;
+    public static final double kFlywheelD = 0.0;
+    public static final double kFlywheelS = 0.0;
+    public static final double kFlywheelG = 0.0;
+    public static final double kFlywheelV = 0.0;
 
-		public static final LoggedTunableNumber kShooterPIDTolerance = new LoggedTunableNumber("Shooter/PID Tolerance",
-				0.5);
+    public static final double kHoodP = 0.0;
+    public static final double kHoodI = 0.0;
+    public static final double kHoodD = 0.0;
+    public static final double kHoodS = 0.0;
+    public static final double kHoodG = 0.0;
+    public static final double kHoodV = 0.0;
+}
 
-		// TODO: Change to computed value
-		public static final LoggedTunableNumber kAutoShooterExitVel = new LoggedTunableNumber(
-				"Auto Shooter Exit Velocity", 10);
+public static class AutoConstants {
+    // Speeds from -1 to 1
+    public static final double kAutoXDriveSpeed = 0.0;
+    public static final double kAutoYDriveSpeed = 0.5;
 
-		// Constants for auto-aiming
-		public static final boolean ampUpperEntry = false;
-		public static final boolean speakerUpperEntry = true;
+    public static final double kAutoTurningSpeed = 0.0;
+    public static final double kAutoAlignTolerance = 0.015;
 
-		public static final double ampHoriEntryRange = Math.PI / 6;
-		public static final double speakerHoriEntryRange = Math.PI / 2;
-                // PID values
-                public static final double kP = 0.0;
-		public static final double kI = 0.0;
-		public static final double kD = 0.0;
-		public static final double kS = 0.0;
-		public static final double kG = 0.0;
-		public static final double kV = 0.0;
-	}
+    public static final PPHolonomicDriveController kHolonomicController =
+            new PPHolonomicDriveController(
+                    new PIDConstants(0.25, 0, 0), new PIDConstants(0.5, 0, 0));
+}
 
-    public static class AutoConstants {
-        // Speeds from -1 to 1
-        public static final double kAutoXDriveSpeed = 0.0;
-        public static final double kAutoYDriveSpeed = 0.5;
+// CAN = computer area network
+public static class CAN {
+    public static final int kFrontLeftDriveMotorPort = 10;
+    public static final int kFrontLeftTurningMotorPort = 20;
 
-        public static final double kAutoTurningSpeed = 0.0;
-        public static final double kAutoAlignTolerance = 0.015;
+    public static final int kFrontRightDriveMotorPort = 11;
+    public static final int kFrontRightTurningMotorPort = 21;
 
-        public static final PPHolonomicDriveController kHolonomicController =
-                new PPHolonomicDriveController(
-                        new PIDConstants(0.25, 0, 0), new PIDConstants(0.5, 0, 0));
-    }
+    public static final int kBackLeftDriveMotorPort = 12;
+    public static final int kBackLeftTurningMotorPort = 22;
 
-    // CAN = computer area network
-    public static class CAN {
-        public static final int kFrontLeftDriveMotorPort = 10;
-        public static final int kFrontLeftTurningMotorPort = 20;
+    public static final int kBackRightDriveMotorPort = 13;
+    public static final int kBackRightTurningMotorPort = 23;
+    
+    public static final int kFlywheelLeadPort = 1;
+    public static final int kFlywheelFollowerPort = 2;
 
-        public static final int kFrontRightDriveMotorPort = 11;
-        public static final int kFrontRightTurningMotorPort = 21;
+    public static final int kKickerPort = 3;
+    
+    public static final int kHoodPort = 4;
 
-        public static final int kBackLeftDriveMotorPort = 12;
-        public static final int kBackLeftTurningMotorPort = 22;
+    public static final int kHoodEncoderPort = 0; 
+}
+public static final class GainsConstants {
+    public static final Gains shooterTopGains {
+        new Gains(0.00000065361, 0.0, 0.0, 0.0091151, 0.0018015, 0.0, 0.0);
+                    };
+    public static final Gains shooterBottomGains{
+        new Gains(0.000001136, 0.0, 0.0, 0.06427, 0.0018144, 0.0, 0.0);
+    };
 
-        public static final int kBackRightDriveMotorPort = 13;
-        public static final int kBackRightTurningMotorPort = 23;
-        
-        public static final int kflywheelleadPort = 1;
-        public static final int kflywheelfollowerPort = 2;
+}
 
-        public static final int kkickerport = 3;
-        
-        public static final int khoodport = 4;
-    }
-    public static final class GainsConstants {
-		public static final Gains shooterTopGains {
-			new Gains(0.00000065361, 0.0, 0.0, 0.0091151, 0.0018015, 0.0, 0.0);
-                        };
-		public static final Gains shooterBottomGains{
-			new Gains(0.000001136, 0.0, 0.0, 0.06427, 0.0018144, 0.0, 0.0);
-		};
-
-	}
-
-	public record Gains(double kP, double kI, double kD, double ffkS, double ffkV, double ffkA, double ffkG) {
-	}
+public record Gains(double kP, double kI, double kD, double ffkS, double ffkV, double ffkA, double ffkG) {
+}
 
 
-    public static class OIConstants {
-        public static final ControllerType controllerTypeDriver = ControllerType.XBOX;
-        public static final ControllerType controllerTypeOperator = ControllerType.XBOX;
+public static class OIConstants {
+    public static final ControllerType controllerTypeDriver = ControllerType.XBOX;
+    public static final ControllerType controllerTypeOperator = ControllerType.XBOX;
 
-        public static final int kDriverControllerPort = 0;
-        public static final int kOperatorControllerPort = 1;
+    public static final int kDriverControllerPort = 0;
+    public static final int kOperatorControllerPort = 1;
 
-        public static final double kDeadband = 0.1;
-    }
+    public static final double kDeadband = 0.1;
+}
 
-    public static enum ControllerType {
-        XBOX,
-        LOGITECH,
-        JOYSTICK
-    }
+public static enum ControllerType {
+    XBOX,
+    LOGITECH,
+    JOYSTICK
+}
 }

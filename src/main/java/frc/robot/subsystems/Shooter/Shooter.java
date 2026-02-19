@@ -2,6 +2,8 @@ package frc.robot.subsystems.Shooter;
 
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.ShooterConstants;
+import frc.robot.subsystems.Shooter.ShooterIO.ShooterIOInputs;
+
 // import frc.robot.subsystems.Lights;
 import org.littletonrobotics.junction.Logger;
 
@@ -9,18 +11,19 @@ public class Shooter extends SubsystemBase {
     
 
 	private final ShooterIO io;
-        /*
-         * Initialize all components and one-time logic to be completed on boot-up here
-         */
-        public Shooter(ShooterIO io) {
-            this.io = io;
+	private final ShooterIOInputs inputs = new ShooterIOInputs();
+	/*
+	* Initialize all components and one-time logic to be completed on boot-up here
+	*/
+    public Shooter(ShooterIO io) {
+        this.io = io;
 	}
 
 	/* Runs periodically (about once every 20 ms) */
 	@Override
 	public void periodic() {
 		io.updateInputs(inputs);
-		Logger.processInputs("Shooter", inputs);
+		// Logger.processInputs("Shooter", inputs);
 
 		Logger.recordOutput("Shooter/TargetVelocity", getTargetVelocity());
 		Logger.recordOutput("Shooter/AtVelocity", atVelocity());
@@ -28,12 +31,12 @@ public class Shooter extends SubsystemBase {
 
 	public void shoot() {
 		double targetVel = getTargetVelocity();
-		io.setVelocity(targetVel, targetVel);
+		io.setFlywheelVelocity(targetVel);
 	}
 
 	public void shoot(double scaleDown) {
 		double targetVel = scaleDown * getTargetVelocity();
-		io.setVelocity(targetVel, targetVel);
+		io.setFlywheelVelocity(targetVel);
 	}
 
 	public boolean atVelocity() {
@@ -56,15 +59,28 @@ public class Shooter extends SubsystemBase {
 			case TRAP -> ShooterConstants.kTrapRPM.get();
 			default -> ShooterConstants.kIdleRPM.get();
 		};
-
+/* 
 		if (Lights.getInstance().isDemo && vel >= 800) {
 			return ShooterConstants.shooterDemoScaleFactor * vel;
 		} else {
-			return vel;
-		}
+*/
+		return vel;
+		// }
 	}
 
-	public void stop() {
-		io.stop();
+	public void kickIn() {
+		io.setFlywheelInputVoltage(ShooterConstants.kKickerVoltage.get());
+	}
+
+	public void stopFlywheel() {
+		io.stopFlywheel();
+	}
+
+	public void stopKicker() {
+		io.stopKicker();
+	}
+
+	public void stopHood() {
+		io.stopHood();
 	}
 }

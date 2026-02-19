@@ -12,55 +12,75 @@ import com.revrobotics.spark.config.SparkBaseConfig;
 import com.revrobotics.spark.config.SparkMaxConfig;
 import com.revrobotics.spark.config.SparkFlexConfig;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
+import com.revrobotics.AbsoluteEncoder;
 import com.revrobotics.RelativeEncoder;
+
+import edu.wpi.first.math.controller.ElevatorFeedforward;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
+import edu.wpi.first.wpilibj.DutyCycleEncoder;
 import frc.robot.Constants.CAN;
 import frc.robot.Constants.ShooterConstants;
+import org.littletonrobotics.junction.Logger;
 
 
 public class ShooterIOSparkMax implements ShooterIO {
-	private final SparkFlex flywheelleadMotor, flywheelfollowerMotor;
+	private final SparkFlex flywheelLeadMotor, flywheelFollowerMotor;
     private final SparkMax kickerMotor, hoodMotor;
-    private final SparkFlexConfig flywheelleadConfig, flywheelfollowerConfig;
-     private final SparkMaxConfig kickerConfig, hoodConfig;
-	private final RelativeEncoder hoodEncoder;
-	private final PIDController shooterTopPID, shooterBottomPID;
-	private SimpleMotorFeedforward shooterTopFF, shooterBottomFF;
+    private final SparkFlexConfig flywheelLeadConfig, flywheelFollowerConfig;
+    private final SparkMaxConfig kickerConfig, hoodConfig;
+	private final DutyCycleEncoder hoodEncoder;
+	private final RelativeEncoder hoodMotorEncoder, flywheelLeadEncoder, flywheelFollowerEncoder, kickerEncoder;
+	private final PIDController flywheelPID, hoodPID;
+	private SimpleMotorFeedforward flywheelFF, hoodFF;
 
 	private double topTarget, bottomTarget;
 
 	public ShooterIOSparkMax() {
 		System.out.println("[Init] Creating ShooterIOSparkMax");
 
-		flywheelleadMotor = new SparkFlex(CAN.kflywheelleadPort, MotorType.kBrushless);
-		flywheelleadConfig = new SparkFlexConfig();
-		flywheelleadMotor.setInverted(false);
+		flywheelPID = new PIDController(ShooterConstants.kFlywheelP, ShooterConstants.kFlywheelI, ShooterConstants.kFlywheelD);
+		flywheelFF = new SimpleMotorFeedforward(ShooterConstants.kFlywheelS, ShooterConstants.kFlywheelG, ShooterConstants.kFlywheelV);
 
-		flywheelfollowerMotor = new SparkFlex(CAN.kflywheelfollowerPort, MotorType.kBrushless);
-		flywheelfollowerConfig = new SparkFlexConfig();
-		flywheelfollowerMotor.setInverted(false);
+		hoodPID = new PIDController(ShooterConstants.kHoodP, ShooterConstants.kHoodI, ShooterConstants.kHoodD);
+		hoodFF = new SimpleMotorFeedforward(ShooterConstants.kHoodS, ShooterConstants.kHoodG, EShooterConstants.kHoodV);
 
-        kickerMotor = new SparkMax(CAN.kkickerport, MotorType.kBrushless);
+		flywheelLeadMotor = new SparkFlex(CAN.kFlywheelLeadPort, MotorType.kBrushless);
+		flywheelLeadConfig = new SparkFlexConfig();
+		flywheelLeadEncoder = flywheelLeadMotor.getEncoder();
+		flywheelLeadConfig.encoder.velocityConversionFactor(1.0 / ShooterConstants.kFlywheelReduction);
+
+		flywheelFollowerMotor = new SparkFlex(CAN.kFlywheelFollowerPort, MotorType.kBrushless);
+		flywheelFollowerConfig = new SparkFlexConfig();
+		flywheelFollowerEncoder = flywheelFollowerMotor.getEncoder();
+		flywheelFollowerConfig.encoder.velocityConversionFactor(1.0 / ShooterConstants.kFlywheelReduction);	
+       
+		kickerMotor = new SparkMax(CAN.kKickerPort, MotorType.kBrushless);
         kickerConfig = new SparkMaxConfig();
-
-        hoodMotor = new SparkMax(CAN.khoodport, MotorType.kBrushless);
+		kickerEncoder = kickerMotor.getEncoder();
+		kickerConfig.encoder.velocityConversionFactor(1.0 / ShooterConstants.kKickerReduction);
+        
+		hoodMotor = new SparkMax(CAN.kHoodPort, MotorType.kBrushless);
         hoodConfig = new SparkMaxConfig();
+		hoodMotorEncoder = hoodMotor.getEncoder();
+		kickerConfig.encoder.velocityConversionFactor(1.0 / ShooterConstants.kHoodReduction);
+		hoodEncoder = new DutyCycleEncoder(CAN.kHoodEncoderPort);
       
-      flywheelleadConfig.idleMode(IdleMode.kBrake);
-	    flywheelfollowerConfig.idleMode(IdleMode.kBrake);
+      	flywheelLeadConfig.idleMode(IdleMode.kBrake);
+	    flywheelFollowerConfig.idleMode(IdleMode.kBrake);
+
 // Change smart current limit numbers later
-		 flywheelleadConfig.smartCurrentLimit(80);
-		 flywheelfollowerConfig.smartCurrentLimit(80);
+		flywheelLeadConfig.smartCurrentLimit(80);
+		flywheelFollowerConfig.smartCurrentLimit(80);
 
-		 flywheelfollowerConfig.inverted(false);
-		 flywheelfollowerConfig.follow(flywheelleadMotor);
+		flywheelFollowerConfig.inverted(false);
+		flywheelFollowerConfig.follow(flywheelLeadMotor);
 
-        flywheelleadMotor.configure(flywheelleadConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
-		flywheelfollowerMotor.configure(flywheelfollowerConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+        flywheelLeadMotor.configure(flywheelLeadConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+		flywheelFollowerMotor.configure(flywheelFollowerConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
 
-         hoodConfig.smartCurrentLimit(50);
+        hoodConfig.smartCurrentLimit(50);
 
 		hoodMotor.configure(kickerConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
 
@@ -68,86 +88,118 @@ public class ShooterIOSparkMax implements ShooterIO {
 
 		kickerMotor.configure(kickerConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
 
-
-		hoodEncoder = hoodMotor.getEncoder();
-		hoodConfig.encoder.velocityConversionFactor(1.0 / ShooterConstants.kShooterReduction);
-
-
-		flywheelleadPID = flywheelleadMotor.getPIDController();
-		flywheelfollowerPID = flywheelfollowerMotor.getPIDController();
-
-		setGains(shooterTopGains.kP(), shooterTopGains.kI(), shooterTopGains.kD(), shooterTopGains.ffkS(),
-				shooterTopGains.ffkV(), shooterBottomGains.kP(), shooterBottomGains.kI(), shooterBottomGains.kD(),
-				shooterBottomGains.ffkS(), shooterBottomGains.ffkV());
-
 		topTarget = 0;
 		bottomTarget = 0;
+
+		resetEncoders();
 	}
+@Override 
+public double getFlywheelVelocity() {
+return flywheelLeadEncoder.getVelocity();
+}
+
 
 	@Override
 	public void updateInputs(ShooterIOInputs inputs) {
-		inputs.topVelocityRPM = shooterTopEncoder.getVelocity();
-		inputs.topTargetVelocityRPM = topTarget;
-		inputs.topAppliedVoltage = shooterTopMotor.getAppliedOutput() * shooterTopMotor.getBusVoltage();
-		inputs.topCurrentAmps = new double[]{shooterTopMotor.getOutputCurrent()};
-		inputs.topTempCelsius = new double[]{shooterBottomMotor.getMotorTemperature()};
-
-		inputs.bottomVelocityRPM = shooterBottomEncoder.getVelocity();
-		inputs.bottomTargetVelocityRPM = bottomTarget;
-		inputs.bottomAppliedVoltage = shooterBottomMotor.getAppliedOutput() * shooterBottomMotor.getBusVoltage();
-		inputs.bottomCurrentAmps = new double[]{shooterBottomMotor.getOutputCurrent()};
-		inputs.bottomTempCelsius = new double[]{shooterBottomMotor.getMotorTemperature()};
-
-		inputs.topRotations = shooterTopEncoder.getPosition();
-		inputs.bottomRotations = shooterBottomEncoder.getPosition();
-	}
-
-	@Override
-	public void setTopInputVoltage(double volts) {
-		double appliedVolts = MathUtil.clamp(volts, -12.0, 12.0);
-		flywheelleadMotor.setVoltage(appliedVolts);
-	}
-
-
-	@Override
-	public void setInputVoltage(double topVolts, double bottomVolts) {
-		setTopInputVoltage(topVolts);
 	
+		inputs.targetVelocityRPM = topTarget;
+		inputs.appliedVoltage = new double[]{flywheelLeadMotor.getAppliedOutput() * flywheelLeadMotor.getBusVoltage(), 
+			flywheelFollowerMotor.getAppliedOutput() * flywheelFollowerMotor.getBusVoltage()};
+		inputs.currentAmps = new double[]{flywheelLeadMotor.getOutputCurrent(), flywheelFollowerMotor.getOutputCurrent()};
+		inputs.tempCelsius = new double[]{flywheelLeadMotor.getMotorTemperature(), flywheelFollowerMotor.getMotorTemperature()};
+		
+		inputs.hoodEncoderValue = getAbsoluteRotationRads();
+	
+		inputs.followerTargetVelocityRPM = bottomTarget;
+		inputs.followerTargetVelocityRPM = flywheelFollowerMotor.getAppliedOutput() * flywheelLeadMotor.getBusVoltage();
+
+		inputs.hoodRotations = hoodEncoder.getPosition();
+		resetEncoders();
 	}
+
 
 	@Override
-	public void stop() {
-		setInputVoltage(0.0, 0.0);
+	public void setFlywheelInputVoltage(double volts) {
+		double appliedVolts = MathUtil.clamp(volts, -12.0, 12.0);
+		flywheelLeadMotor.setVoltage(appliedVolts);
 	}
+		@Override
+	public void setKickerInputVoltage(double volts) {
+		double appliedVolts = MathUtil.clamp(volts, -12.0, 12.0);
+		kickerMotor.setVoltage(appliedVolts);
+	}
+	@Override
+	public void setHoodInputVoltage(double volts) {
+		double appliedVolts = MathUtil.clamp(volts, -12.0, 12.0);
+		hoodMotor.setVoltage(appliedVolts);
+	}
+	
 
 	@Override
-	public void setGains(double tkP, double tkI, double tkD, double tffkS, double tffkV, double bkP, double bkI,
-			double bkD, double bffkS, double bffkV) {
-		shooterTopPID.setP(tkP);
-		shooterTopPID.setI(tkI);
-		shooterTopPID.setD(tkI);
-		shooterTopFF = new SimpleMotorFeedforward(tffkS, tffkV);
-
-		shooterBottomPID.setP(bkP);
-		shooterBottomPID.setI(bkI);
-		shooterBottomPID.setD(bkD);
-		shooterBottomFF = new SimpleMotorFeedforward(bffkS, bffkV);
+	public void stopFlywheel() {
+		setFlywheelInputVoltage(0.0);
 	}
+	@Override
+	public void stopKicker() {
+		setKickerInputVoltage(0.0);
+	}
+	@Override
+	public void stopHood() {
+		setHoodInputVoltage(0.0);
+	}
+
+	
+	
+
 
 	@Override
 	public void setBrakeMode(boolean brake) {
-		flywheelleadMotor.setIdleMode(brake ? IdleMode.kBrake : IdleMode.kCoast);
-		flywheelfollowerMotor.setIdleMode(brake ? IdleMode.kBrake : IdleMode.kCoast);
+		flywheelLeadMotor.setIdleMode(brake ? IdleMode.kBrake : IdleMode.kCoast);
+		flywheelFollowerMotor.setIdleMode(brake ? IdleMode.kBrake : IdleMode.kCoast);
 	}
 
 	@Override
-	public void setVelocity(double topTargetVel, double bottomTargetVel) {
-		shooterTopPID.setReference(topTargetVel, SparkBase.ControlType.kVelocity, 0,
-				shooterTopFF.calculate(topTargetVel));
-		shooterBottomPID.setReference(bottomTargetVel, SparkBase.ControlType.kVelocity, 0,
-				shooterBottomFF.calculate(bottomTargetVel));
+	// TODO: HOOD PID!
+	public void setHoodRads(double rads) {
+// PID computed voltage to move to the given height
+		double pidVolts = hoodPID.calculate(getRotationRads(), rads);
+		double ffVolts = hoodFF.calculate(rads, 0);
 
-		topTarget = topTargetVel;
-		bottomTarget = bottomTargetVel;
+		double voltage = MathUtil.clamp(pidVolts, ShooterConstants.kVelocityThresholdLow, ShooterConstants.kVelocityThreshold);
+
+		Logger.recordOutput("Shooter/Hood/PID Voltage", pidVolts);
+		Logger.recordOutput("Shooter/Hood//FF Voltage", ffVolts);
+
+		setHoodInputVoltage(voltage);
+	}
+
+	// TODO: MAKE THE TWO MOTORS BE FRIENDS
+	@Override
+	public void setFlywheelVelocity(double flywheelTargetVel) {
+		// PID computed voltage to move to the given height
+		double pidVolts = flywheelPID.calculate(getFlywheelVelocity(), flywheelTargetVel);
+		double ffVolts = flywheelFF.calculate(flywheelTargetVel, 0); //not using FF for now
+
+		// double voltage = MathUtil.clamp(pidVolts, ShooterConstants.kVelocityThresholdLow, ShooterConstants.kVelocityThreshold);
+		double voltage = MathUtil.clamp(pidVolts, -ShooterConstants.kFlywheelVoltage, ShooterConstants.kFlywheelVoltage);
+				
+		Logger.recordOutput("Shooter/Flywheel/PID Voltage", pidVolts);
+		Logger.recordOutput("Shooter/Flywheel/FF Voltage", ffVolts);
+
+		setFlywheelInputVoltage(voltage);
+	}
+	
+	@Override
+	public void resetEncoders() {
+		hoodEncoder.setPosition(getHoodAbsoluteRotationRads());
+		flywheelLeadEncoder.setPosition(getFlywheelAbsoluteRotationRads());
+		flywheelFollowerEncoder.setPosition(getFlywheelAbsoluteRotationRads());
+		kickerEncoder.setPosition(getKickerAbsoluteRotationRads());
+	
+	}
+
+	
+
+		topTarget = flywheelTargetVel;
 	}
 }
