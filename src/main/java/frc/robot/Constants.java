@@ -4,12 +4,24 @@
 
 package frc.robot;
 
+import static edu.wpi.first.units.Units.Seconds;
+import static edu.wpi.first.units.Units.Volts;
+
 import com.pathplanner.lib.config.PIDConstants;
 import com.pathplanner.lib.controllers.PPHolonomicDriveController;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.util.Units;
-
+import com.pathplanner.lib.util.HolonomicPathFollowerConfig;
+import com.pathplanner.lib.util.PIDConstants;
+import com.pathplanner.lib.util.ReplanningConfig;
+import edu.wpi.first.math.geometry.Rotation3d;
+import edu.wpi.first.math.geometry.Transform3d;
+import edu.wpi.first.math.geometry.Translation3d;
+import edu.wpi.first.wpilibj.PowerDistribution.ModuleType;
+import edu.wpi.first.wpilibj.RobotBase;
+import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
+import frc.robot.util.LoggedTunableNumber;
 /**
  * The Constants class provides a convenient place for teams to hold robot-wide numerical or boolean
  * constants. This class should not be used for any other purpose. All constants should be declared
@@ -107,6 +119,64 @@ public final class Constants {
         public static final double kRobotMass = 25;
         public static final double kRobotMOI = 7.0;
     }
+public static final class ArmConstants {
+		public static final int kArmEncoderPort = 5;
+		public static final double kArmEncoderOffset = -2.65016;
+		public static final boolean kArmEncoderReversed = true;
+
+		// Physics
+		public static final double kArmLength = 0.58;
+		public static final double kArmReduction = 144.0;
+		public static final double kArmJKgMetersSquared = 0.515;
+
+		// Constraints
+		public static final double kMaxArmAngle = -0.084;
+		public static final double kMinArmAngle = -1.76625;
+
+		public static final LoggedTunableNumber kMaxSpeed = new LoggedTunableNumber("Arm/Max Speed", 4.5);
+		public static final LoggedTunableNumber kMaxAcceleration = new LoggedTunableNumber("Arm/Max Acceleration", 1);
+		public static final LoggedTunableNumber kManualVoltage = new LoggedTunableNumber("Arm/ManualVoltage", 8);
+
+		
+
+		// Control
+		public static final LoggedTunableNumber kArmPIDTolerance = new LoggedTunableNumber("Arm/PID Tolerance", 0.0001);
+		public static final double kSetpointTolerance = 0.2;
+
+		// Arm characterization
+		public static final SysIdRoutine.Config characterizationConfig = new SysIdRoutine.Config(
+				Volts.of(2).per(Seconds.of(1)), Volts.of(5), Seconds.of(5));
+	}
+    public static final class ShooterConstants {
+
+		public static final double shooterDemoScaleFactor = 0.25;
+
+		public static final double kShooterReduction = 1.0;
+
+		public static final double kVelocityThreshold = 0.8;
+		public static final double kVelocityThresholdLow = 0.6;
+
+		public static final LoggedTunableNumber kShooterPIDTolerance = new LoggedTunableNumber("Shooter/PID Tolerance",
+				0.5);
+
+		// TODO: Change to computed value
+		public static final LoggedTunableNumber kAutoShooterExitVel = new LoggedTunableNumber(
+				"Auto Shooter Exit Velocity", 10);
+
+		// Constants for auto-aiming
+		public static final boolean ampUpperEntry = false;
+		public static final boolean speakerUpperEntry = true;
+
+		public static final double ampHoriEntryRange = Math.PI / 6;
+		public static final double speakerHoriEntryRange = Math.PI / 2;
+                // PID values
+                public static final double kP = 0.0;
+		public static final double kI = 0.0;
+		public static final double kD = 0.0;
+		public static final double kS = 0.0;
+		public static final double kG = 0.0;
+		public static final double kV = 0.0;
+	}
 
     public static class AutoConstants {
         // Speeds from -1 to 1
@@ -134,7 +204,27 @@ public final class Constants {
 
         public static final int kBackRightDriveMotorPort = 13;
         public static final int kBackRightTurningMotorPort = 23;
+        
+        public static final int kflywheelleadPort = 1;
+        public static final int kflywheelfollowerPort = 2;
+
+        public static final int kkickerport = 3;
+        
+        public static final int khoodport = 4;
     }
+    public static final class GainsConstants {
+		public static final Gains shooterTopGains {
+			new Gains(0.00000065361, 0.0, 0.0, 0.0091151, 0.0018015, 0.0, 0.0);
+                        };
+		public static final Gains shooterBottomGains{
+			new Gains(0.000001136, 0.0, 0.0, 0.06427, 0.0018144, 0.0, 0.0);
+		};
+
+	}
+
+	public record Gains(double kP, double kI, double kD, double ffkS, double ffkV, double ffkA, double ffkG) {
+	}
+
 
     public static class OIConstants {
         public static final ControllerType controllerTypeDriver = ControllerType.XBOX;
