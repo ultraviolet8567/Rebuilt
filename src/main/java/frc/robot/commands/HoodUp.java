@@ -23,9 +23,9 @@ public class HoodUp extends Command {
 
     @Override
 	public void execute() {
-        if (!shooter.hoodOutOfUpperBound()) {
+        // if (!shooter.hoodOutOfUpperBound()) {
 		    shooter.hoodUp();
-        }
+        //}
 	}
 
 	@Override

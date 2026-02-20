@@ -24,9 +24,9 @@ public class HoodDown extends Command {
 
     @Override
 	public void execute() {
-        if (!shooter.hoodOutOfLowerBound()) {
+        //if (!shooter.hoodOutOfLowerBound()) {
 		    shooter.hoodDown();
-        }
+        //}
 	}
 
 	@Override

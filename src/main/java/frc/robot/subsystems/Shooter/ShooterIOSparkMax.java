@@ -106,8 +106,10 @@ public class ShooterIOSparkMax implements ShooterIO {
 	
 		inputs.targetVelocityRPM = targetVel; // TODO: Calculate target velocity
 		inputs.velocityRPM = flywheelLeadEncoder.getVelocity(); 
-		inputs.appliedVoltage = new double[]{flywheelLeadMotor.getAppliedOutput() * flywheelLeadMotor.getBusVoltage(), 
+		inputs.flywheelAppliedVoltage = new double[]{flywheelLeadMotor.getAppliedOutput() * flywheelLeadMotor.getBusVoltage(), 
 			flywheelFollowerMotor.getAppliedOutput() * flywheelFollowerMotor.getBusVoltage()};
+		inputs.kickerAppliedVoltage = kickerMotor.getAppliedOutput();
+		inputs.hoodAppliedVoltage = hoodMotor.getAppliedOutput();
 		inputs.currentAmps = new double[]{flywheelLeadMotor.getOutputCurrent(), flywheelFollowerMotor.getOutputCurrent()};
 		inputs.tempCelsius = new double[]{flywheelLeadMotor.getMotorTemperature(), flywheelFollowerMotor.getMotorTemperature()};
 
@@ -121,7 +123,8 @@ public class ShooterIOSparkMax implements ShooterIO {
 		double appliedVolts = MathUtil.clamp(volts, -12.0, 12.0);
 		flywheelLeadMotor.setVoltage(appliedVolts);
 	}
-		@Override
+	
+	@Override
 	public void setKickerInputVoltage(double volts) {
 		double appliedVolts = MathUtil.clamp(volts, -12.0, 12.0);
 		kickerMotor.setVoltage(appliedVolts);

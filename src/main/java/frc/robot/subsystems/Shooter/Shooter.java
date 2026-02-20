@@ -11,7 +11,7 @@ public class Shooter extends SubsystemBase {
     
 
 	private final ShooterIO io;
-	private final ShooterIOInputs inputs = new ShooterIOInputs();
+	private final ShooterIOInputsAutoLogged inputs = new ShooterIOInputsAutoLogged();
 	/*
 	* Initialize all components and one-time logic to be completed on boot-up here
 	*/
@@ -23,7 +23,7 @@ public class Shooter extends SubsystemBase {
 	@Override
 	public void periodic() {
 		io.updateInputs(inputs);
-		// Logger.processInputs("Shooter", inputs);
+		Logger.processInputs("Shooter", inputs);
 
 		Logger.recordOutput("Shooter/TargetVelocity", getTargetVelocity());
 		Logger.recordOutput("Shooter/AtVelocity", atVelocity());
