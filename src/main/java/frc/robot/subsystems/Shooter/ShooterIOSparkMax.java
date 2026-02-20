@@ -1,6 +1,6 @@
 package frc.robot.subsystems.Shooter;
 
-import static frc.robot.Constants.GainsConstants.*;
+// import static frc.robot.Constants.GainsConstants.*;
 
 import com.revrobotics.spark.SparkBase;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
@@ -15,7 +15,6 @@ import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.AbsoluteEncoder;
 import com.revrobotics.RelativeEncoder;
 
-import edu.wpi.first.math.controller.ElevatorFeedforward;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
@@ -101,12 +100,13 @@ public class ShooterIOSparkMax implements ShooterIO {
 	@Override
 	public void updateInputs(ShooterIOInputs inputs) {
 	
-		inputs.targetVelocityRPM = targetVel; // TODO: Figure out what is going on with the target vel
+		inputs.targetVelocityRPM = targetVel; // TODO: Calculate target velocity
+		inputs.velocityRPM = flywheelLeadEncoder.getVelocity(); 
 		inputs.appliedVoltage = new double[]{flywheelLeadMotor.getAppliedOutput() * flywheelLeadMotor.getBusVoltage(), 
 			flywheelFollowerMotor.getAppliedOutput() * flywheelFollowerMotor.getBusVoltage()};
 		inputs.currentAmps = new double[]{flywheelLeadMotor.getOutputCurrent(), flywheelFollowerMotor.getOutputCurrent()};
 		inputs.tempCelsius = new double[]{flywheelLeadMotor.getMotorTemperature(), flywheelFollowerMotor.getMotorTemperature()};
-		
+
 		inputs.hoodAbsoluteEncoderValue = getHoodAbsoluteRotationRads();
 		inputs.hoodRotations = hoodMotorEncoder.getPosition(); 
 		inputs.hoodAngle = getHoodAngleRads(); 
@@ -172,8 +172,8 @@ public class ShooterIOSparkMax implements ShooterIO {
 	// TODO: HOOD PID! DO NOT USE RIGHT NOW!!!
 	public void setHoodRads(double rads) {
 		// PID computed voltage to move to the given angle
-		double pidVolts = hoodPID.calculate(getHoodAbsoluteRotationRads(), rads);
-		double ffVolts = hoodFF.calculate(rads, 0);
+		double pidVolts = hoodPID.calculate(getHoodAngleRads(), rads);
+		double ffVolts = hoodFF.calculate(rads, 0); // not using FF for now
 
 		double voltage = MathUtil.clamp(pidVolts, ShooterConstants.kVelocityThresholdLow, ShooterConstants.kVelocityThreshold);
 

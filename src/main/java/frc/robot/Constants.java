@@ -132,6 +132,8 @@ public static final class ShooterConstants {
     public static final double kVelocityThreshold = 0.8;
     public static final double kVelocityThresholdLow = 0.6;
 
+    public static final double kShooterVelocityRPM = 4000.0;
+
     public static final double kFlywheelVoltage = 9;
     public static final LoggedTunableNumber kKickerVoltage = new LoggedTunableNumber("Shooter/Kicker Voltage", 10.0);
 
@@ -203,15 +205,15 @@ public static class CAN {
 
     public static final int kHoodEncoderPort = 0; 
 }
-public static final class GainsConstants {
-    public static final Gains shooterTopGains {
-        new Gains(0.00000065361, 0.0, 0.0, 0.0091151, 0.0018015, 0.0, 0.0);
-                    };
-    public static final Gains shooterBottomGains{
-        new Gains(0.000001136, 0.0, 0.0, 0.06427, 0.0018144, 0.0, 0.0);
-    };
+// public static final class GainsConstants {
+//     public static final Gains shooterTopGains {
+//         new Gains(0.00000065361, 0.0, 0.0, 0.0091151, 0.0018015, 0.0, 0.0);
+//                     };
+//     public static final Gains shooterBottomGains{
+//         new Gains(0.000001136, 0.0, 0.0, 0.06427, 0.0018144, 0.0, 0.0);
+//     };
 
-}
+// }
 
 public record Gains(double kP, double kI, double kD, double ffkS, double ffkV, double ffkA, double ffkG) {
 }

@@ -42,12 +42,13 @@ public class Shooter extends SubsystemBase {
 	public boolean atVelocity() {
 		// Velocity threshold for Amp shots is lower because shot velocity requires less
 		// precision
-		double threshold = (getTargetVelocity() < 800)
-				? ShooterConstants.kVelocityThresholdLow
-				: ShooterConstants.kVelocityThreshold;
+		// double threshold = (getTargetVelocity() < 800)
+		// 		? ShooterConstants.kVelocityThresholdLow
+		// 		: ShooterConstants.kVelocityThreshold;
 
-		return inputs.topVelocityRPM >= threshold * inputs.topTargetVelocityRPM
-				&& inputs.bottomVelocityRPM >= threshold * inputs.bottomTargetVelocityRPM;
+		double threshold = ShooterConstants.kVelocityThreshold; 
+
+		return inputs.velocityRPM >= threshold * inputs.targetVelocityRPM;
 	}
 
 	public double getTargetVelocity() {
@@ -61,7 +62,7 @@ public class Shooter extends SubsystemBase {
 			default -> ShooterConstants.kIdleRPM.get();
 		};
 		*/
-		double vel = 4000.0;
+		double vel = ShooterConstants.kShooterVelocityRPM;
 		/* 
 		if (Lights.getInstance().isDemo && vel >= 800) {
 			return ShooterConstants.shooterDemoScaleFactor * vel;

@@ -11,9 +11,12 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants.ModuleConstants;
 import frc.robot.Constants.OperatorConstants;
-import frc.robot.commands.SwerveTeleOp;
 import frc.robot.subsystems.Odometry;
 import frc.robot.subsystems.Swerve;
+import frc.robot.subsystems.Shooter.Shooter;
+import frc.robot.subsystems.Shooter.ShooterIOSparkMax;
+import frc.robot.Constants.*;
+import frc.robot.commands.*;
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
@@ -23,8 +26,9 @@ import frc.robot.subsystems.Swerve;
  */
 public class RobotContainer {
     // The robot's subsystems and commands are defined here...
-    private Swerve swerve;
-    private Odometry odometry;
+    private final Swerve swerve;
+    private final Odometry odometry;
+    private final Shooter shooter;
 
     // Replace with CommandPS4Controller or CommandJoystick if needed
     private static final CommandXboxController driverController =
@@ -38,6 +42,7 @@ public class RobotContainer {
 
         swerve = new Swerve(ModuleConstants.kDriveMotorGearing);
         odometry = new Odometry(swerve);
+        shooter = new Shooter(new ShooterIOSparkMax());
 
         // Configure the PathPlanner auto-builder
 
@@ -85,6 +90,13 @@ public class RobotContainer {
      */
     private void configureBindings() {
         driverController.back().onTrue(new InstantCommand(() -> odometry.resetGyrometerHeading()));
+        // operatorController.rightBumper().whileTrue(new SpinUp(shooter));
+        operatorController.rightBumper().whileTrue(new InstantCommand(() -> shooter.shoot(0.75)))
+            .onFalse(new InstantCommand(() -> shooter.stopFlywheel()));
+		operatorController.rightTrigger().whileTrue(new Shoot(shooter, swerve, odometry));
+        operatorController.y().whileTrue(new HoodUp(shooter, intake, swerve, arm, odometry));
+        operatorController.a().whileTrue(new HoodDown(shooter, intake, swerve, arm, odometry));
+
     }
 
     /**
