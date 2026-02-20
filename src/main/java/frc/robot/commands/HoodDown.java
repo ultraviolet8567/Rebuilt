@@ -29,4 +29,8 @@ public class HoodDown extends Command {
         }
 	}
 
+	public void end() {
+		shooter.stopHood();
+	}
+
 }

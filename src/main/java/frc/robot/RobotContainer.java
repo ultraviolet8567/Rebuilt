@@ -94,8 +94,9 @@ public class RobotContainer {
         operatorController.rightBumper().whileTrue(new InstantCommand(() -> shooter.shoot(0.75)))
             .onFalse(new InstantCommand(() -> shooter.stopFlywheel()));
 		operatorController.rightTrigger().whileTrue(new Shoot(shooter, swerve, odometry));
-        operatorController.y().whileTrue(new HoodUp(shooter, swerve, odometry));
-        operatorController.a().whileTrue(new HoodDown(shooter, swerve, odometry));
+        operatorController.leftTrigger().whileTrue(new Kick(shooter));
+        // operatorController.y().whileTrue(new HoodUp(shooter, swerve, odometry));
+        // operatorController.a().whileTrue(new HoodDown(shooter, swerve, odometry));
 
     }
 

@@ -28,4 +28,8 @@ public class HoodUp extends Command {
         }
 	}
 
+	public void end() {
+		shooter.stopHood();
+	}
+
 }
