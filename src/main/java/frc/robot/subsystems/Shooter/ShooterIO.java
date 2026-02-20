@@ -6,12 +6,14 @@ public interface ShooterIO {
 	@AutoLog
 	class ShooterIOInputs {
 		public double velocityRPM = 0.0;
-		public double[] targetVelocityRPM = new double[]{0.0, 0.0};
+		public double targetVelocityRPM = 0.0;
 		public double[] appliedVoltage = new double[]{0.0, 0.0};
 		public double[] currentAmps = new double[]{0.0, 0.0};
 		public double[] tempCelsius = new double[]{0.0, 0.0};
 
+		public double hoodAbsoluteEncoderValue = 0.0; 
 		public double hoodRotations = 0.0;
+		public double hoodAngle = 0.0; 
 	}
 
 	default double getFlywheelVelocity() {
@@ -19,6 +21,14 @@ public interface ShooterIO {
 	}
 
 	default void updateInputs(ShooterIOInputs inputs) {
+	}
+
+	default double getRotationRads() {
+		return 0;
+	}
+
+	default double getHoodAngleRads() {
+		return 0;
 	}
 
 	/** Sets motor voltage */
@@ -59,6 +69,6 @@ public interface ShooterIO {
 	default void setHoodRads(double rads) {
 	}
 
-	default void resetEncoders() {
+	default void resetHoodEncoder() {
 	}
 }

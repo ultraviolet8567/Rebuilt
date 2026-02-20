@@ -35,7 +35,7 @@ public class ShooterIOSparkMax implements ShooterIO {
 	private final PIDController flywheelPID, hoodPID;
 	private SimpleMotorFeedforward flywheelFF, hoodFF;
 
-	private double topTarget, bottomTarget;
+	private double targetVel;
 
 	public ShooterIOSparkMax() {
 		System.out.println("[Init] Creating ShooterIOSparkMax");
@@ -44,7 +44,7 @@ public class ShooterIOSparkMax implements ShooterIO {
 		flywheelFF = new SimpleMotorFeedforward(ShooterConstants.kFlywheelS, ShooterConstants.kFlywheelG, ShooterConstants.kFlywheelV);
 
 		hoodPID = new PIDController(ShooterConstants.kHoodP, ShooterConstants.kHoodI, ShooterConstants.kHoodD);
-		hoodFF = new SimpleMotorFeedforward(ShooterConstants.kHoodS, ShooterConstants.kHoodG, EShooterConstants.kHoodV);
+		hoodFF = new SimpleMotorFeedforward(ShooterConstants.kHoodS, ShooterConstants.kHoodG, ShooterConstants.kHoodV);
 
 		flywheelLeadMotor = new SparkFlex(CAN.kFlywheelLeadPort, MotorType.kBrushless);
 		flywheelLeadConfig = new SparkFlexConfig();
@@ -64,7 +64,8 @@ public class ShooterIOSparkMax implements ShooterIO {
 		hoodMotor = new SparkMax(CAN.kHoodPort, MotorType.kBrushless);
         hoodConfig = new SparkMaxConfig();
 		hoodMotorEncoder = hoodMotor.getEncoder();
-		kickerConfig.encoder.velocityConversionFactor(1.0 / ShooterConstants.kHoodReduction);
+		hoodConfig.encoder.positionConversionFactor(1.0 / ShooterConstants.kHoodMotorReduction / ShooterConstants.kHoodGearReduction * 2 * Math.PI); // converts position to RADIANS
+		hoodConfig.encoder.velocityConversionFactor(1.0 / ShooterConstants.kHoodMotorReduction / ShooterConstants.kHoodGearReduction); // converts velocity to RPM
 		hoodEncoder = new DutyCycleEncoder(CAN.kHoodEncoderPort);
       
       	flywheelLeadConfig.idleMode(IdleMode.kBrake);
@@ -74,49 +75,42 @@ public class ShooterIOSparkMax implements ShooterIO {
 		flywheelLeadConfig.smartCurrentLimit(80);
 		flywheelFollowerConfig.smartCurrentLimit(80);
 
-		flywheelFollowerConfig.inverted(false);
-		flywheelFollowerConfig.follow(flywheelLeadMotor);
+		flywheelFollowerConfig.follow(flywheelLeadMotor, false);
 
         flywheelLeadMotor.configure(flywheelLeadConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
 		flywheelFollowerMotor.configure(flywheelFollowerConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
 
         hoodConfig.smartCurrentLimit(50);
 
-		hoodMotor.configure(kickerConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+		hoodMotor.configure(hoodConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
 
         kickerConfig.smartCurrentLimit(50);
 
 		kickerMotor.configure(kickerConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
 
-		topTarget = 0;
-		bottomTarget = 0;
+		targetVel = 0;
 
-		resetEncoders();
+		resetHoodEncoder();
 	}
-@Override 
-public double getFlywheelVelocity() {
-return flywheelLeadEncoder.getVelocity();
-}
 
+	@Override 
+	public double getFlywheelVelocity() {
+		return flywheelLeadEncoder.getVelocity();
+	}
 
 	@Override
 	public void updateInputs(ShooterIOInputs inputs) {
 	
-		inputs.targetVelocityRPM = topTarget;
+		inputs.targetVelocityRPM = targetVel; // TODO: Figure out what is going on with the target vel
 		inputs.appliedVoltage = new double[]{flywheelLeadMotor.getAppliedOutput() * flywheelLeadMotor.getBusVoltage(), 
 			flywheelFollowerMotor.getAppliedOutput() * flywheelFollowerMotor.getBusVoltage()};
 		inputs.currentAmps = new double[]{flywheelLeadMotor.getOutputCurrent(), flywheelFollowerMotor.getOutputCurrent()};
 		inputs.tempCelsius = new double[]{flywheelLeadMotor.getMotorTemperature(), flywheelFollowerMotor.getMotorTemperature()};
 		
-		inputs.hoodEncoderValue = getAbsoluteRotationRads();
-	
-		inputs.followerTargetVelocityRPM = bottomTarget;
-		inputs.followerTargetVelocityRPM = flywheelFollowerMotor.getAppliedOutput() * flywheelLeadMotor.getBusVoltage();
-
-		inputs.hoodRotations = hoodEncoder.getPosition();
-		resetEncoders();
+		inputs.hoodAbsoluteEncoderValue = getHoodAbsoluteRotationRads();
+		inputs.hoodRotations = hoodMotorEncoder.getPosition(); 
+		inputs.hoodAngle = getHoodAngleRads(); 
 	}
-
 
 	@Override
 	public void setFlywheelInputVoltage(double volts) {
@@ -148,21 +142,37 @@ return flywheelLeadEncoder.getVelocity();
 		setHoodInputVoltage(0.0);
 	}
 
-	
-	
+	// @Override
+	// public void setBrakeMode(boolean brake) {
+	// 	flywheelLeadMotor.setIdleMode(brake ? IdleMode.kBrake : IdleMode.kCoast);
+	// 	flywheelFollowerMotor.setIdleMode(brake ? IdleMode.kBrake : IdleMode.kCoast);
+	// }
 
+	public double getHoodAbsoluteRotationRads() {
+		double angle = hoodEncoder.get();
+		angle *= 2 * Math.PI;
+		angle += ShooterConstants.kHoodEncoderOffset;
+		angle = MathUtil.inputModulus(angle, -Math.PI, Math.PI);
 
-	@Override
-	public void setBrakeMode(boolean brake) {
-		flywheelLeadMotor.setIdleMode(brake ? IdleMode.kBrake : IdleMode.kCoast);
-		flywheelFollowerMotor.setIdleMode(brake ? IdleMode.kBrake : IdleMode.kCoast);
+		return angle * (ShooterConstants.kHoodEncoderReversed ? -1 : 1);
 	}
 
 	@Override
-	// TODO: HOOD PID!
+	public double getRotationRads() {
+		return hoodMotorEncoder.getPosition();
+	}
+
+	@Override
+	public double getHoodAngleRads() {
+		double hoodAngle = getRotationRads(); 
+		return hoodAngle;
+	}
+
+	@Override
+	// TODO: HOOD PID! DO NOT USE RIGHT NOW!!!
 	public void setHoodRads(double rads) {
-// PID computed voltage to move to the given height
-		double pidVolts = hoodPID.calculate(getRotationRads(), rads);
+		// PID computed voltage to move to the given angle
+		double pidVolts = hoodPID.calculate(getHoodAbsoluteRotationRads(), rads);
 		double ffVolts = hoodFF.calculate(rads, 0);
 
 		double voltage = MathUtil.clamp(pidVolts, ShooterConstants.kVelocityThresholdLow, ShooterConstants.kVelocityThreshold);
@@ -173,7 +183,6 @@ return flywheelLeadEncoder.getVelocity();
 		setHoodInputVoltage(voltage);
 	}
 
-	// TODO: MAKE THE TWO MOTORS BE FRIENDS
 	@Override
 	public void setFlywheelVelocity(double flywheelTargetVel) {
 		// PID computed voltage to move to the given height
@@ -190,16 +199,9 @@ return flywheelLeadEncoder.getVelocity();
 	}
 	
 	@Override
-	public void resetEncoders() {
-		hoodEncoder.setPosition(getHoodAbsoluteRotationRads());
-		flywheelLeadEncoder.setPosition(getFlywheelAbsoluteRotationRads());
-		flywheelFollowerEncoder.setPosition(getFlywheelAbsoluteRotationRads());
-		kickerEncoder.setPosition(getKickerAbsoluteRotationRads());
-	
+	public void resetHoodEncoder() {
+		hoodMotorEncoder.setPosition(getHoodAbsoluteRotationRads());
 	}
 
-	
-
-		topTarget = flywheelTargetVel;
-	}
+		//topTarget = flywheelTargetVel;
 }

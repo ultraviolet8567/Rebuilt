@@ -51,6 +51,7 @@ public class Shooter extends SubsystemBase {
 	}
 
 	public double getTargetVelocity() {
+		/* 
 		double vel = switch (arm.getArmMode()) {
 			case SPEAKERFRONT -> ShooterConstants.kSpeakerFrontRPM.get();
 			case SPEAKERANGLE -> ShooterConstants.kSpeakerAngleRPM.get();
@@ -59,11 +60,13 @@ public class Shooter extends SubsystemBase {
 			case TRAP -> ShooterConstants.kTrapRPM.get();
 			default -> ShooterConstants.kIdleRPM.get();
 		};
-/* 
+		*/
+		double vel = 4000.0;
+		/* 
 		if (Lights.getInstance().isDemo && vel >= 800) {
 			return ShooterConstants.shooterDemoScaleFactor * vel;
 		} else {
-*/
+		*/
 		return vel;
 		// }
 	}

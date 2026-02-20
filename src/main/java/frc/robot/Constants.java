@@ -12,9 +12,9 @@ import com.pathplanner.lib.controllers.PPHolonomicDriveController;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.util.Units;
-import com.pathplanner.lib.util.HolonomicPathFollowerConfig;
-import com.pathplanner.lib.util.PIDConstants;
-import com.pathplanner.lib.util.ReplanningConfig;
+// import com.pathplanner.lib.util.HolonomicPathFollowerConfig;
+// import com.pathplanner.lib.util.PIDConstants;
+// import com.pathplanner.lib.util.ReplanningConfig;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation3d;
@@ -126,7 +126,8 @@ public static final class ShooterConstants {
 
     public static final double kFlywheelReduction = 1.0;
     public static final double kKickerReduction = 3.0;
-    public static final double kHoodReduction = 25.0;
+    public static final double kHoodMotorReduction = 25.0;
+    public static final double kHoodGearReduction = 168.0 / 10.0; 
 
     public static final double kVelocityThreshold = 0.8;
     public static final double kVelocityThresholdLow = 0.6;
@@ -140,6 +141,9 @@ public static final class ShooterConstants {
     // TODO: Change to computed value
     public static final LoggedTunableNumber kAutoShooterExitVel = new LoggedTunableNumber(
             "Auto Shooter Exit Velocity", 10);
+
+    public static final double kHoodEncoderOffset = 0.0; 
+    public static final boolean kHoodEncoderReversed = false; 
 
     // Constants for auto-aiming
     public static final boolean ampUpperEntry = false;
