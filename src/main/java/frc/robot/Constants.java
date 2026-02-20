@@ -137,7 +137,7 @@ public static final class ShooterConstants {
 
     public static final double kFlywheelVoltage = 10.0;
     public static final LoggedTunableNumber kKickerVoltage = new LoggedTunableNumber("Shooter/Kicker Voltage", 10.0);
-    public static final LoggedTunableNumber kHoodVoltage = new LoggedTunableNumber("Shooter/Hood Voltage", 5.0);
+    public static final LoggedTunableNumber kHoodVoltage = new LoggedTunableNumber("Shooter/Hood Voltage", 3.0);
 
     public static final LoggedTunableNumber kShooterPIDTolerance = new LoggedTunableNumber("Shooter/PID Tolerance",
             0.5);
