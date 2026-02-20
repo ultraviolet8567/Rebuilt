@@ -33,6 +33,7 @@ import frc.robot.util.LoggedTunableNumber;
 public final class Constants {
 
     public static final boolean fieldOriented = true;
+    public static final boolean tuningMode = true;
 
     public static class OperatorConstants {
         public static final int kDriverControllerPort = 0;
@@ -134,8 +135,9 @@ public static final class ShooterConstants {
 
     public static final double kShooterVelocityRPM = 4000.0;
 
-    public static final double kFlywheelVoltage = 9;
+    public static final double kFlywheelVoltage = 9.0;
     public static final LoggedTunableNumber kKickerVoltage = new LoggedTunableNumber("Shooter/Kicker Voltage", 10.0);
+    public static final LoggedTunableNumber kHoodVoltage = new LoggedTunableNumber("Shooter/Hood Voltage", 5.0);
 
     public static final LoggedTunableNumber kShooterPIDTolerance = new LoggedTunableNumber("Shooter/PID Tolerance",
             0.5);
@@ -145,7 +147,10 @@ public static final class ShooterConstants {
             "Auto Shooter Exit Velocity", 10);
 
     public static final double kHoodEncoderOffset = 0.0; 
-    public static final boolean kHoodEncoderReversed = false; 
+    public static final boolean kHoodEncoderReversed = false;
+
+    public static final double kHoodUpperLimit = 0.7;
+    public static final double kHoodLowerLimit = 0.4;
 
     // Constants for auto-aiming
     public static final boolean ampUpperEntry = false;

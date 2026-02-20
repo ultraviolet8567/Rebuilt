@@ -63,7 +63,7 @@ public class ShooterIOSparkMax implements ShooterIO {
 		hoodMotor = new SparkMax(CAN.kHoodPort, MotorType.kBrushless);
         hoodConfig = new SparkMaxConfig();
 		hoodMotorEncoder = hoodMotor.getEncoder();
-		hoodConfig.encoder.positionConversionFactor(1.0 / ShooterConstants.kHoodMotorReduction / ShooterConstants.kHoodGearReduction * 2 * Math.PI); // converts position to RADIANS
+		hoodConfig.encoder.positionConversionFactor(1.0 / ShooterConstants.kHoodMotorReduction * 2 * Math.PI); // converts position to RADIANS
 		hoodConfig.encoder.velocityConversionFactor(1.0 / ShooterConstants.kHoodMotorReduction / ShooterConstants.kHoodGearReduction); // converts velocity to RPM
 		hoodEncoder = new DutyCycleEncoder(CAN.kHoodEncoderPort);
       
@@ -164,7 +164,7 @@ public class ShooterIOSparkMax implements ShooterIO {
 
 	@Override
 	public double getHoodAngleRads() {
-		double hoodAngle = getRotationRads(); 
+		double hoodAngle = getRotationRads() * ShooterConstants.kHoodGearReduction; 
 		return hoodAngle;
 	}
 

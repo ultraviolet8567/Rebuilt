@@ -76,6 +76,22 @@ public class Shooter extends SubsystemBase {
 		io.setFlywheelInputVoltage(ShooterConstants.kKickerVoltage.get());
 	}
 
+	public void hoodUp() {
+		io.setHoodInputVoltage(ShooterConstants.kHoodVoltage.get());
+	}
+
+	public void hoodDown() {
+		io.setHoodInputVoltage(-1 * ShooterConstants.kHoodVoltage.get());
+	}
+
+	public boolean hoodOutOfUpperBound() {
+		return io.getHoodAngleRads() > ShooterConstants.kHoodUpperLimit; 
+	}
+
+	public boolean hoodOutOfLowerBound() {
+		return io.getHoodAngleRads() < ShooterConstants.kHoodLowerLimit;
+	}
+
 	public void stopFlywheel() {
 		io.stopFlywheel();
 	}
@@ -87,4 +103,5 @@ public class Shooter extends SubsystemBase {
 	public void stopHood() {
 		io.stopHood();
 	}
+
 }
