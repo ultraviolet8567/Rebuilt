@@ -39,6 +39,10 @@ public class Shooter extends SubsystemBase {
 		io.setFlywheelVelocity(targetVel);
 	}
 
+	public void shootVoltage() {
+		io.setFlywheelInputVoltage(ShooterConstants.kFlywheelVoltage);
+	}
+
 	public boolean atVelocity() {
 		// Velocity threshold for Amp shots is lower because shot velocity requires less
 		// precision
@@ -73,7 +77,7 @@ public class Shooter extends SubsystemBase {
 	}
 
 	public void kickIn() {
-		io.setFlywheelInputVoltage(ShooterConstants.kKickerVoltage.get());
+		io.setKickerInputVoltage(ShooterConstants.kKickerVoltage.get());
 	}
 
 	public void hoodUp() {

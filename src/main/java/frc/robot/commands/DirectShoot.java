@@ -8,22 +8,27 @@ import frc.robot.subsystems.Swerve;
 import frc.robot.subsystems.Shooter.Shooter;
 import org.littletonrobotics.junction.Logger;
 
-public class Kick extends Command {
-    private Shooter shooter;
+public class DirectShoot extends Command {
+	private Shooter shooter;
+	private Odometry odometry;
+	private Swerve swerve;
 
-	public Kick(Shooter shooter) {
+	public DirectShoot(Shooter shooter, Swerve swerve, Odometry odometry) {
 		this.shooter = shooter;
+		this.odometry = odometry;
+		this.swerve = swerve;
 
 		// addRequirements(shooter);
 	}
 
-    @Override
+	@Override
 	public void initialize() {
-		shooter.kickIn();
+		shooter.shootVoltage();
 	}
 
-    @Override
+
+	@Override
 	public void end(boolean interrupted) {
-		shooter.stopKicker();
+		shooter.stopFlywheel();
 	}
 }

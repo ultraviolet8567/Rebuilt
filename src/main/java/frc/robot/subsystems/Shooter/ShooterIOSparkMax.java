@@ -48,21 +48,25 @@ public class ShooterIOSparkMax implements ShooterIO {
 		flywheelLeadMotor = new SparkFlex(CAN.kFlywheelLeadPort, MotorType.kBrushless);
 		flywheelLeadConfig = new SparkFlexConfig();
 		flywheelLeadEncoder = flywheelLeadMotor.getEncoder();
+		flywheelLeadConfig.inverted(true);
 		flywheelLeadConfig.encoder.velocityConversionFactor(1.0 / ShooterConstants.kFlywheelReduction);
 
 		flywheelFollowerMotor = new SparkFlex(CAN.kFlywheelFollowerPort, MotorType.kBrushless);
 		flywheelFollowerConfig = new SparkFlexConfig();
 		flywheelFollowerEncoder = flywheelFollowerMotor.getEncoder();
+		flywheelFollowerConfig.inverted(true);
 		flywheelFollowerConfig.encoder.velocityConversionFactor(1.0 / ShooterConstants.kFlywheelReduction);	
        
 		kickerMotor = new SparkMax(CAN.kKickerPort, MotorType.kBrushless);
         kickerConfig = new SparkMaxConfig();
 		kickerEncoder = kickerMotor.getEncoder();
+		kickerConfig.inverted(true);
 		kickerConfig.encoder.velocityConversionFactor(1.0 / ShooterConstants.kKickerReduction);
         
 		hoodMotor = new SparkMax(CAN.kHoodPort, MotorType.kBrushless);
         hoodConfig = new SparkMaxConfig();
 		hoodMotorEncoder = hoodMotor.getEncoder();
+		hoodConfig.inverted(true);
 		hoodConfig.encoder.positionConversionFactor(1.0 / ShooterConstants.kHoodMotorReduction * 2 * Math.PI); // converts position to RADIANS
 		hoodConfig.encoder.velocityConversionFactor(1.0 / ShooterConstants.kHoodMotorReduction / ShooterConstants.kHoodGearReduction); // converts velocity to RPM
 		hoodEncoder = new DutyCycleEncoder(CAN.kHoodEncoderPort);
