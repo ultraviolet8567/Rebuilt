@@ -146,11 +146,12 @@ public static final class ShooterConstants {
     public static final LoggedTunableNumber kAutoShooterExitVel = new LoggedTunableNumber(
             "Auto Shooter Exit Velocity", 10);
 
-    public static final double kHoodEncoderOffset = 0.0; 
+    public static final double kHoodEncoderOffset = -2.66; 
+    public static final double kHoodAngleOffset = 0.0;
     public static final boolean kHoodEncoderReversed = false;
 
-    public static final double kHoodUpperLimit = 0.7;
-    public static final double kHoodLowerLimit = 0.4;
+    public static final double kHoodUpperLimit = 0.2;
+    public static final double kHoodLowerLimit = 0.05;
 
     // Constants for auto-aiming
     public static final boolean ampUpperEntry = false;

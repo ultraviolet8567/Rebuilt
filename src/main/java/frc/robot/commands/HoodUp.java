@@ -21,11 +21,18 @@ public class HoodUp extends Command {
 		addRequirements(shooter);
 	}
 
+	@Override
+	public void initialize() {
+        if (!shooter.hoodOutOfUpperBound()) {
+		    shooter.hoodUp();
+        }
+	}
+
     @Override
 	public void execute() {
-        // if (!shooter.hoodOutOfUpperBound()) {
+        if (!shooter.hoodOutOfUpperBound()) {
 		    shooter.hoodUp();
-        //}
+        }
 	}
 
 	@Override

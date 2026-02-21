@@ -108,8 +108,8 @@ public class ShooterIOSparkMax implements ShooterIO {
 		inputs.velocityRPM = flywheelLeadEncoder.getVelocity(); 
 		inputs.flywheelAppliedVoltage = new double[]{flywheelLeadMotor.getAppliedOutput() * flywheelLeadMotor.getBusVoltage(), 
 			flywheelFollowerMotor.getAppliedOutput() * flywheelFollowerMotor.getBusVoltage()};
-		inputs.kickerAppliedVoltage = kickerMotor.getAppliedOutput();
-		inputs.hoodAppliedVoltage = hoodMotor.getAppliedOutput();
+		inputs.kickerAppliedVoltage = kickerMotor.getAppliedOutput() * flywheelFollowerMotor.getBusVoltage();
+		inputs.hoodAppliedVoltage = hoodMotor.getAppliedOutput() * flywheelFollowerMotor.getBusVoltage();
 		inputs.currentAmps = new double[]{flywheelLeadMotor.getOutputCurrent(), flywheelFollowerMotor.getOutputCurrent()};
 		inputs.tempCelsius = new double[]{flywheelLeadMotor.getMotorTemperature(), flywheelFollowerMotor.getMotorTemperature()};
 
@@ -159,7 +159,7 @@ public class ShooterIOSparkMax implements ShooterIO {
 		double angle = hoodEncoder.get();
 		angle *= 2 * Math.PI;
 		angle += ShooterConstants.kHoodEncoderOffset;
-		angle = MathUtil.inputModulus(angle, -Math.PI, Math.PI);
+		angle = MathUtil.inputModulus(angle, 0, 2 * Math.PI);
 
 		return angle * (ShooterConstants.kHoodEncoderReversed ? -1 : 1);
 	}
@@ -171,7 +171,7 @@ public class ShooterIOSparkMax implements ShooterIO {
 
 	@Override
 	public double getHoodAngleRads() {
-		double hoodAngle = getRotationRads() * ShooterConstants.kHoodGearReduction; 
+		double hoodAngle = getRotationRads() / ShooterConstants.kHoodGearReduction; 
 		return hoodAngle;
 	}
 

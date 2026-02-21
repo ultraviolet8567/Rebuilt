@@ -22,11 +22,18 @@ public class HoodDown extends Command {
 		addRequirements(shooter);
 	}
 
+	@Override
+	public void initialize() {
+        if (!shooter.hoodOutOfLowerBound()) {
+		    shooter.hoodDown();
+        }
+	}
+
     @Override
 	public void execute() {
-        //if (!shooter.hoodOutOfLowerBound()) {
+        if (!shooter.hoodOutOfLowerBound()) {
 		    shooter.hoodDown();
-        //}
+        }
 	}
 
 	@Override
