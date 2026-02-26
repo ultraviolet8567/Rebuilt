@@ -14,7 +14,6 @@ import frc.robot.Constants.OperatorConstants;
 import frc.robot.subsystems.Odometry;
 import frc.robot.subsystems.Swerve;
 import frc.robot.subsystems.Shooter.Shooter;
-import frc.robot.subsystems.Shooter.ShooterIOSparkMax;
 import frc.robot.Constants.*;
 import frc.robot.commands.*;
 
@@ -42,7 +41,7 @@ public class RobotContainer {
 
         swerve = new Swerve(ModuleConstants.kDriveMotorGearing);
         odometry = new Odometry(swerve);
-        shooter = new Shooter(new ShooterIOSparkMax());
+        shooter = new Shooter();
 
         // Configure the PathPlanner auto-builder
 
@@ -91,10 +90,10 @@ public class RobotContainer {
     private void configureBindings() {
         driverController.back().onTrue(new InstantCommand(() -> odometry.resetGyrometerHeading()));
         // operatorController.rightBumper().whileTrue(new SpinUp(shooter));
-        operatorController.rightBumper().whileTrue(new InstantCommand(() -> shooter.shoot(0.75)))
-            .onFalse(new InstantCommand(() -> shooter.stopFlywheel()));
-		operatorController.rightTrigger().whileTrue(new DirectShoot(shooter, swerve, odometry));
-        operatorController.leftTrigger().whileTrue(new Kick(shooter));
+        // operatorController.rightBumper().whileTrue(new InstantCommand(() -> shooter.shoot(0.75)))
+        //     .onFalse(new InstantCommand(() -> shooter.stopFlywheel()));
+		// operatorController.rightTrigger().whileTrue(new DirectShoot(shooter, swerve, odometry));
+        // operatorController.leftTrigger().whileTrue(new Kick(shooter));
         // operatorController.y().whileTrue(new HoodUp(shooter, swerve, odometry));
         // operatorController.a().whileTrue(new HoodDown(shooter, swerve, odometry));
 

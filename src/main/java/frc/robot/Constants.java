@@ -122,56 +122,28 @@ public final class Constants {
     }
 
 public static final class ShooterConstants {
-
-    public static final double shooterDemoScaleFactor = 0.25;
-
     public static final double kFlywheelReduction = 1.0;
+    public static final double kFlywheelVoltage = 10;
+    public static final boolean kFlywheelInverted = true;
+
     public static final double kKickerReduction = 3.0;
+    public static final double kKickerVoltage = 10;
+    public static final boolean kKickerInverted = true;
+
     public static final double kHoodMotorReduction = 25.0;
     public static final double kHoodGearReduction = 168.0 / 10.0; 
-
-    public static final double kVelocityThreshold = 0.8;
-    public static final double kVelocityThresholdLow = 0.6;
-
-    public static final double kShooterVelocityRPM = 4000.0;
-
-    public static final double kFlywheelVoltage = 10.0;
-    public static final LoggedTunableNumber kKickerVoltage = new LoggedTunableNumber("Shooter/Kicker Voltage", 10.0);
-    public static final LoggedTunableNumber kHoodVoltage = new LoggedTunableNumber("Shooter/Hood Voltage", 5.0);
-
-    public static final LoggedTunableNumber kShooterPIDTolerance = new LoggedTunableNumber("Shooter/PID Tolerance",
-            0.5);
-
-    // TODO: Change to computed value
-    public static final LoggedTunableNumber kAutoShooterExitVel = new LoggedTunableNumber(
-            "Auto Shooter Exit Velocity", 10);
-
-    public static final double kHoodEncoderOffset = 0.0; 
+    public static final double kHoodEncoderOffset = 0;
     public static final boolean kHoodEncoderReversed = false;
+    public static final boolean kHoodInverted = true;
 
-    public static final double kHoodUpperLimit = 0.7;
-    public static final double kHoodLowerLimit = 0.4;
-
-    // Constants for auto-aiming
-    public static final boolean ampUpperEntry = false;
-    public static final boolean speakerUpperEntry = true;
-
-    public static final double ampHoriEntryRange = Math.PI / 6;
-    public static final double speakerHoriEntryRange = Math.PI / 2;
-            // PID values
-            public static final double kFlywheelP = 0.0;
+    // PID values
+    public static final double kFlywheelP = 0.0;
     public static final double kFlywheelI = 0.0;
     public static final double kFlywheelD = 0.0;
-    public static final double kFlywheelS = 0.0;
-    public static final double kFlywheelG = 0.0;
-    public static final double kFlywheelV = 0.0;
 
     public static final double kHoodP = 0.0;
     public static final double kHoodI = 0.0;
     public static final double kHoodD = 0.0;
-    public static final double kHoodS = 0.0;
-    public static final double kHoodG = 0.0;
-    public static final double kHoodV = 0.0;
 }
 
 public static class AutoConstants {
