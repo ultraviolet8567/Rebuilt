@@ -6,6 +6,7 @@ public interface ShooterIO {
 	@AutoLog
 	class ShooterIOInputs {
 		public double velocityRPM = 0.0;
+		public double followerVelocityRPM = 0.0;
 		public double targetVelocityRPM = 0.0;
 		public double[] flywheelAppliedVoltage = new double[]{0.0, 0.0};
 		public double[] currentAmps = new double[]{0.0, 0.0};
@@ -37,6 +38,11 @@ public interface ShooterIO {
 	/** Sets motor voltage */
 	default void setFlywheelInputVoltage(double volts) {
 	}
+
+	default void setFlywheelFollowerInputVoltage(double volts) {
+
+	}
+	
 	default void setKickerInputVoltage(double volts) {
 	}
 	default void setHoodInputVoltage(double volts) {

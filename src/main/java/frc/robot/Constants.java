@@ -7,10 +7,13 @@ package frc.robot;
 import static edu.wpi.first.units.Units.Seconds;
 import static edu.wpi.first.units.Units.Volts;
 
+import com.pathplanner.lib.config.ModuleConfig;
 import com.pathplanner.lib.config.PIDConstants;
+import com.pathplanner.lib.config.RobotConfig;
 import com.pathplanner.lib.controllers.PPHolonomicDriveController;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
+import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.util.Units;
 // import com.pathplanner.lib.util.HolonomicPathFollowerConfig;
 // import com.pathplanner.lib.util.PIDConstants;
@@ -117,8 +120,17 @@ public final class Constants {
         public static final double kTeleDriveMaxAccelerationUnitsPerSecond = 3;
         public static final double kTeleDriveMaxAngularAccelerationUnitsPerSecond = 3 * Math.PI;
 
-        public static final double kRobotMass = 25;
+        public static final double kRobotMass = 48.5;
         public static final double kRobotMOI = 7.0;
+
+        public static final ModuleConfig kRobotModuleConfig = new ModuleConfig(ModuleConstants.kWheelDiameterMeters / 2,
+				kPhysicalMaxSpeedMetersPerSecond, 1, // friction coefficient between wheel and carpet, (unsure so 1.0)
+				DCMotor.getNEO(1), 1 / ModuleConstants.kDriveMotorGearR2Ratio, 80, 1);
+		public static final RobotConfig kRobotConfig = new RobotConfig(kRobotMass, // mass, kg
+				kRobotMOI, // moment of inertia (why), kgm^2
+				kRobotModuleConfig, // module config
+				kDriveKinematics.getModules()); // locations of modules relative of robot center
+
     }
 
 public static final class ShooterConstants {
@@ -146,7 +158,7 @@ public static final class ShooterConstants {
     public static final LoggedTunableNumber kAutoShooterExitVel = new LoggedTunableNumber(
             "Auto Shooter Exit Velocity", 10);
 
-    public static final double kHoodEncoderOffset = -2.66; 
+    public static final double kHoodEncoderOffset = -2.4; 
     public static final double kHoodAngleOffset = 0.0;
     public static final boolean kHoodEncoderReversed = false;
 

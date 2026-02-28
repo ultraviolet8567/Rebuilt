@@ -4,13 +4,21 @@
 
 package frc.robot;
 
+import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.auto.NamedCommands;
+import com.pathplanner.lib.config.ModuleConfig;
+import com.pathplanner.lib.config.PIDConstants;
+import com.pathplanner.lib.config.RobotConfig;
+import com.pathplanner.lib.controllers.PPHolonomicDriveController;
+import frc.robot.subsystems.AutoChooser;
+
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
-import frc.robot.Constants.ModuleConstants;
-import frc.robot.Constants.OperatorConstants;
 import frc.robot.subsystems.Odometry;
 import frc.robot.subsystems.Swerve;
 import frc.robot.subsystems.Shooter.Shooter;
@@ -29,6 +37,7 @@ public class RobotContainer {
     private final Swerve swerve;
     private final Odometry odometry;
     private final Shooter shooter;
+    private final AutoChooser autoChooser;
 
     // Replace with CommandPS4Controller or CommandJoystick if needed
     private static final CommandXboxController driverController =
@@ -66,6 +75,17 @@ public class RobotContainer {
                     return false;
                 }, swerve);
         */
+
+        // Configure the PathPlanner auto-builder
+		AutoBuilder.configure(odometry::getPose, odometry::resetPose, swerve::getRobotRelativeSpeeds,
+				swerve::setModuleStates, AutoConstants.kHolonomicController, // rotational PID
+				DriveConstants.kRobotConfig, () -> {
+					if (DriverStation.getAlliance().isPresent()) {
+						return DriverStation.getAlliance().get() == Alliance.Red;
+					}
+					return false;
+				}, swerve);
+        autoChooser = new AutoChooser();
 
         swerve.setDefaultCommand(
                 new SwerveTeleOp(
@@ -106,9 +126,8 @@ public class RobotContainer {
      * @return the command to run in autonomous
      */
     public Command getAutonomousCommand() {
-        // An example command will be run in autonomous
-        return null;
-    }
+		return autoChooser.getSelectedAuto();
+	}
 
     public static XboxController getDriverJoystick() {
         return driverController.getHID();

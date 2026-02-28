@@ -41,6 +41,7 @@ public class Shooter extends SubsystemBase {
 
 	public void shootVoltage() {
 		io.setFlywheelInputVoltage(ShooterConstants.kFlywheelVoltage);
+		io.setFlywheelFollowerInputVoltage(ShooterConstants.kFlywheelVoltage);
 	}
 
 	public boolean atVelocity() {

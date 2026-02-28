@@ -74,11 +74,11 @@ public class ShooterIOSparkMax implements ShooterIO {
       	flywheelLeadConfig.idleMode(IdleMode.kBrake);
 	    flywheelFollowerConfig.idleMode(IdleMode.kBrake);
 
-// Change smart current limit numbers later
+
 		flywheelLeadConfig.smartCurrentLimit(80);
 		flywheelFollowerConfig.smartCurrentLimit(80);
 
-		flywheelFollowerConfig.follow(flywheelLeadMotor, false);
+		//flywheelFollowerConfig.follow(flywheelLeadMotor, false);
 
         flywheelLeadMotor.configure(flywheelLeadConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
 		flywheelFollowerMotor.configure(flywheelFollowerConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
@@ -106,6 +106,7 @@ public class ShooterIOSparkMax implements ShooterIO {
 	
 		inputs.targetVelocityRPM = targetVel; // TODO: Calculate target velocity
 		inputs.velocityRPM = flywheelLeadEncoder.getVelocity(); 
+		inputs.followerVelocityRPM = flywheelFollowerEncoder.getVelocity();
 		inputs.flywheelAppliedVoltage = new double[]{flywheelLeadMotor.getAppliedOutput() * flywheelLeadMotor.getBusVoltage(), 
 			flywheelFollowerMotor.getAppliedOutput() * flywheelFollowerMotor.getBusVoltage()};
 		inputs.kickerAppliedVoltage = kickerMotor.getAppliedOutput() * flywheelFollowerMotor.getBusVoltage();
@@ -125,6 +126,12 @@ public class ShooterIOSparkMax implements ShooterIO {
 	}
 	
 	@Override
+	public void setFlywheelFollowerInputVoltage(double volts) {
+		double appliedVolts = MathUtil.clamp(volts, -12.0, 12.0);
+		flywheelFollowerMotor.setVoltage(appliedVolts);
+	}
+
+	@Override
 	public void setKickerInputVoltage(double volts) {
 		double appliedVolts = MathUtil.clamp(volts, -12.0, 12.0);
 		kickerMotor.setVoltage(appliedVolts);
@@ -139,6 +146,7 @@ public class ShooterIOSparkMax implements ShooterIO {
 	@Override
 	public void stopFlywheel() {
 		setFlywheelInputVoltage(0.0);
+		setFlywheelFollowerInputVoltage(0.0);
 	}
 	@Override
 	public void stopKicker() {
