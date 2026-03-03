@@ -3,10 +3,9 @@ package frc.robot.subsystems.Shooter;
 import com.revrobotics.PersistMode;
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.ResetMode;
-import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
+import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.config.SparkMaxConfig;
-
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.CAN;
@@ -21,15 +20,17 @@ public class Kicker extends SubsystemBase {
         kickerMotor = new SparkMax(CAN.kKickerPort, MotorType.kBrushless);
         kickerEncoder = kickerMotor.getEncoder();
         kickerMotorConfig = new SparkMaxConfig();
-        kickerMotorConfig.inverted(ShooterConstants.kKickerInverted);
-		kickerMotorConfig.encoder.velocityConversionFactor(1.0 / ShooterConstants.kKickerReduction);
+        kickerMotorConfig.encoder.velocityConversionFactor(1.0 / ShooterConstants.kKickerReduction);
         kickerMotorConfig.smartCurrentLimit(50);
-        kickerMotor.configure(kickerMotorConfig,ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+        kickerMotor.configure(
+                kickerMotorConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
     }
 
     public void setVoltage(double voltage) {
-        voltage = MathUtil.clamp(voltage,-ShooterConstants.kKickerVoltage,ShooterConstants.kKickerVoltage);
-        voltage *= ShooterConstants.kKickerInverted?1:-1;
+        voltage =
+                MathUtil.clamp(
+                        voltage, -ShooterConstants.kKickerVoltage, ShooterConstants.kKickerVoltage);
+        voltage *= ShooterConstants.kKickerInverted ? 1 : -1;
         kickerMotor.set(voltage);
     }
 
@@ -40,7 +41,4 @@ public class Kicker extends SubsystemBase {
     public void stop() {
         kickerMotor.setVoltage(0);
     }
-
-    
 }
-
