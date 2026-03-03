@@ -44,12 +44,13 @@ public class Hood extends SubsystemBase {
 	}
 
     public void setAngleRads(double angle) {
-        double voltage = pidController.calculate(getAbsoluteRotationRads(), angle);
-        voltage = MathUtil.clamp(voltage, -ShooterConstants.kFlywheelVoltage, ShooterConstants.kFlywheelVoltage);
+        double voltage = pidController.calculate(getAbsoluteRotationRads(), MathUtil.clamp(angle,ShooterConstants.kHoodLower,ShooterConstants.kHoodUpper));
         setVoltage(voltage);
     }
 
     public void setVoltage(double voltage) {
+        voltage = MathUtil.clamp(voltage, -ShooterConstants.kHoodVoltage, ShooterConstants.kHoodVoltage);
+        voltage *= ShooterConstants.kHoodInverted?1:-1;
         hoodMotor.set(voltage);
     }
 

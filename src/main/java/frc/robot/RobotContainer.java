@@ -3,6 +3,16 @@
 // the WPILib BSD license file in the root directory of this project.
 
 package frc.robot;
+import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.auto.NamedCommands;
+import com.pathplanner.lib.config.ModuleConfig;
+import com.pathplanner.lib.config.PIDConstants;
+import com.pathplanner.lib.config.RobotConfig;
+import com.pathplanner.lib.controllers.PPHolonomicDriveController;
+import frc.robot.subsystems.AutoChooser;
+
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
 
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -28,6 +38,7 @@ public class RobotContainer {
     private final Swerve swerve;
     private final Odometry odometry;
     private final Shooter shooter;
+    private final AutoChooser autoChooser;
 
     // Replace with CommandPS4Controller or CommandJoystick if needed
     private static final CommandXboxController driverController =
@@ -42,6 +53,7 @@ public class RobotContainer {
         swerve = new Swerve(ModuleConstants.kDriveMotorGearing);
         odometry = new Odometry(swerve);
         shooter = new Shooter();
+       
 
         // Configure the PathPlanner auto-builder
 
@@ -65,6 +77,17 @@ public class RobotContainer {
                     return false;
                 }, swerve);
         */
+
+        // Configure the PathPlanner auto-builder
+		AutoBuilder.configure(odometry::getPose, odometry::resetPose, swerve::getRobotRelativeSpeeds,
+				swerve::setModuleStates, AutoConstants.kHolonomicController, // rotational PID
+				DriveConstants.kRobotConfig, () -> {
+					if (DriverStation.getAlliance().isPresent()) {
+						return DriverStation.getAlliance().get() == Alliance.Red;
+					}
+					return false;
+				}, swerve);
+        autoChooser = new AutoChooser();
 
         swerve.setDefaultCommand(
                 new SwerveTeleOp(
@@ -97,6 +120,9 @@ public class RobotContainer {
         // operatorController.y().whileTrue(new HoodUp(shooter, swerve, odometry));
         // operatorController.a().whileTrue(new HoodDown(shooter, swerve, odometry));
 
+        operatorController.leftBumper().whileTrue(new HoodDown(shooter,swerve,odometry));
+        operatorController.rightBumper().whileTrue(new HoodUp(shooter,swerve,odometry));
+        operatorController.rightTrigger().whileTrue(new DirectShoot(shooter,swerve,odometry));
     }
 
     /**
@@ -107,6 +133,7 @@ public class RobotContainer {
     public Command getAutonomousCommand() {
         // An example command will be run in autonomous
         return null;
+        
     }
 
     public static XboxController getDriverJoystick() {

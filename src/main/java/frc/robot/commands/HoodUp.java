@@ -23,13 +23,11 @@ public class HoodUp extends Command {
 
     @Override
 	public void execute() {
-        if (!shooter.hoodOutOfUpperBound()) {
-		    shooter.hoodUp();
-        }
+        shooter.getHood().setAngleRads(ShooterConstants.kHoodUpper);
 	}
-
-	public void end() {
-		shooter.stopHood();
+	
+	@Override
+	public void end(boolean interrupted) {
+		shooter.getHood().stop();
 	}
-
 }

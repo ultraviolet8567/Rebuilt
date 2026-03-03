@@ -6,12 +6,14 @@ package frc.robot;
 
 import static edu.wpi.first.units.Units.Seconds;
 import static edu.wpi.first.units.Units.Volts;
-
+import com.pathplanner.lib.config.ModuleConfig;
 import com.pathplanner.lib.config.PIDConstants;
+import com.pathplanner.lib.config.RobotConfig;
 import com.pathplanner.lib.controllers.PPHolonomicDriveController;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.math.system.plant.DCMotor;
 // import com.pathplanner.lib.util.HolonomicPathFollowerConfig;
 // import com.pathplanner.lib.util.PIDConstants;
 // import com.pathplanner.lib.util.ReplanningConfig;
@@ -117,31 +119,45 @@ public final class Constants {
         public static final double kTeleDriveMaxAccelerationUnitsPerSecond = 3;
         public static final double kTeleDriveMaxAngularAccelerationUnitsPerSecond = 3 * Math.PI;
 
-        public static final double kRobotMass = 25;
+        public static final double kRobotMass = 48.5;
         public static final double kRobotMOI = 7.0;
+
+        public static final ModuleConfig kRobotModuleConfig = new ModuleConfig(ModuleConstants.kWheelDiameterMeters / 2,
+				kPhysicalMaxSpeedMetersPerSecond, 1, // friction coefficient between wheel and carpet, (unsure so 1.0)
+				DCMotor.getNEO(1), 1 / ModuleConstants.kDriveMotorGearR2Ratio, 80, 1);
+		public static final RobotConfig kRobotConfig = new RobotConfig(kRobotMass, // mass, 
+        kRobotMOI, // moment of inertia (why), kgm^2
+				kRobotModuleConfig, // module config
+				kDriveKinematics.getModules()); // locations of modules relative of robot center
     }
 
+
 public static final class ShooterConstants {
+    public static final double kFlywheelVelocityTolerance = 0.1;
     public static final double kFlywheelReduction = 1.0;
     public static final double kFlywheelVoltage = 10;
-    public static final boolean kFlywheelInverted = true;
+    public static final boolean kFlywheelInverted = false;
+
+      public static final double kHoodUpper = 0.2;
+    public static final double kHoodLower = 0.05;
 
     public static final double kKickerReduction = 3.0;
     public static final double kKickerVoltage = 10;
-    public static final boolean kKickerInverted = true;
+    public static final boolean kKickerInverted = false;
 
     public static final double kHoodMotorReduction = 25.0;
     public static final double kHoodGearReduction = 168.0 / 10.0; 
     public static final double kHoodEncoderOffset = 0;
     public static final boolean kHoodEncoderReversed = false;
-    public static final boolean kHoodInverted = true;
+    public static final double kHoodVoltage = 10;
+    public static final boolean kHoodInverted = false;
 
     // PID values
-    public static final double kFlywheelP = 0.0;
+    public static final double kFlywheelP = 1.0;
     public static final double kFlywheelI = 0.0;
     public static final double kFlywheelD = 0.0;
 
-    public static final double kHoodP = 0.0;
+    public static final double kHoodP = 1.0;
     public static final double kHoodI = 0.0;
     public static final double kHoodD = 0.0;
 }

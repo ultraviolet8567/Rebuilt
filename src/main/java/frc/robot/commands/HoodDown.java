@@ -24,13 +24,11 @@ public class HoodDown extends Command {
 
     @Override
 	public void execute() {
-        if (!shooter.hoodOutOfLowerBound()) {
-		    shooter.hoodDown();
-        }
+        shooter.getHood().setAngleRads(ShooterConstants.kHoodLower);
 	}
 
-	public void end() {
-		shooter.stopHood();
+	@Override
+	public void end(boolean interrupted) {
+		shooter.getHood().stop();
 	}
-
 }

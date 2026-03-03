@@ -7,6 +7,7 @@ import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.config.SparkMaxConfig;
 
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.CAN;
 import frc.robot.Constants.ShooterConstants;
@@ -27,11 +28,19 @@ public class Kicker extends SubsystemBase {
     }
 
     public void setVoltage(double voltage) {
+        voltage = MathUtil.clamp(voltage,-ShooterConstants.kKickerVoltage,ShooterConstants.kKickerVoltage);
+        voltage *= ShooterConstants.kKickerInverted?1:-1;
         kickerMotor.set(voltage);
+    }
+
+    public void start() {
+        kickerMotor.setVoltage(ShooterConstants.kKickerVoltage);
     }
 
     public void stop() {
         kickerMotor.setVoltage(0);
     }
+
+    
 }
 

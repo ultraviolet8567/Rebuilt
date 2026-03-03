@@ -25,25 +25,16 @@ public class SpinUp extends Command {
 
 	@Override
 	public void initialize() {
-		shooter.shoot(0.75);
+		
 	}
 
 	@Override
 	public void execute() {
-		// if (shooter.atVelocity()) {
-		// 	shooter.kickIn();
-
-			// double targetRotZ = swerve.solveBodyRot(odometry.getPose(), FieldConstants.Speaker.centerSpeakerOpening);
-			// double targetRotY = arm.solveArmRot(odometry.getPose(), FieldConstants.Speaker.centerSpeakerOpening,
-			// 		ShooterConstants.kAutoShooterExitVel.get(), false);
-
-			// Logger.recordOutput("AutoTargeter/RotZ", targetRotZ);
-			// Logger.recordOutput("AutoTargeter/RotY", targetRotY);
-		// }
+		
 	}
 
 	@Override
 	public void end(boolean interrupted) {
-		shooter.stopKicker();
+
 	}
 }

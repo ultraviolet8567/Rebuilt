@@ -51,6 +51,7 @@ public class Flywheel extends SubsystemBase {
 
     public void setVoltage(double voltage) {
         voltage = MathUtil.clamp(voltage, -ShooterConstants.kFlywheelVoltage, ShooterConstants.kFlywheelVoltage);
+        voltage *= ShooterConstants.kFlywheelInverted?1:-1;
         leadMotor.set(voltage);
     }
 
@@ -62,5 +63,9 @@ public class Flywheel extends SubsystemBase {
         double voltage = pidController.calculate(getVelocity(), velocity);
         voltage = MathUtil.clamp(voltage, -ShooterConstants.kFlywheelVoltage, ShooterConstants.kFlywheelVoltage);
         setVoltage(voltage);
+    }
+
+    public boolean atVelocity(double velocity) {
+        return Math.abs(velocity-getVelocity()) < ShooterConstants.kFlywheelVelocityTolerance;
     }
 }

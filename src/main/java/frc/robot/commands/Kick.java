@@ -6,6 +6,7 @@ import frc.robot.Constants.ShooterConstants;
 import frc.robot.subsystems.Odometry;
 import frc.robot.subsystems.Swerve;
 import frc.robot.subsystems.Shooter.Shooter;
+import frc.robot.subsystems.Shooter.Kicker;
 import org.littletonrobotics.junction.Logger;
 
 public class Kick extends Command {
@@ -19,11 +20,11 @@ public class Kick extends Command {
 
     @Override
 	public void initialize() {
-		shooter.kickIn();
+		shooter.getKicker().start();
 	}
 
     @Override
 	public void end(boolean interrupted) {
-		shooter.stopKicker();
+		shooter.getKicker().stop();
 	}
 }

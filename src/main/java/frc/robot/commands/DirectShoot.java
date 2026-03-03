@@ -23,12 +23,12 @@ public class DirectShoot extends Command {
 
 	@Override
 	public void initialize() {
-		shooter.shootVoltage();
+		shooter.getFlywheel().setVoltage(ShooterConstants.kFlywheelVoltage);
 	}
 
 
 	@Override
 	public void end(boolean interrupted) {
-		shooter.stopFlywheel();
+		shooter.getFlywheel().stop();
 	}
 }
