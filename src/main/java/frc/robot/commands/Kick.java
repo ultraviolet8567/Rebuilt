@@ -10,11 +10,11 @@ public class Kick extends Command {
     public Kick(Kicker kicker) {
         this.kicker = kicker;
 
-      //   addRequirements();
+        //   addRequirements();
     }
 
     @Override
-    public void initialize() {
+    public void execute() {
         kicker.start();
     }
 

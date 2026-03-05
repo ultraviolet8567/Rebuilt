@@ -10,6 +10,7 @@ import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.CAN;
 import frc.robot.Constants.ShooterConstants;
+import org.littletonrobotics.junction.Logger;
 
 public class Kicker extends SubsystemBase {
     private final SparkMax kickerMotor;
@@ -26,11 +27,15 @@ public class Kicker extends SubsystemBase {
                 kickerMotorConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
     }
 
+    @Override
+    public void periodic() {}
+
     public void setVoltage(double voltage) {
         voltage =
                 MathUtil.clamp(
                         voltage, -ShooterConstants.kKickerVoltage, ShooterConstants.kKickerVoltage);
-        voltage *= ShooterConstants.kKickerInverted ? 1 : -1;
+        voltage *= ShooterConstants.kKickerInverted ? -1 : 1;
+        Logger.recordOutput("Shooter/Kicker/Voltage", voltage);
         kickerMotor.set(voltage);
     }
 

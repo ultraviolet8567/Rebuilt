@@ -1,7 +1,5 @@
 package frc.robot.subsystems.Shooter;
 
-import org.littletonrobotics.junction.Logger;
-
 import com.revrobotics.PersistMode;
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.ResetMode;
@@ -11,15 +9,18 @@ import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.SparkFlexConfig;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.CAN;
 import frc.robot.Constants.ShooterConstants;
+import org.littletonrobotics.junction.Logger;
 
 public class Flywheel extends SubsystemBase {
     private final SparkFlex leadMotor, followerMotor;
     private final SparkFlexConfig leadMotorConfig, followerMotorConfig;
     private final RelativeEncoder leadEncoder, followerEncoder;
     private final PIDController pidController;
+    private final SimpleMotorFeedforward feedforwardController;
 
     private double velocity;
     private boolean running;
@@ -42,7 +43,9 @@ public class Flywheel extends SubsystemBase {
         followerMotorConfig.smartCurrentLimit(80);
         followerMotorConfig.idleMode(IdleMode.kCoast);
         followerMotor.configure(
-                leadMotorConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+                followerMotorConfig,
+                ResetMode.kResetSafeParameters,
+                PersistMode.kPersistParameters);
 
         followerMotorConfig.follow(CAN.kFlywheelLeadPort);
 
@@ -51,25 +54,20 @@ public class Flywheel extends SubsystemBase {
                         ShooterConstants.kFlywheelP,
                         ShooterConstants.kFlywheelI,
                         ShooterConstants.kFlywheelD);
-            
+        feedforwardController =
+                new SimpleMotorFeedforward(
+                        ShooterConstants.kFlywheelS, ShooterConstants.kFlywheelV);
     }
 
-    /*
     public void periodic() {
         if (running) {
-            double voltage = pidController.calculate(getVelocity(), velocity);
-            voltage =
-                    MathUtil.clamp(
-                            voltage,
-                            -ShooterConstants.kFlywheelVoltage,
-                            ShooterConstants.kFlywheelVoltage);
+            double voltage = feedforwardController.calculate(-velocity);
             setVoltage(voltage);
         }
-    }
-    */
 
-    public void periodic() {
         Logger.recordOutput("Shooter/Flywheel/Velocity", getVelocity());
+        Logger.recordOutput("Shooter/Flywheel/TargetVelocity", velocity);
+        Logger.recordOutput("Shooter/Flywheel/Voltage", leadMotor.getAppliedOutput());
     }
 
     public double getVelocity() {
@@ -82,7 +80,8 @@ public class Flywheel extends SubsystemBase {
                         voltage,
                         -ShooterConstants.kFlywheelVoltage,
                         ShooterConstants.kFlywheelVoltage);
-        voltage *= ShooterConstants.kFlywheelInverted ? 1 : -1;
+        voltage *= ShooterConstants.kFlywheelInverted ? -1 : 1;
+        Logger.recordOutput("Shooter/Flywheel/InternalVoltage", voltage);
         leadMotor.set(voltage);
     }
 

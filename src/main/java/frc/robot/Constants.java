@@ -136,11 +136,11 @@ public final class Constants {
         public static final double kFlywheelVelocityTolerance = 0.1;
         public static final double kFlywheelReduction = 1.0;
         public static final double kFlywheelVoltage = 10;
-        public static final boolean kFlywheelInverted = false;
+        public static final boolean kFlywheelInverted = true;
 
         public static final double kKickerReduction = 3.0;
-        public static final double kKickerVoltage = 10;
-        public static final boolean kKickerInverted = false;
+        public static final double kKickerVoltage = 5;
+        public static final boolean kKickerInverted = true;
 
         public static final double kHoodLower = -Math.PI + 0.1;
         public static final double kHoodUpper = Math.PI - 0.1;
@@ -157,6 +157,9 @@ public final class Constants {
         public static final double kFlywheelP = 1.0;
         public static final double kFlywheelI = 0.0;
         public static final double kFlywheelD = 0.0;
+
+        public static final double kFlywheelS = 0.0;
+        public static final double kFlywheelV = 0.00033;
 
         public static final double kHoodP = 0.1;
         public static final double kHoodI = 0.0;

@@ -5,6 +5,7 @@ import com.revrobotics.RelativeEncoder;
 import com.revrobotics.ResetMode;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.SparkMax;
+import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.SparkMaxConfig;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
@@ -28,6 +29,7 @@ public class Hood extends SubsystemBase {
         hoodMotorConfig = new SparkMaxConfig();
         hoodMotorConfig.encoder.velocityConversionFactor(1.0 / ShooterConstants.kHoodGearReduction);
         hoodMotorConfig.smartCurrentLimit(50);
+        hoodMotorConfig.idleMode(IdleMode.kBrake);
         hoodMotor.configure(
                 hoodMotorConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
 
@@ -38,7 +40,7 @@ public class Hood extends SubsystemBase {
     }
 
     public void periodic() {
-        Logger.recordOutput("Hood/AbsoluteRotation", getAbsoluteRotationRads());
+        Logger.recordOutput("Shooter/Hood/AbsoluteRotation", getAbsoluteRotationRads());
     }
 
     public double getAbsoluteRotationRads() {
@@ -55,6 +57,8 @@ public class Hood extends SubsystemBase {
                         getAbsoluteRotationRads(),
                         MathUtil.clamp(
                                 angle, ShooterConstants.kHoodLower, ShooterConstants.kHoodUpper));
+        voltage *= ShooterConstants.kHoodInverted ? -1 : 1;
+
         Logger.recordOutput("Hood/Voltage", voltage);
         setVoltage(voltage);
     }
@@ -63,7 +67,7 @@ public class Hood extends SubsystemBase {
         voltage =
                 MathUtil.clamp(
                         voltage, -ShooterConstants.kHoodVoltage, ShooterConstants.kHoodVoltage);
-        voltage *= ShooterConstants.kHoodInverted ? 1 : -1;
+        voltage *= ShooterConstants.kHoodInverted ? -1 : 1;
         hoodMotor.set(voltage);
     }
 
