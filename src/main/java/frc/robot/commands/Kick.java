@@ -2,24 +2,24 @@ package frc.robot.commands;
 
 import edu.wpi.first.wpilibj2.command.Command;
 // import frc.robot.FieldConstants;
-import frc.robot.subsystems.Shooter.Shooter;
+import frc.robot.subsystems.Shooter.Kicker;
 
 public class Kick extends Command {
-    private Shooter shooter;
+    private Kicker kicker;
 
-    public Kick(Shooter shooter) {
-        this.shooter = shooter;
+    public Kick(Kicker kicker) {
+        this.kicker = kicker;
 
-        // addRequirements(shooter);
+      //   addRequirements();
     }
 
     @Override
     public void initialize() {
-        shooter.getKicker().start();
+        kicker.start();
     }
 
     @Override
     public void end(boolean interrupted) {
-        shooter.getKicker().stop();
+        kicker.stop();
     }
 }

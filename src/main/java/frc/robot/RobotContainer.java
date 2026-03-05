@@ -119,9 +119,10 @@ public class RobotContainer {
         // operatorController.y().whileTrue(new HoodUp(shooter, swerve, odometry));
         // operatorController.a().whileTrue(new HoodDown(shooter, swerve, odometry));
 
-        operatorController.leftBumper().whileTrue(new HoodDown(shooter, swerve, odometry));
-        operatorController.rightBumper().whileTrue(new HoodUp(shooter, swerve, odometry));
-        operatorController.rightTrigger().whileTrue(new DirectShoot(shooter, swerve, odometry));
+        operatorController.leftBumper().whileTrue(new HoodDown(shooter.getHood()));
+        operatorController.rightBumper().whileTrue(new HoodUp(shooter.getHood()));
+        operatorController.rightTrigger().whileTrue(new DirectShoot(shooter.getFlywheel()));
+        operatorController.x().whileTrue(new Kick(shooter.getKicker()));
     }
 
     /**

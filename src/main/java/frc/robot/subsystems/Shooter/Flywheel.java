@@ -1,5 +1,7 @@
 package frc.robot.subsystems.Shooter;
 
+import org.littletonrobotics.junction.Logger;
+
 import com.revrobotics.PersistMode;
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.ResetMode;
@@ -17,8 +19,10 @@ public class Flywheel extends SubsystemBase {
     private final SparkFlex leadMotor, followerMotor;
     private final SparkFlexConfig leadMotorConfig, followerMotorConfig;
     private final RelativeEncoder leadEncoder, followerEncoder;
-
     private final PIDController pidController;
+
+    private double velocity;
+    private boolean running;
 
     public Flywheel() {
         leadMotor = new SparkFlex(CAN.kFlywheelLeadPort, MotorType.kBrushless);
@@ -47,6 +51,25 @@ public class Flywheel extends SubsystemBase {
                         ShooterConstants.kFlywheelP,
                         ShooterConstants.kFlywheelI,
                         ShooterConstants.kFlywheelD);
+            
+    }
+
+    /*
+    public void periodic() {
+        if (running) {
+            double voltage = pidController.calculate(getVelocity(), velocity);
+            voltage =
+                    MathUtil.clamp(
+                            voltage,
+                            -ShooterConstants.kFlywheelVoltage,
+                            ShooterConstants.kFlywheelVoltage);
+            setVoltage(voltage);
+        }
+    }
+    */
+
+    public void periodic() {
+        Logger.recordOutput("Shooter/Flywheel/Velocity", getVelocity());
     }
 
     public double getVelocity() {
@@ -64,17 +87,16 @@ public class Flywheel extends SubsystemBase {
     }
 
     public void stop() {
+        running = false;
         leadMotor.setVoltage(0);
     }
 
     public void setVelocity(double velocity) {
-        double voltage = pidController.calculate(getVelocity(), velocity);
-        voltage =
-                MathUtil.clamp(
-                        voltage,
-                        -ShooterConstants.kFlywheelVoltage,
-                        ShooterConstants.kFlywheelVoltage);
-        setVoltage(voltage);
+        this.velocity = velocity;
+    }
+
+    public void start() {
+        running = true;
     }
 
     public boolean atVelocity(double velocity) {
