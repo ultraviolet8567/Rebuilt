@@ -21,7 +21,7 @@ public class Flywheel extends SubsystemBase {
     private final PIDController pidController;
 
     public Flywheel() {
-        leadMotor = new SparkFlex(CAN.kKickerPort, MotorType.kBrushless);
+        leadMotor = new SparkFlex(CAN.kFlywheelLeadPort, MotorType.kBrushless);
         leadEncoder = leadMotor.getEncoder();
         leadMotorConfig = new SparkFlexConfig();
         leadMotorConfig.encoder.velocityConversionFactor(1.0 / ShooterConstants.kFlywheelReduction);

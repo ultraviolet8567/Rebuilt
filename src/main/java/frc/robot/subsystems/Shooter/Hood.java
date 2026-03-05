@@ -12,6 +12,7 @@ import edu.wpi.first.wpilibj.DutyCycleEncoder;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.CAN;
 import frc.robot.Constants.ShooterConstants;
+import org.littletonrobotics.junction.Logger;
 
 public class Hood extends SubsystemBase {
     private final SparkMax hoodMotor;
@@ -22,11 +23,10 @@ public class Hood extends SubsystemBase {
     private final PIDController pidController;
 
     public Hood() {
-        hoodMotor = new SparkMax(CAN.kKickerPort, MotorType.kBrushless);
+        hoodMotor = new SparkMax(CAN.kHoodPort, MotorType.kBrushless);
         hoodEncoder = hoodMotor.getEncoder();
         hoodMotorConfig = new SparkMaxConfig();
-        hoodMotorConfig.inverted(ShooterConstants.kKickerInverted);
-        hoodMotorConfig.encoder.velocityConversionFactor(1.0 / ShooterConstants.kKickerReduction);
+        hoodMotorConfig.encoder.velocityConversionFactor(1.0 / ShooterConstants.kHoodGearReduction);
         hoodMotorConfig.smartCurrentLimit(50);
         hoodMotor.configure(
                 hoodMotorConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
@@ -35,6 +35,10 @@ public class Hood extends SubsystemBase {
         pidController =
                 new PIDController(
                         ShooterConstants.kHoodP, ShooterConstants.kHoodI, ShooterConstants.kHoodD);
+    }
+
+    public void periodic() {
+        Logger.recordOutput("Hood/AbsoluteRotation", getAbsoluteRotationRads());
     }
 
     public double getAbsoluteRotationRads() {
@@ -51,6 +55,7 @@ public class Hood extends SubsystemBase {
                         getAbsoluteRotationRads(),
                         MathUtil.clamp(
                                 angle, ShooterConstants.kHoodLower, ShooterConstants.kHoodUpper));
+        Logger.recordOutput("Hood/Voltage", voltage);
         setVoltage(voltage);
     }
 
