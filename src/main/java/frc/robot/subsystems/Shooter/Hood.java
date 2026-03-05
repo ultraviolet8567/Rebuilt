@@ -3,10 +3,9 @@ package frc.robot.subsystems.Shooter;
 import com.revrobotics.PersistMode;
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.ResetMode;
-import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
+import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.config.SparkMaxConfig;
-
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.wpilibj.DutyCycleEncoder;
@@ -27,30 +26,39 @@ public class Hood extends SubsystemBase {
         hoodEncoder = hoodMotor.getEncoder();
         hoodMotorConfig = new SparkMaxConfig();
         hoodMotorConfig.inverted(ShooterConstants.kKickerInverted);
-		hoodMotorConfig.encoder.velocityConversionFactor(1.0 / ShooterConstants.kKickerReduction);
+        hoodMotorConfig.encoder.velocityConversionFactor(1.0 / ShooterConstants.kKickerReduction);
         hoodMotorConfig.smartCurrentLimit(50);
-        hoodMotor.configure(hoodMotorConfig,ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+        hoodMotor.configure(
+                hoodMotorConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
 
         absoluteEncoder = new DutyCycleEncoder(CAN.kHoodEncoderPort);
-        pidController = new PIDController(ShooterConstants.kHoodP, ShooterConstants.kHoodI, ShooterConstants.kHoodD);
+        pidController =
+                new PIDController(
+                        ShooterConstants.kHoodP, ShooterConstants.kHoodI, ShooterConstants.kHoodD);
     }
 
     public double getAbsoluteRotationRads() {
-		double angle = absoluteEncoder.get();
-		angle *= 2 * Math.PI;
-		angle += ShooterConstants.kHoodEncoderOffset;
-		angle = MathUtil.inputModulus(angle,-Math.PI, Math.PI);
-		return angle * (ShooterConstants.kHoodEncoderReversed ? -1 : 1);
-	}
+        double angle = absoluteEncoder.get();
+        angle *= 2 * Math.PI;
+        angle += ShooterConstants.kHoodEncoderOffset;
+        angle = MathUtil.inputModulus(angle, -Math.PI, Math.PI);
+        return angle * (ShooterConstants.kHoodEncoderReversed ? -1 : 1);
+    }
 
     public void setAngleRads(double angle) {
-        double voltage = pidController.calculate(getAbsoluteRotationRads(), MathUtil.clamp(angle,ShooterConstants.kHoodLower,ShooterConstants.kHoodUpper));
+        double voltage =
+                pidController.calculate(
+                        getAbsoluteRotationRads(),
+                        MathUtil.clamp(
+                                angle, ShooterConstants.kHoodLower, ShooterConstants.kHoodUpper));
         setVoltage(voltage);
     }
 
     public void setVoltage(double voltage) {
-        voltage = MathUtil.clamp(voltage, -ShooterConstants.kHoodVoltage, ShooterConstants.kHoodVoltage);
-        voltage *= ShooterConstants.kHoodInverted?1:-1;
+        voltage =
+                MathUtil.clamp(
+                        voltage, -ShooterConstants.kHoodVoltage, ShooterConstants.kHoodVoltage);
+        voltage *= ShooterConstants.kHoodInverted ? 1 : -1;
         hoodMotor.set(voltage);
     }
 
@@ -58,4 +66,3 @@ public class Hood extends SubsystemBase {
         hoodMotor.setVoltage(0);
     }
 }
-

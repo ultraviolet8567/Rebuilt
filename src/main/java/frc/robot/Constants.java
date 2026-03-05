@@ -4,26 +4,18 @@
 
 package frc.robot;
 
-import static edu.wpi.first.units.Units.Seconds;
-import static edu.wpi.first.units.Units.Volts;
 import com.pathplanner.lib.config.ModuleConfig;
 import com.pathplanner.lib.config.PIDConstants;
 import com.pathplanner.lib.config.RobotConfig;
 import com.pathplanner.lib.controllers.PPHolonomicDriveController;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
-import edu.wpi.first.math.util.Units;
 import edu.wpi.first.math.system.plant.DCMotor;
 // import com.pathplanner.lib.util.HolonomicPathFollowerConfig;
 // import com.pathplanner.lib.util.PIDConstants;
 // import com.pathplanner.lib.util.ReplanningConfig;
-import edu.wpi.first.math.geometry.Rotation3d;
-import edu.wpi.first.math.geometry.Transform3d;
-import edu.wpi.first.math.geometry.Translation3d;
-import edu.wpi.first.wpilibj.PowerDistribution.ModuleType;
-import edu.wpi.first.wpilibj.RobotBase;
-import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
-import frc.robot.util.LoggedTunableNumber;
+import edu.wpi.first.math.util.Units;
+
 /**
  * The Constants class provides a convenient place for teams to hold robot-wide numerical or boolean
  * constants. This class should not be used for any other purpose. All constants should be declared
@@ -122,109 +114,117 @@ public final class Constants {
         public static final double kRobotMass = 48.5;
         public static final double kRobotMOI = 7.0;
 
-        public static final ModuleConfig kRobotModuleConfig = new ModuleConfig(ModuleConstants.kWheelDiameterMeters / 2,
-				kPhysicalMaxSpeedMetersPerSecond, 1, // friction coefficient between wheel and carpet, (unsure so 1.0)
-				DCMotor.getNEO(1), 1 / ModuleConstants.kDriveMotorGearR2Ratio, 80, 1);
-		public static final RobotConfig kRobotConfig = new RobotConfig(kRobotMass, // mass, 
-        kRobotMOI, // moment of inertia (why), kgm^2
-				kRobotModuleConfig, // module config
-				kDriveKinematics.getModules()); // locations of modules relative of robot center
+        public static final ModuleConfig kRobotModuleConfig =
+                new ModuleConfig(
+                        ModuleConstants.kWheelDiameterMeters / 2,
+                        kPhysicalMaxSpeedMetersPerSecond,
+                        1, // friction coefficient between wheel and carpet, (unsure so 1.0)
+                        DCMotor.getNEO(1),
+                        1 / ModuleConstants.kDriveMotorGearR2Ratio,
+                        80,
+                        1);
+        public static final RobotConfig kRobotConfig =
+                new RobotConfig(
+                        kRobotMass, // mass,
+                        kRobotMOI, // moment of inertia (why), kgm^2
+                        kRobotModuleConfig, // module config
+                        kDriveKinematics
+                                .getModules()); // locations of modules relative of robot center
     }
 
+    public static final class ShooterConstants {
+        public static final double kFlywheelVelocityTolerance = 0.1;
+        public static final double kFlywheelReduction = 1.0;
+        public static final double kFlywheelVoltage = 10;
+        public static final boolean kFlywheelInverted = false;
 
-public static final class ShooterConstants {
-    public static final double kFlywheelVelocityTolerance = 0.1;
-    public static final double kFlywheelReduction = 1.0;
-    public static final double kFlywheelVoltage = 10;
-    public static final boolean kFlywheelInverted = false;
+        public static final double kHoodUpper = 0.2;
+        public static final double kHoodLower = 0.05;
 
-      public static final double kHoodUpper = 0.2;
-    public static final double kHoodLower = 0.05;
+        public static final double kKickerReduction = 3.0;
+        public static final double kKickerVoltage = 10;
+        public static final boolean kKickerInverted = false;
 
-    public static final double kKickerReduction = 3.0;
-    public static final double kKickerVoltage = 10;
-    public static final boolean kKickerInverted = false;
+        public static final double kHoodMotorReduction = 25.0;
+        public static final double kHoodGearReduction = 168.0 / 10.0;
+        public static final double kHoodEncoderOffset = 0;
+        public static final boolean kHoodEncoderReversed = false;
+        public static final double kHoodVoltage = 10;
+        public static final boolean kHoodInverted = false;
 
-    public static final double kHoodMotorReduction = 25.0;
-    public static final double kHoodGearReduction = 168.0 / 10.0; 
-    public static final double kHoodEncoderOffset = 0;
-    public static final boolean kHoodEncoderReversed = false;
-    public static final double kHoodVoltage = 10;
-    public static final boolean kHoodInverted = false;
+        // PID values
+        public static final double kFlywheelP = 1.0;
+        public static final double kFlywheelI = 0.0;
+        public static final double kFlywheelD = 0.0;
 
-    // PID values
-    public static final double kFlywheelP = 1.0;
-    public static final double kFlywheelI = 0.0;
-    public static final double kFlywheelD = 0.0;
+        public static final double kHoodP = 1.0;
+        public static final double kHoodI = 0.0;
+        public static final double kHoodD = 0.0;
+    }
 
-    public static final double kHoodP = 1.0;
-    public static final double kHoodI = 0.0;
-    public static final double kHoodD = 0.0;
-}
+    public static class AutoConstants {
+        // Speeds from -1 to 1
+        public static final double kAutoXDriveSpeed = 0.0;
+        public static final double kAutoYDriveSpeed = 0.5;
 
-public static class AutoConstants {
-    // Speeds from -1 to 1
-    public static final double kAutoXDriveSpeed = 0.0;
-    public static final double kAutoYDriveSpeed = 0.5;
+        public static final double kAutoTurningSpeed = 0.0;
+        public static final double kAutoAlignTolerance = 0.015;
 
-    public static final double kAutoTurningSpeed = 0.0;
-    public static final double kAutoAlignTolerance = 0.015;
+        public static final PPHolonomicDriveController kHolonomicController =
+                new PPHolonomicDriveController(
+                        new PIDConstants(0.25, 0, 0), new PIDConstants(0.5, 0, 0));
+    }
 
-    public static final PPHolonomicDriveController kHolonomicController =
-            new PPHolonomicDriveController(
-                    new PIDConstants(0.25, 0, 0), new PIDConstants(0.5, 0, 0));
-}
+    // CAN = computer area network
+    public static class CAN {
+        public static final int kFrontLeftDriveMotorPort = 10;
+        public static final int kFrontLeftTurningMotorPort = 20;
 
-// CAN = computer area network
-public static class CAN {
-    public static final int kFrontLeftDriveMotorPort = 10;
-    public static final int kFrontLeftTurningMotorPort = 20;
+        public static final int kFrontRightDriveMotorPort = 11;
+        public static final int kFrontRightTurningMotorPort = 21;
 
-    public static final int kFrontRightDriveMotorPort = 11;
-    public static final int kFrontRightTurningMotorPort = 21;
+        public static final int kBackLeftDriveMotorPort = 12;
+        public static final int kBackLeftTurningMotorPort = 22;
 
-    public static final int kBackLeftDriveMotorPort = 12;
-    public static final int kBackLeftTurningMotorPort = 22;
+        public static final int kBackRightDriveMotorPort = 13;
+        public static final int kBackRightTurningMotorPort = 23;
 
-    public static final int kBackRightDriveMotorPort = 13;
-    public static final int kBackRightTurningMotorPort = 23;
-    
-    public static final int kFlywheelLeadPort = 1;
-    public static final int kFlywheelFollowerPort = 2;
+        public static final int kFlywheelLeadPort = 1;
+        public static final int kFlywheelFollowerPort = 2;
 
-    public static final int kKickerPort = 3;
-    
-    public static final int kHoodPort = 4;
+        public static final int kKickerPort = 3;
 
-    public static final int kHoodEncoderPort = 0; 
-}
-// public static final class GainsConstants {
-//     public static final Gains shooterTopGains {
-//         new Gains(0.00000065361, 0.0, 0.0, 0.0091151, 0.0018015, 0.0, 0.0);
-//                     };
-//     public static final Gains shooterBottomGains{
-//         new Gains(0.000001136, 0.0, 0.0, 0.06427, 0.0018144, 0.0, 0.0);
-//     };
+        public static final int kHoodPort = 4;
 
-// }
+        public static final int kHoodEncoderPort = 0;
+    }
 
-public record Gains(double kP, double kI, double kD, double ffkS, double ffkV, double ffkA, double ffkG) {
-}
+    // public static final class GainsConstants {
+    //     public static final Gains shooterTopGains {
+    //         new Gains(0.00000065361, 0.0, 0.0, 0.0091151, 0.0018015, 0.0, 0.0);
+    //                     };
+    //     public static final Gains shooterBottomGains{
+    //         new Gains(0.000001136, 0.0, 0.0, 0.06427, 0.0018144, 0.0, 0.0);
+    //     };
 
+    // }
 
-public static class OIConstants {
-    public static final ControllerType controllerTypeDriver = ControllerType.XBOX;
-    public static final ControllerType controllerTypeOperator = ControllerType.XBOX;
+    public record Gains(
+            double kP, double kI, double kD, double ffkS, double ffkV, double ffkA, double ffkG) {}
 
-    public static final int kDriverControllerPort = 0;
-    public static final int kOperatorControllerPort = 1;
+    public static class OIConstants {
+        public static final ControllerType controllerTypeDriver = ControllerType.XBOX;
+        public static final ControllerType controllerTypeOperator = ControllerType.XBOX;
 
-    public static final double kDeadband = 0.1;
-}
+        public static final int kDriverControllerPort = 0;
+        public static final int kOperatorControllerPort = 1;
 
-public static enum ControllerType {
-    XBOX,
-    LOGITECH,
-    JOYSTICK
-}
+        public static final double kDeadband = 0.1;
+    }
+
+    public static enum ControllerType {
+        XBOX,
+        LOGITECH,
+        JOYSTICK
+    }
 }
