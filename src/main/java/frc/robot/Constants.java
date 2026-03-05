@@ -138,16 +138,17 @@ public final class Constants {
         public static final double kFlywheelVoltage = 10;
         public static final boolean kFlywheelInverted = false;
 
-        public static final double kHoodUpper = 0.2;
-        public static final double kHoodLower = 0.05;
-
         public static final double kKickerReduction = 3.0;
         public static final double kKickerVoltage = 10;
         public static final boolean kKickerInverted = false;
 
+        public static final double kHoodLower = -Math.PI + 0.1;
+        public static final double kHoodUpper = Math.PI - 0.1;
+
         public static final double kHoodMotorReduction = 25.0;
         public static final double kHoodGearReduction = 168.0 / 10.0;
-        public static final double kHoodEncoderOffset = 0;
+        public static final double kHoodEncoderOffset =
+                1.341 + 0.716 - 0.617 - 1.291 - 0.554 - Math.PI - (Math.PI - 1.94);
         public static final boolean kHoodEncoderReversed = false;
         public static final double kHoodVoltage = 10;
         public static final boolean kHoodInverted = false;
@@ -157,7 +158,7 @@ public final class Constants {
         public static final double kFlywheelI = 0.0;
         public static final double kFlywheelD = 0.0;
 
-        public static final double kHoodP = 1.0;
+        public static final double kHoodP = 0.1;
         public static final double kHoodI = 0.0;
         public static final double kHoodD = 0.0;
     }

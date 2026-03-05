@@ -20,7 +20,6 @@ public class Kicker extends SubsystemBase {
         kickerMotor = new SparkMax(CAN.kKickerPort, MotorType.kBrushless);
         kickerEncoder = kickerMotor.getEncoder();
         kickerMotorConfig = new SparkMaxConfig();
-        kickerMotorConfig.inverted(ShooterConstants.kKickerInverted);
         kickerMotorConfig.encoder.velocityConversionFactor(1.0 / ShooterConstants.kKickerReduction);
         kickerMotorConfig.smartCurrentLimit(50);
         kickerMotor.configure(

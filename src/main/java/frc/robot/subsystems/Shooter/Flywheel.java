@@ -24,17 +24,15 @@ public class Flywheel extends SubsystemBase {
         leadMotor = new SparkFlex(CAN.kKickerPort, MotorType.kBrushless);
         leadEncoder = leadMotor.getEncoder();
         leadMotorConfig = new SparkFlexConfig();
-        leadMotorConfig.inverted(ShooterConstants.kKickerInverted);
         leadMotorConfig.encoder.velocityConversionFactor(1.0 / ShooterConstants.kFlywheelReduction);
         leadMotorConfig.smartCurrentLimit(80);
         leadMotorConfig.idleMode(IdleMode.kCoast);
         leadMotor.configure(
                 leadMotorConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
 
-        followerMotor = new SparkFlex(CAN.kKickerPort, MotorType.kBrushless);
+        followerMotor = new SparkFlex(CAN.kFlywheelFollowerPort, MotorType.kBrushless);
         followerEncoder = leadMotor.getEncoder();
         followerMotorConfig = new SparkFlexConfig();
-        followerMotorConfig.inverted(ShooterConstants.kKickerInverted);
         followerMotorConfig.encoder.velocityConversionFactor(
                 1.0 / ShooterConstants.kFlywheelReduction);
         followerMotorConfig.smartCurrentLimit(80);
