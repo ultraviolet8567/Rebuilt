@@ -163,6 +163,23 @@ public final class Constants {
         public static final double kHoodD = 0.0;
     }
 
+    public static final class IntakeConstants {
+        
+        public static final double kIntakeRaiseReduction = 1.0;
+        public static final double kIntakeRaiseVoltage = 10;
+        public static final boolean kRaiseInverted = false;
+
+        // Software limit
+        // public static final double kRaiseUpper = ;
+        // public static final double kRaiseLower = ;
+
+        public static final double kIntakeSpinReduction = 1.0;
+        public static final double kIntakeSpinVoltage = 10;
+        public static final double kIntakeSpinMaxVoltage = 12;
+        public static final boolean kSpinInverted = false;
+
+    }
+
     public static class AutoConstants {
         // Speeds from -1 to 1
         public static final double kAutoXDriveSpeed = 0.0;
@@ -198,6 +215,9 @@ public final class Constants {
         public static final int kHoodPort = 4;
 
         public static final int kHoodEncoderPort = 0;
+// change later
+       public static final int kIntakeRaisePort = 25;
+        public static final int kIntakeSpinPort = 30;
     }
 
     // public static final class GainsConstants {

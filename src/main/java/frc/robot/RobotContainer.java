@@ -33,6 +33,7 @@ public class RobotContainer {
     private final Odometry odometry;
     private final Shooter shooter;
     private final AutoChooser autoChooser;
+    private final Intake intake;
 
     // Replace with CommandPS4Controller or CommandJoystick if needed
     private static final CommandXboxController driverController =
@@ -47,6 +48,7 @@ public class RobotContainer {
         swerve = new Swerve(ModuleConstants.kDriveMotorGearing);
         odometry = new Odometry(swerve);
         shooter = new Shooter();
+        intake = new Intake();
 
         // Configure the PathPlanner auto-builder
 
