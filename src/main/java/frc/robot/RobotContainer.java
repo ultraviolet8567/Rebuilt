@@ -19,6 +19,7 @@ import frc.robot.commands.*;
 import frc.robot.subsystems.AutoChooser;
 import frc.robot.subsystems.Odometry;
 import frc.robot.subsystems.Shooter.Shooter;
+import frc.robot.subsystems.Intake.Intake;
 import frc.robot.subsystems.Swerve;
 
 /**
@@ -33,6 +34,7 @@ public class RobotContainer {
     private final Odometry odometry;
     private final Shooter shooter;
     private final AutoChooser autoChooser;
+    private final Intake intake;
     //private final Intake intake;
 
     // Replace with CommandPS4Controller or CommandJoystick if needed
@@ -48,7 +50,7 @@ public class RobotContainer {
         swerve = new Swerve(ModuleConstants.kDriveMotorGearing);
         odometry = new Odometry(swerve);
         shooter = new Shooter();
-       // intake = new Intake();
+        intake = new Intake();
 
         // Configure the PathPlanner auto-builder
 

@@ -4,11 +4,9 @@ import com.revrobotics.PersistMode;
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.ResetMode;
 import com.revrobotics.spark.SparkFlex;
-import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.SparkFlexConfig;
-import com.revrobotics.spark.config.SparkMaxConfig;
 import frc.robot.RobotContainer;
 
 import edu.wpi.first.math.MathUtil;
@@ -33,18 +31,17 @@ public class Spinner extends SubsystemBase {
         intakeSpinMotor = new SparkFlex(CAN.kIntakeSpinPort, MotorType.kBrushless);
         intakeSpinMotorConfig = new SparkFlexConfig();
         intakeSpinEncoder = intakeSpinMotor.getEncoder();
-            
-        }
-
-       
         intakeSpinMotorConfig.encoder.velocityConversionFactor(1.0 / IntakeConstants.kIntakeSpinReduction);        
         intakeSpinMotorConfig.smartCurrentLimit(80);
         intakeSpinMotor.configure(
-                intakeSpinMotorConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+                intakeSpinMotorConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);    
+        }
 
        
+        
+       
 
-    } // Intake Constructer Close Bracket
+     // Intake Constructer Close Bracket
 
         // public void setRaiseVelocity()
         
@@ -61,7 +58,7 @@ public class Spinner extends SubsystemBase {
 // help pls 💔
 
 
-        public void spinStart (double voltage) {
+        public void spinStart () {
         setSpinVoltage(IntakeConstants.kIntakeSpinVoltage);
         } 
 
@@ -70,9 +67,6 @@ public class Spinner extends SubsystemBase {
         }
 
 
-        public void setRaiseVelocity (double velocity) {
-            
-        }
 
 } // DO NOT CODE PAST THIS LINE
 

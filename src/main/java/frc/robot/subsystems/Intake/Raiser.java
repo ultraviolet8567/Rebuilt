@@ -27,7 +27,7 @@ public class Raiser {
      public Raiser() {
         intakeRaiseMotor = new SparkMax(CAN.kIntakeRaisePort, MotorType.kBrushless);
         intakeRaiseMotorConfig = new SparkMaxConfig();
-
+        intakeRaiseEncoder = intakeRaiseMotor.getEncoder();
         intakeRaiseMotorConfig.encoder.velocityConversionFactor(1.0 / IntakeConstants.kIntakeRaiseReduction);
         intakeRaiseMotorConfig.smartCurrentLimit(50);
         intakeRaiseMotor.configure(
@@ -35,6 +35,10 @@ public class Raiser {
         
         pidController = new PIDController(IntakeConstants.kIntakeRaiseP, IntakeConstants.kIntakeRaiseI, IntakeConstants.kIntakeRaiseD);
      }
+
+    public void setRaiseRads (double velocity) {
+        
+    }
 }
 
 
