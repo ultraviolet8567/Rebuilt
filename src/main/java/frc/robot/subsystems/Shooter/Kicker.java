@@ -16,6 +16,7 @@ public class Kicker extends SubsystemBase {
     private final SparkMax kickerMotor;
     private final SparkMaxConfig kickerMotorConfig;
     private final RelativeEncoder kickerEncoder;
+    private boolean kickerRunning;
 
     public Kicker() {
         kickerMotor = new SparkMax(CAN.kKickerPort, MotorType.kBrushless);
@@ -25,25 +26,31 @@ public class Kicker extends SubsystemBase {
         kickerMotorConfig.smartCurrentLimit(50);
         kickerMotor.configure(
                 kickerMotorConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+
+        kickerRunning = false;
     }
 
     @Override
-    public void periodic() {}
+    public void periodic() {
+        Logger.recordOutput("Shooter/Kicker/Voltage", kickerMotor.getAppliedOutput());
+        Logger.recordOutput("Shooter/Kicker/KickerRunning", kickerMotor.getAppliedOutput());
+    }
 
-    public void setVoltage(double voltage) {
+    public void setKickerVoltage(double voltage) {
         voltage =
                 MathUtil.clamp(
                         voltage, -ShooterConstants.kKickerVoltage, ShooterConstants.kKickerVoltage);
         voltage *= ShooterConstants.kKickerInverted ? -1 : 1;
-        Logger.recordOutput("Shooter/Kicker/Voltage", voltage);
-        kickerMotor.set(voltage);
+        kickerMotor.setVoltage(voltage);
     }
 
     public void start() {
-        kickerMotor.setVoltage(ShooterConstants.kKickerVoltage);
+        kickerRunning = true;
+        setKickerVoltage(ShooterConstants.kKickerVoltage);
     }
 
     public void stop() {
-        kickerMotor.setVoltage(0);
+        kickerRunning = false;
+        setKickerVoltage(0);
     }
 }

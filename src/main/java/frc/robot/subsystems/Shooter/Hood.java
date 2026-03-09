@@ -47,7 +47,7 @@ public class Hood extends SubsystemBase {
         double angle = absoluteEncoder.get();
         angle *= 2 * Math.PI;
         angle += ShooterConstants.kHoodEncoderOffset;
-        angle = MathUtil.inputModulus(angle, -Math.PI, Math.PI);
+        angle = MathUtil.inputModulus(angle, -Math.PI, Math.PI) + Math.PI;
         return angle * (ShooterConstants.kHoodEncoderReversed ? -1 : 1);
     }
 
@@ -57,21 +57,20 @@ public class Hood extends SubsystemBase {
                         getAbsoluteRotationRads(),
                         MathUtil.clamp(
                                 angle, ShooterConstants.kHoodLower, ShooterConstants.kHoodUpper));
-        voltage *= ShooterConstants.kHoodInverted ? -1 : 1;
 
         Logger.recordOutput("Hood/Voltage", voltage);
-        setVoltage(voltage);
+        setHoodVoltage(voltage);
     }
 
-    public void setVoltage(double voltage) {
+    public void setHoodVoltage(double voltage) {
         voltage =
                 MathUtil.clamp(
                         voltage, -ShooterConstants.kHoodVoltage, ShooterConstants.kHoodVoltage);
         voltage *= ShooterConstants.kHoodInverted ? -1 : 1;
-        hoodMotor.set(voltage);
+        hoodMotor.setVoltage(voltage);
     }
 
     public void stop() {
-        hoodMotor.setVoltage(0);
+        setHoodVoltage(0);
     }
 }

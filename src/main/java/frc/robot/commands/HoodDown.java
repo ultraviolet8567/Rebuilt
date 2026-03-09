@@ -15,7 +15,7 @@ public class HoodDown extends Command {
 
     @Override
     public void execute() {
-        hood.setAngleRads(-Math.PI);
+        hood.setAngleRads(0);
     }
 
     @Override

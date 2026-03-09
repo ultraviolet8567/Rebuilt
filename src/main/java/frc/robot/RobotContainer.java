@@ -88,6 +88,7 @@ public class RobotContainer {
                 swerve);
         autoChooser = new AutoChooser();
 
+        /*
         swerve.setDefaultCommand(
                 new SwerveTeleOp(
                         swerve,
@@ -96,6 +97,7 @@ public class RobotContainer {
                         () -> -driverController.getLeftX(),
                         () -> -driverController.getRightX(),
                         () -> driverController.getHID().getRightBumperButton()));
+        */
 
         configureBindings();
     }
@@ -119,9 +121,9 @@ public class RobotContainer {
         // operatorController.y().whileTrue(new HoodUp(shooter, swerve, odometry));
         // operatorController.a().whileTrue(new HoodDown(shooter, swerve, odometry));
 
-        operatorController.leftBumper().whileTrue(new HoodDown(shooter.getHood()));
-        operatorController.rightBumper().whileTrue(new HoodUp(shooter.getHood()));
-        operatorController.rightTrigger().whileTrue(new Shoot(shooter.getFlywheel()));
+        // operatorController.leftBumper().whileTrue(new HoodDown(shooter.getHood()));
+        // operatorController.rightBumper().whileTrue(new HoodUp(shooter.getHood()));
+        operatorController.rightTrigger().whileTrue(new DirectShoot(shooter.getFlywheel()));
         operatorController.x().whileTrue(new Kick(shooter.getKicker()));
     }
 

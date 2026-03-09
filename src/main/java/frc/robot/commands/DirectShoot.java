@@ -1,7 +1,6 @@
 package frc.robot.commands;
 
 import edu.wpi.first.wpilibj2.command.Command;
-import frc.robot.Constants.ShooterConstants;
 // import frc.robot.FieldConstants;
 import frc.robot.subsystems.Shooter.Flywheel;
 
@@ -16,7 +15,7 @@ public class DirectShoot extends Command {
 
     @Override
     public void initialize() {
-        flywheel.setVoltage(ShooterConstants.kFlywheelVoltage);
+        flywheel.toVelocity(-1400);
     }
 
     @Override
