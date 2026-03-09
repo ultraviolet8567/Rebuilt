@@ -178,6 +178,10 @@ public final class Constants {
         public static final double kIntakeSpinMaxVoltage = 12;
         public static final boolean kSpinInverted = false;
 
+        public static final double kIntakeRaiseP = 1.0;
+        public static final double kIntakeRaiseI = 0.0;
+        public static final double kIntakeRaiseD = 0.0;
+
     }
 
     public static class AutoConstants {

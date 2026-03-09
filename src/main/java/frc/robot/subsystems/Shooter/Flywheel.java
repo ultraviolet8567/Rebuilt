@@ -64,7 +64,7 @@ public class Flywheel extends SubsystemBase {
     }
 
     public void stop() {
-        leadMotor.setVoltage(0);
+        setVoltage(0);
     }
 
     public void setVelocity(double velocity) {

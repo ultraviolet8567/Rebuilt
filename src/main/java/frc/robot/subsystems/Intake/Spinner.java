@@ -1,3 +1,5 @@
+package frc.robot.subsystems.Intake;
+
 import com.revrobotics.PersistMode;
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.ResetMode;
@@ -15,50 +17,62 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.CAN;
 import frc.robot.Constants.IntakeConstants;
 
-public class Intake extends SubsystemBase {
+public class Spinner extends SubsystemBase {
 
     // Idk what variables 🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🍅
-    private final SparkMax intakeRaiseMotor; // Spark Max Raises
-    private final SparkMaxConfig intakeRaiseMotorConfig;
-    private final RelativeEncoder intakeRaiseEncoder;
+   
     private final SparkFlex intakeSpinMotor; // Spark Flex Spins
     private final SparkFlexConfig intakeSpinMotorConfig;
     private final RelativeEncoder intakeSpinEncoder;
 
-    public Intake() {
+   
+
+    public Spinner() {
         System.out.println("[Init] Creating Intake");
-        intakeRaiseMotor = new SparkMax(CAN.kIntakeRaisePort, MotorType.kBrushless);
-        intakeRaiseMotorConfig = new SparkMaxConfig();
+       
         intakeSpinMotor = new SparkFlex(CAN.kIntakeSpinPort, MotorType.kBrushless);
         intakeSpinMotorConfig = new SparkFlexConfig();
+        intakeSpinEncoder = intakeSpinMotor.getEncoder();
+            
+        }
 
-        intakeRaiseMotorConfig.encoder.velocityConversionFactor(1.0 / IntakeConstants.kIntakeRaiseReduction);
-        intakeRaiseMotorConfig.smartCurrentLimit(50);
-        intakeRaiseMotor.configure(
-                intakeRaiseMotorConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+       
         intakeSpinMotorConfig.encoder.velocityConversionFactor(1.0 / IntakeConstants.kIntakeSpinReduction);        
         intakeSpinMotorConfig.smartCurrentLimit(80);
+        intakeSpinMotor.configure(
+                intakeSpinMotorConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+
+       
 
     } // Intake Constructer Close Bracket
 
         // public void setRaiseVelocity()
         
         public void setSpinVoltage(double voltage) {
-                voltage = MathUtil.clamp(
-        voltage, -IntakeConstants.kIntakeSpinVoltage, IntakeConstants.kIntakeSpinVoltage);
+                
+            voltage = MathUtil.clamp(
+        voltage, -IntakeConstants.kIntakeSpinMaxVoltage, IntakeConstants.kIntakeSpinMaxVoltage);
                 voltage *= IntakeConstants.kSpinInverted ? 1 : -1;
-        public void spinStart() 
-            kickerMotor.set(voltage);
+       intakeSpinMotor.set(voltage);
                 }
-
+        
+        
 
 // help pls 💔
 
 
         public void spinStart (double voltage) {
-            intakeSpinMotor.setSpinVoltage(IntakeConstants)
+        setSpinVoltage(IntakeConstants.kIntakeSpinVoltage);
         } 
-kinTakeIntakeSpinVoltageIntakentkIngtakeSpinVoltage
+
+        public void spinStop() {
+            setSpinVoltage(0.0);
+        }
+
+
+        public void setRaiseVelocity (double velocity) {
+            
+        }
 
 } // DO NOT CODE PAST THIS LINE
 
