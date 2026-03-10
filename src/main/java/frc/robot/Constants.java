@@ -138,7 +138,7 @@ public final class Constants {
         public static final double kFlywheelReduction = 1.0;
         public static final double kFlywheelVoltage = 10;
         public static final boolean kFlywheelInverted = true;
-        public static final double kFlywheelMaxVelocity = 1600;
+        public static final double kFlywheelMaxVelocity = 2400;
 
         public static final double kKickerReduction = 3.0;
         public static final double kKickerVoltage = 5;

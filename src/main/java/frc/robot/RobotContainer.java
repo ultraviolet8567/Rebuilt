@@ -99,6 +99,8 @@ public class RobotContainer {
                         () -> driverController.getHID().getRightBumperButton()));
         */
 
+        shooter.getKicker().setDefaultCommand(new Kick(shooter.getFlywheel(), shooter.getKicker()));
+
         configureBindings();
     }
 
@@ -123,8 +125,7 @@ public class RobotContainer {
 
         operatorController.povUp().whileTrue(new HoodUp(shooter.getHood()));
         operatorController.povDown().whileTrue(new HoodDown(shooter.getHood()));
-        operatorController.rightTrigger().whileTrue(new DirectShoot(shooter.getFlywheel()));
-        operatorController.x().whileTrue(new Kick(shooter.getKicker()));
+        operatorController.rightTrigger().whileTrue(new Shoot(shooter.getFlywheel()));
     }
 
     /**

@@ -97,10 +97,11 @@ public class Flywheel extends SubsystemBase {
     }
 
     public void start() {
-        toVelocity(10);
+        toVelocity(1400);
     }
 
     public boolean atVelocity(double velocity) {
-        return Math.abs(velocity - getVelocity()) < ShooterConstants.kFlywheelVelocityTolerance;
+        return Math.abs(Math.abs(velocity) - Math.abs(getVelocity()))
+                < ShooterConstants.kFlywheelVelocityTolerance;
     }
 }

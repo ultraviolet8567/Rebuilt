@@ -40,22 +40,22 @@ public class Hood extends SubsystemBase {
                         ShooterConstants.kHoodP, ShooterConstants.kHoodI, ShooterConstants.kHoodD);
 
         targetPosition = absoluteEncoder.get();
-        
-        //resetRelativeEncoder();
+
+        // resetRelativeEncoder();
     }
 
     public void periodic() {
         Logger.recordOutput("Shooter/Hood/AbsoluteRotation", getAbsoluteRotationRads());
         Logger.recordOutput("Shooter/Hood/RelativeRotation", getAbsoluteRotationRads());
 
-        //setAngleRads(targetPosition);
+        // setAngleRads(targetPosition);
     }
 
     public double getAbsoluteRotationRads() {
         double angle = absoluteEncoder.get();
         angle *= 2 * Math.PI;
         angle += ShooterConstants.kHoodEncoderOffset;
-        angle = MathUtil.inputModulus(angle, 0, Math.PI*2);
+        angle = MathUtil.inputModulus(angle, 0, Math.PI * 2);
         return angle;
     }
 
