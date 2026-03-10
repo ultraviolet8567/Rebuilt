@@ -1,25 +1,36 @@
 package frc.robot.commands;
 
 import edu.wpi.first.wpilibj2.command.Command;
+import frc.robot.Constants.ShooterConstants;
+import frc.robot.subsystems.Shooter.Flywheel;
 // import frc.robot.FieldConstants;
-import frc.robot.subsystems.Shooter.Shooter;
+import frc.robot.subsystems.Shooter.Kicker;
+import org.littletonrobotics.junction.Logger;
 
 public class Kick extends Command {
-    private Shooter shooter;
+    private Flywheel flywheel;
+    private Kicker kicker;
 
-    public Kick(Shooter shooter) {
-        this.shooter = shooter;
+    public Kick(Flywheel flywheel, Kicker kicker) {
+        this.flywheel = flywheel;
+        this.kicker = kicker;
 
-        // addRequirements(shooter);
+        addRequirements(kicker);
     }
 
     @Override
-    public void initialize() {
-        shooter.getKicker().start();
+    public void execute() {
+        if (flywheel.atVelocity(ShooterConstants.kFlywheelMaxVelocity)) {
+            Logger.recordOutput("Shooter/Kicking", true);
+            kicker.start();
+        } else {
+            Logger.recordOutput("Shooter/Kicking", false);
+            kicker.stop();
+        }
     }
 
     @Override
     public void end(boolean interrupted) {
-        shooter.getKicker().stop();
+        kicker.stop();
     }
 }

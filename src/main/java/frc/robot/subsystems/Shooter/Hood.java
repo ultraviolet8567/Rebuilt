@@ -5,6 +5,7 @@ import com.revrobotics.RelativeEncoder;
 import com.revrobotics.ResetMode;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.SparkMax;
+import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.SparkMaxConfig;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
@@ -19,15 +20,17 @@ public class Hood extends SubsystemBase {
     private final SparkMaxConfig hoodMotorConfig;
     private final RelativeEncoder hoodEncoder;
     private final DutyCycleEncoder absoluteEncoder;
-
     private final PIDController pidController;
+
+    private double targetPosition;
 
     public Hood() {
         hoodMotor = new SparkMax(CAN.kHoodPort, MotorType.kBrushless);
         hoodEncoder = hoodMotor.getEncoder();
         hoodMotorConfig = new SparkMaxConfig();
-        hoodMotorConfig.encoder.velocityConversionFactor(1.0 / ShooterConstants.kHoodGearReduction);
+        hoodMotorConfig.encoder.positionConversionFactor(1.0 / ShooterConstants.kHoodGearReduction);
         hoodMotorConfig.smartCurrentLimit(50);
+        hoodMotorConfig.idleMode(IdleMode.kBrake);
         hoodMotor.configure(
                 hoodMotorConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
 
@@ -35,39 +38,65 @@ public class Hood extends SubsystemBase {
         pidController =
                 new PIDController(
                         ShooterConstants.kHoodP, ShooterConstants.kHoodI, ShooterConstants.kHoodD);
+
+        targetPosition = absoluteEncoder.get();
+
+        // resetRelativeEncoder();
     }
 
     public void periodic() {
-        Logger.recordOutput("Hood/AbsoluteRotation", getAbsoluteRotationRads());
+        Logger.recordOutput("Shooter/Hood/AbsoluteRotation", getAbsoluteRotationRads());
+        Logger.recordOutput("Shooter/Hood/RelativeRotation", getAbsoluteRotationRads());
+
+        // setAngleRads(targetPosition);
     }
 
     public double getAbsoluteRotationRads() {
         double angle = absoluteEncoder.get();
         angle *= 2 * Math.PI;
         angle += ShooterConstants.kHoodEncoderOffset;
-        angle = MathUtil.inputModulus(angle, -Math.PI, Math.PI);
-        return angle * (ShooterConstants.kHoodEncoderReversed ? -1 : 1);
+        angle = MathUtil.inputModulus(angle, 0, Math.PI * 2);
+        return angle;
+    }
+
+    public double getRelativeRotationRads() {
+        double angle = hoodEncoder.getPosition();
+        angle *= 2 * Math.PI;
+        return angle;
+    }
+
+    public void resetRelativeEncoder() {
+        hoodEncoder.setPosition(absoluteEncoder.get());
     }
 
     public void setAngleRads(double angle) {
         double voltage =
                 pidController.calculate(
-                        getAbsoluteRotationRads(),
+                        getRelativeRotationRads(),
                         MathUtil.clamp(
                                 angle, ShooterConstants.kHoodLower, ShooterConstants.kHoodUpper));
+
         Logger.recordOutput("Hood/Voltage", voltage);
-        setVoltage(voltage);
+        setHoodVoltage(voltage);
     }
 
-    public void setVoltage(double voltage) {
+    public void setHoodVoltage(double voltage) {
         voltage =
                 MathUtil.clamp(
                         voltage, -ShooterConstants.kHoodVoltage, ShooterConstants.kHoodVoltage);
-        voltage *= ShooterConstants.kHoodInverted ? 1 : -1;
-        hoodMotor.set(voltage);
+        voltage *= ShooterConstants.kHoodInverted ? -1 : 1;
+        hoodMotor.setVoltage(voltage);
     }
 
     public void stop() {
-        hoodMotor.setVoltage(0);
+        setHoodVoltage(0);
+    }
+
+    public void setTargetPosition(double targetPosition) {
+        this.targetPosition = targetPosition;
+    }
+
+    public double getTargetPosition() {
+        return targetPosition;
     }
 }

@@ -2,30 +2,25 @@ package frc.robot.commands;
 
 import edu.wpi.first.wpilibj2.command.Command;
 // import frc.robot.FieldConstants;
-import frc.robot.subsystems.Odometry;
-import frc.robot.subsystems.Shooter.Shooter;
-import frc.robot.subsystems.Swerve;
-import frc.robot.Constants.ShooterConstants;
+import frc.robot.subsystems.Shooter.Hood;
+
 public class HoodUp extends Command {
-    private Shooter shooter;
-    private Odometry odometry;
-    private Swerve swerve;
+    private Hood hood;
 
-    public HoodUp(Shooter shooter, Swerve swerve, Odometry odometry) {
-        this.shooter = shooter;
-        this.odometry = odometry;
-        this.swerve = swerve;
+    public HoodUp(Hood hood) {
+        this.hood = hood;
 
-        addRequirements(shooter);
+        addRequirements(hood);
     }
 
     @Override
     public void execute() {
-        shooter.getHood().setAngleRads(ShooterConstants.kHoodUpper);
+        hood.setTargetPosition(hood.getTargetPosition() + 0.01);
+        hood.setAngleRads(hood.getTargetPosition());
     }
 
     @Override
     public void end(boolean interrupted) {
-        shooter.getHood().stop();
+        hood.stop();
     }
 }

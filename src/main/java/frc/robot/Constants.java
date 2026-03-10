@@ -15,6 +15,7 @@ import edu.wpi.first.math.system.plant.DCMotor;
 // import com.pathplanner.lib.util.PIDConstants;
 // import com.pathplanner.lib.util.ReplanningConfig;
 import edu.wpi.first.math.util.Units;
+import frc.robot.util.LoggedTunableNumber;
 
 /**
  * The Constants class provides a convenient place for teams to hold robot-wide numerical or boolean
@@ -133,30 +134,38 @@ public final class Constants {
     }
 
     public static final class ShooterConstants {
-        public static final double kFlywheelVelocityTolerance = 0.1;
+        public static final double kFlywheelVelocityTolerance = 100;
         public static final double kFlywheelReduction = 1.0;
         public static final double kFlywheelVoltage = 10;
-        public static final boolean kFlywheelInverted = false;
+        public static final boolean kFlywheelInverted = true;
+        public static final double kFlywheelMaxVelocity = 2400;
 
         public static final double kKickerReduction = 3.0;
-        public static final double kKickerVoltage = 10;
-        public static final boolean kKickerInverted = false;
+        public static final double kKickerVoltage = 5;
+        public static final boolean kKickerInverted = true;
 
-        public static final double kHoodLower = -Math.PI + 0.1;
-        public static final double kHoodUpper = Math.PI - 0.1;
+        public static final double kHoodLower = 0.1;
+        public static final double kHoodUpper = 6.0;
 
         public static final double kHoodMotorReduction = 25.0;
         public static final double kHoodGearReduction = 168.0 / 10.0;
         public static final double kHoodEncoderOffset =
                 1.341 + 0.716 - 0.617 - 1.291 - 0.554 - Math.PI - (Math.PI - 1.94);
-        public static final boolean kHoodEncoderReversed = false;
         public static final double kHoodVoltage = 10;
         public static final boolean kHoodInverted = false;
 
         // PID values
-        public static final double kFlywheelP = 1.0;
-        public static final double kFlywheelI = 0.0;
-        public static final double kFlywheelD = 0.0;
+        public static final LoggedTunableNumber kFlywheelP =
+                new LoggedTunableNumber("FlywheelP", 0.15);
+        public static final LoggedTunableNumber kFlywheelI =
+                new LoggedTunableNumber("FlywheelI", 0.0);
+        public static final LoggedTunableNumber kFlywheelD =
+                new LoggedTunableNumber("FlywheelD", 0.0);
+
+        public static final LoggedTunableNumber kFlywheelS =
+                new LoggedTunableNumber("FlywheelS", 0.0091151);
+        public static final LoggedTunableNumber kFlywheelV =
+                new LoggedTunableNumber("FlywheelV", 0.0018015);
 
         public static final double kHoodP = 0.1;
         public static final double kHoodI = 0.0;
@@ -230,19 +239,6 @@ public final class Constants {
 
         public static final int kIndexerPort = 40;
     }
-
-    // public static final class GainsConstants {
-    //     public static final Gains shooterTopGains {
-    //         new Gains(0.00000065361, 0.0, 0.0, 0.0091151, 0.0018015, 0.0, 0.0);
-    //                     };
-    //     public static final Gains shooterBottomGains{
-    //         new Gains(0.000001136, 0.0, 0.0, 0.06427, 0.0018144, 0.0, 0.0);
-    //     };
-
-    // }
-
-    public record Gains(
-            double kP, double kI, double kD, double ffkS, double ffkV, double ffkA, double ffkG) {}
 
     public static class OIConstants {
         public static final ControllerType controllerTypeDriver = ControllerType.XBOX;

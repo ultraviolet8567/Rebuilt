@@ -49,11 +49,11 @@ public class Indexer extends SubsystemBase {
 
     // help pls 💔
 
-    public void spinStart() {
+    public void start() {
         setIndexerVoltage(HopperConstants.kIndexerMaxVoltage);
     }
 
-    public void spinStop() {
+    public void stop() {
         setIndexerVoltage(0.0);
     }
 }

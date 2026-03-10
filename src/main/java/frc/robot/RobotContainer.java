@@ -17,7 +17,7 @@ import frc.robot.Constants.ModuleConstants;
 import frc.robot.Constants.OperatorConstants;
 import frc.robot.commands.*;
 import frc.robot.subsystems.AutoChooser;
-import frc.robot.subsystems.Indexer;
+import frc.robot.subsystems.Hopper.Indexer;
 import frc.robot.subsystems.Intake.Intake;
 import frc.robot.subsystems.Odometry;
 import frc.robot.subsystems.Shooter.Shooter;
@@ -96,6 +96,7 @@ public class RobotContainer {
                 swerve);
         autoChooser = new AutoChooser();
 
+        /*
         swerve.setDefaultCommand(
                 new SwerveTeleOp(
                         swerve,
@@ -104,6 +105,9 @@ public class RobotContainer {
                         () -> -driverController.getLeftX(),
                         () -> -driverController.getRightX(),
                         () -> driverController.getHID().getRightBumperButton()));
+        */
+
+        shooter.getKicker().setDefaultCommand(new Kick(shooter.getFlywheel(), shooter.getKicker()));
 
         configureBindings();
     }
@@ -127,10 +131,11 @@ public class RobotContainer {
         // operatorController.y().whileTrue(new HoodUp(shooter, swerve, odometry));
         // operatorController.a().whileTrue(new HoodDown(shooter, swerve, odometry));
 
-        operatorController.leftBumper().whileTrue(new HoodDown(shooter, swerve, odometry));
-        operatorController.rightBumper().whileTrue(new HoodUp(shooter, swerve, odometry));
-        operatorController.rightTrigger().whileTrue(new DirectShoot(shooter, swerve, odometry));
         operatorController.x().whileTrue(new SpinIntake(intake.getMouth()));
+        operatorController.a().whileTrue(new SpinIndexer(hopper.getIndexer()));
+        operatorController.povUp().whileTrue(new HoodUp(shooter.getHood()));
+        operatorController.povDown().whileTrue(new HoodDown(shooter.getHood()));
+        operatorController.rightTrigger().whileTrue(new Shoot(shooter.getFlywheel()));
     }
 
     /**
