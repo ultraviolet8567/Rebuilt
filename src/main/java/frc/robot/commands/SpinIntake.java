@@ -17,7 +17,7 @@ public class SpinIntake extends Command {
     }
 
     @Override
-    public void execute() {
+    public void initialize() {
         mouth.start();
     }
 

@@ -1,7 +1,7 @@
 package frc.robot.commands;
 
 import edu.wpi.first.wpilibj2.command.Command;
-import frc.robot.subsystems.Hopper.Indexer;;
+import frc.robot.subsystems.Hopper.Indexer;
 
 public class SpinIndexer extends Command {
     private Indexer indexer;

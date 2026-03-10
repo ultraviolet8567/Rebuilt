@@ -17,12 +17,10 @@ import frc.robot.Constants.ModuleConstants;
 import frc.robot.Constants.OperatorConstants;
 import frc.robot.commands.*;
 import frc.robot.subsystems.AutoChooser;
-import frc.robot.subsystems.Hopper.Indexer;
 import frc.robot.subsystems.Intake.Intake;
 import frc.robot.subsystems.Odometry;
 import frc.robot.subsystems.Shooter.Shooter;
 import frc.robot.subsystems.Swerve;
-import frc.robot.subsystems.Hopper.Hopper;
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
@@ -37,7 +35,7 @@ public class RobotContainer {
     private final Shooter shooter;
     private final AutoChooser autoChooser;
     private final Intake intake;
-    private final Hopper hopper;
+    // private final Hopper hopper;
     // private final Intake intake;
 
     // Replace with CommandPS4Controller or CommandJoystick if needed
@@ -54,7 +52,7 @@ public class RobotContainer {
         odometry = new Odometry(swerve);
         shooter = new Shooter();
         intake = new Intake();
-        hopper = new Hopper();
+        // hopper = new Hopper();
 
         // Configure the PathPlanner auto-builder
 
@@ -132,7 +130,7 @@ public class RobotContainer {
         // operatorController.a().whileTrue(new HoodDown(shooter, swerve, odometry));
 
         operatorController.x().whileTrue(new SpinIntake(intake.getMouth()));
-        operatorController.a().whileTrue(new SpinIndexer(hopper.getIndexer()));
+        // operatorController.a().whileTrue(new SpinIndexer(hopper.getIndexer()));
         operatorController.povUp().whileTrue(new HoodUp(shooter.getHood()));
         operatorController.povDown().whileTrue(new HoodDown(shooter.getHood()));
         operatorController.rightTrigger().whileTrue(new Shoot(shooter.getFlywheel()));

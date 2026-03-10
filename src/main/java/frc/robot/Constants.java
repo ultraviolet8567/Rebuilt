@@ -183,7 +183,8 @@ public final class Constants {
         // public static final double kRaiseLower = ;
 
         public static final double kMouthReduction = 1.0;
-        public static final double kMouthVoltage = 10;
+        public static final LoggedTunableNumber kMouthVoltage =
+                new LoggedTunableNumber("MouthVoltage", 3);
         public static final double kMouthMaxVoltage = 12;
         public static final boolean kMouthInverted = false;
 
@@ -233,11 +234,11 @@ public final class Constants {
         public static final int kHoodPort = 4;
         public static final int kHoodEncoderPort = 0;
 
-        public static final int kRaiserPort = 25;
+        public static final int kRaiserPort = 5;
         public static final int kRaiserEncoderPort = 0;
-        public static final int kMouthPort = 30;
+        public static final int kMouthPort = 6;
 
-        public static final int kIndexerPort = 40;
+        public static final int kIndexerPort = 7;
     }
 
     public static class OIConstants {

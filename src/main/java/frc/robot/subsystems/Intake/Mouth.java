@@ -49,7 +49,7 @@ public class Mouth extends SubsystemBase {
     // help pls 💔
 
     public void start() {
-        setMouthVoltage(IntakeConstants.kMouthVoltage);
+        setMouthVoltage(IntakeConstants.kMouthVoltage.get());
     }
 
     public void stop() {
