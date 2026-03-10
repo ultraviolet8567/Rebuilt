@@ -164,24 +164,30 @@ public final class Constants {
     }
 
     public static final class IntakeConstants {
-        
-        public static final double kIntakeRaiseReduction = 1.0;
-        public static final double kIntakeRaiseVoltage = 10;
-        public static final boolean kRaiseInverted = false;
+        public static final double kRaiserGearboxReduction = 4.0;
+        public static final double kRaiserChainReduction = 40.0 / 16.0;
+        public static final double kRaiserVoltage = 10;
+        public static final boolean kRaiserInverted = false;
 
         // Software limit
         // public static final double kRaiseUpper = ;
         // public static final double kRaiseLower = ;
 
-        public static final double kIntakeSpinReduction = 1.0;
-        public static final double kIntakeSpinVoltage = 10;
-        public static final double kIntakeSpinMaxVoltage = 12;
+        public static final double kMouthReduction = 1.0;
+        public static final double kMouthVoltage = 10;
+        public static final double kMouthMaxVoltage = 12;
+        public static final boolean kMouthInverted = false;
+
+        public static final double kRaiserP = 1.0;
+        public static final double kRaiserI = 0.0;
+        public static final double kRaiserD = 0.0;
+    }
+
+    public static final class HopperConstants {
+        // change later
+        public static final double kIndexerMaxVoltage = 10;
+        public static final double kIndexerReduction = 1.0;
         public static final boolean kSpinInverted = false;
-
-        public static final double kIntakeRaiseP = 1.0;
-        public static final double kIntakeRaiseI = 0.0;
-        public static final double kIntakeRaiseD = 0.0;
-
     }
 
     public static class AutoConstants {
@@ -215,13 +221,14 @@ public final class Constants {
         public static final int kFlywheelFollowerPort = 2;
 
         public static final int kKickerPort = 3;
-
         public static final int kHoodPort = 4;
-
         public static final int kHoodEncoderPort = 0;
-// change later
-       public static final int kIntakeRaisePort = 25;
-        public static final int kIntakeSpinPort = 30;
+
+        public static final int kRaiserPort = 25;
+        public static final int kRaiserEncoderPort = 0;
+        public static final int kMouthPort = 30;
+
+        public static final int kIndexerPort = 40;
     }
 
     // public static final class GainsConstants {

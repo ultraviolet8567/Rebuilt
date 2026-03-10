@@ -17,10 +17,12 @@ import frc.robot.Constants.ModuleConstants;
 import frc.robot.Constants.OperatorConstants;
 import frc.robot.commands.*;
 import frc.robot.subsystems.AutoChooser;
+import frc.robot.subsystems.Indexer;
+import frc.robot.subsystems.Intake.Intake;
 import frc.robot.subsystems.Odometry;
 import frc.robot.subsystems.Shooter.Shooter;
-import frc.robot.subsystems.Intake.Intake;
 import frc.robot.subsystems.Swerve;
+import frc.robot.subsystems.Hopper.Hopper;
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
@@ -35,7 +37,8 @@ public class RobotContainer {
     private final Shooter shooter;
     private final AutoChooser autoChooser;
     private final Intake intake;
-    //private final Intake intake;
+    private final Hopper hopper;
+    // private final Intake intake;
 
     // Replace with CommandPS4Controller or CommandJoystick if needed
     private static final CommandXboxController driverController =
@@ -51,6 +54,7 @@ public class RobotContainer {
         odometry = new Odometry(swerve);
         shooter = new Shooter();
         intake = new Intake();
+        hopper = new Hopper();
 
         // Configure the PathPlanner auto-builder
 
@@ -126,6 +130,7 @@ public class RobotContainer {
         operatorController.leftBumper().whileTrue(new HoodDown(shooter, swerve, odometry));
         operatorController.rightBumper().whileTrue(new HoodUp(shooter, swerve, odometry));
         operatorController.rightTrigger().whileTrue(new DirectShoot(shooter, swerve, odometry));
+        operatorController.x().whileTrue(new SpinIntake(intake.getMouth()));
     }
 
     /**
