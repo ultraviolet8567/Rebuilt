@@ -134,10 +134,11 @@ public final class Constants {
     }
 
     public static final class ShooterConstants {
-        public static final double kFlywheelVelocityTolerance = 0.1;
+        public static final double kFlywheelVelocityTolerance = 100;
         public static final double kFlywheelReduction = 1.0;
         public static final double kFlywheelVoltage = 10;
         public static final boolean kFlywheelInverted = true;
+        public static final double kFlywheelMaxVelocity = 1600;
 
         public static final double kKickerReduction = 3.0;
         public static final double kKickerVoltage = 5;
@@ -150,7 +151,6 @@ public final class Constants {
         public static final double kHoodGearReduction = 168.0 / 10.0;
         public static final double kHoodEncoderOffset =
                 1.341 + 0.716 - 0.617 - 1.291 - 0.554 - Math.PI - (Math.PI - 1.94);
-        public static final boolean kHoodEncoderReversed = false;
         public static final double kHoodVoltage = 10;
         public static final boolean kHoodInverted = false;
 

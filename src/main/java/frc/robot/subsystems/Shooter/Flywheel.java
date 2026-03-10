@@ -22,9 +22,6 @@ public class Flywheel extends SubsystemBase {
     private final PIDController pidController;
     private final SimpleMotorFeedforward feedforwardController;
 
-    private double velocity;
-    private boolean running;
-
     public Flywheel() {
         leadMotor = new SparkFlex(CAN.kFlywheelLeadPort, MotorType.kBrushless);
         leadEncoder = leadMotor.getEncoder();
@@ -55,20 +52,16 @@ public class Flywheel extends SubsystemBase {
     }
 
     public void periodic() {
-        Logger.recordOutput("Shooter/Flywheel/FlywheelRunning", running);
-
         Logger.recordOutput("Shooter/Flywheel/Velocity", getVelocity());
-        Logger.recordOutput("Shooter/Flywheel/TargetVelocity", velocity);
         Logger.recordOutput(
                 "Shooter/Flywheel/MeasuredVoltage",
                 leadMotor.getAppliedOutput() * leadMotor.getBusVoltage());
 
-        // pidController.setPID(
-        //        ShooterConstants.kFlywheelP.get(),
-        //        ShooterConstants.kFlywheelI.get(),
-        //        ShooterConstants.kFlywheelD.get());
-        // feedforwardController.setKs(ShooterConstants.kFlywheelS.get());
-        // feedforwardController.setKv(ShooterConstants.kFlywheelV.get());
+        pidController.setP(ShooterConstants.kFlywheelP.get());
+        pidController.setI(ShooterConstants.kFlywheelI.get());
+        pidController.setD(ShooterConstants.kFlywheelD.get());
+        feedforwardController.setKs(ShooterConstants.kFlywheelS.get());
+        feedforwardController.setKv(ShooterConstants.kFlywheelV.get());
     }
 
     public double getVelocity() {
@@ -100,16 +93,10 @@ public class Flywheel extends SubsystemBase {
     }
 
     public void stop() {
-        running = false;
         leadMotor.setVoltage(0);
     }
 
-    public void setVelocity(double velocity) {
-        this.velocity = velocity;
-    }
-
     public void start() {
-        running = true;
         toVelocity(10);
     }
 

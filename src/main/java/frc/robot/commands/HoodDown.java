@@ -15,7 +15,8 @@ public class HoodDown extends Command {
 
     @Override
     public void execute() {
-        hood.setAngleRads(0);
+        hood.setTargetPosition(hood.getTargetPosition()-0.01);
+        hood.setAngleRads(hood.getTargetPosition());
     }
 
     @Override

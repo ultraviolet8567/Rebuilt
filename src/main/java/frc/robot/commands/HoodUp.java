@@ -15,7 +15,8 @@ public class HoodUp extends Command {
 
     @Override
     public void execute() {
-        hood.setAngleRads(Math.PI * 2);
+        hood.setTargetPosition(hood.getTargetPosition()+0.01);
+        hood.setAngleRads(hood.getTargetPosition());
     }
 
     @Override
