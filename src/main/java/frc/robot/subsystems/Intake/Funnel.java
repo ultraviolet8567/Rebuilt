@@ -49,7 +49,7 @@ public class Funnel extends SubsystemBase {
     // help pls 💔
 
     public void start() {
-        setFunnelVoltage(IntakeConstants.kFunnelVoltage.get());
+        setFunnelVoltage(IntakeConstants.kFunnelVoltage);
     }
 
     public void stop() {

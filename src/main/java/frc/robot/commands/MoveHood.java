@@ -4,17 +4,19 @@ import edu.wpi.first.wpilibj2.command.Command;
 // import frc.robot.FieldConstants;
 import frc.robot.subsystems.Shooter.Hood;
 
-public class HoodUp extends Command {
-    private Hood hood;
+public class MoveHood extends Command {
+    private final Hood hood;
+    private final boolean reversed;
 
-    public HoodUp(Hood hood) {
+    public MoveHood(Hood hood,boolean reversed) {
         this.hood = hood;
+        this.reversed = reversed;
 
         addRequirements(hood);
     }
 
     @Override
     public void execute() {
-        hood.setTargetPosition(hood.getTargetPosition() + 0.01);
+        hood.setTargetPosition(hood.getTargetPosition() + (reversed?-0.01:0.01));
     }
 }

@@ -4,7 +4,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.Intake.Funnel;
 
 public class SpinIntake extends Command {
-    private Funnel funnel;
+    private final Funnel funnel;
 
     // private Odometry odometry;
     // private Swerve swerve;

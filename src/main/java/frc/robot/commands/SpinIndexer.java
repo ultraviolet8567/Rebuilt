@@ -4,7 +4,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.Storage.Indexer;
 
 public class SpinIndexer extends Command {
-    private Indexer indexer;
+    private final  Indexer indexer;
 
     public SpinIndexer(Indexer indexer) {
         this.indexer = indexer;

@@ -40,7 +40,9 @@ public class Hood extends SubsystemBase {
         absoluteEncoder = new DutyCycleEncoder(CAN.kHoodEncoderPort);
         pidController =
                 new PIDController(
-                        ShooterConstants.kHoodP, ShooterConstants.kHoodI, ShooterConstants.kHoodD);
+                        ShooterConstants.kHoodP.get(),
+                        ShooterConstants.kHoodI.get(),
+                        ShooterConstants.kHoodD.get());
 
         targetPosition = getAbsoluteRotationRads();
 
@@ -84,7 +86,7 @@ public class Hood extends SubsystemBase {
         hoodEncoder.setPosition(angle);
     }
 
-    public void setAngleRads(double angle) {
+    public void setHoodRads(double angle) {
         double voltage =
                 pidController.calculate(
                         getRelativeRotationRads(),

@@ -5,7 +5,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.Shooter.Flywheel;
 
 public class DirectShoot extends Command {
-    private Flywheel flywheel;
+    private final Flywheel flywheel;
 
     public DirectShoot(Flywheel flywheel) {
         this.flywheel = flywheel;
@@ -15,7 +15,7 @@ public class DirectShoot extends Command {
 
     @Override
     public void initialize() {
-        flywheel.toVelocity(-1400);
+        flywheel.setFlywheelRadsPerSec(-1400);
     }
 
     @Override

@@ -168,9 +168,9 @@ public final class Constants {
         public static final LoggedTunableNumber kFlywheelV =
                 new LoggedTunableNumber("FlywheelV", 0.0018015);
 
-        public static final double kHoodP = 5.0;
-        public static final double kHoodI = 0.0;
-        public static final double kHoodD = 0.0;
+        public static final LoggedTunableNumber kHoodP = new LoggedTunableNumber("HoodP", 5);
+        public static final LoggedTunableNumber kHoodI = new LoggedTunableNumber("HoodI", 0.0);
+        public static final LoggedTunableNumber kHoodD = new LoggedTunableNumber("HoodD", 0.0);
     }
 
     public static final class IntakeConstants {
@@ -179,20 +179,28 @@ public final class Constants {
         public static final double kPivotEncoderOffset = 0;
         public static final double kPivotVoltage = 10;
         public static final boolean kPivotInverted = false;
+        public static final boolean kPivotAbsoluteEncoderInverted = false;
+        public static final boolean kPivotRelativeEncoderInverted = true;
+
+		public static final double kPivotRetractedAngle = 0.0;
+		public static final double kPivotExtendedAngle = 0.0;
 
         // Software limit
         // public static final double kRaiseUpper = ;
         // public static final double kRaiseLower = ;
 
         public static final double kFunnelReduction = 1.0;
-        public static final LoggedTunableNumber kFunnelVoltage =
-                new LoggedTunableNumber("FunnelVoltage", 3);
+        public static final double kFunnelVoltage = 3;
         public static final double kFunnelMaxVoltage = 12;
         public static final boolean kFunnelInverted = false;
 
-        public static final double kPivotP = 1.0;
-        public static final double kPivotI = 0.0;
-        public static final double kPivotD = 0.0;
+        public static final LoggedTunableNumber kPivotP = new LoggedTunableNumber("PivotP", 0.0);
+        public static final LoggedTunableNumber kPivotI = new LoggedTunableNumber("PivotI", 0.0);
+        public static final LoggedTunableNumber kPivotD = new LoggedTunableNumber("PivotD", 0.0);
+
+        public static final LoggedTunableNumber kPivotS = new LoggedTunableNumber("PivotS", 0.0);
+        public static final LoggedTunableNumber kPivotG = new LoggedTunableNumber("PivotG", 0.0);
+        public static final LoggedTunableNumber kPivotV = new LoggedTunableNumber("PivotV", 0.0);
     }
 
     public static final class StorageConstants {

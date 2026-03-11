@@ -14,7 +14,7 @@ public class RunHood extends Command {
 
     @Override
     public void execute() {
-        hood.setAngleRads(hood.getTargetPosition());
+        hood.setHoodRads(hood.getTargetPosition());
     }
 
     @Override

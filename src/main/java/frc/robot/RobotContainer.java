@@ -132,8 +132,8 @@ public class RobotContainer {
 
         // operatorController.x().whileTrue(new SpinIntake(intake.getFunnel()));
         // operatorController.a().whileTrue(new SpinIndexer(storage.getIndexer()));
-        operatorController.povUp().whileTrue(new HoodUp(shooter.getHood()));
-        operatorController.povDown().whileTrue(new HoodDown(shooter.getHood()));
+        operatorController.povUp().whileTrue(new MoveHood(shooter.getHood(),false));
+        operatorController.povDown().whileTrue(new MoveHood(shooter.getHood(),true));
         // operatorController.rightTrigger().whileTrue(new Shoot(shooter.getFlywheel()));
     }
 

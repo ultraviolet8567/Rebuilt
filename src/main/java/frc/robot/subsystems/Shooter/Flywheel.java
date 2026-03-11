@@ -67,7 +67,7 @@ public class Flywheel extends SubsystemBase {
         return relativeEncoder.getVelocity();
     }
 
-    public void toVelocity(double targetVelocity) {
+    public void setFlywheelRadsPerSec(double targetVelocity) {
         double voltage =
                 MathUtil.clamp(
                         pidController.calculate(getVelocity(), targetVelocity)
@@ -96,7 +96,7 @@ public class Flywheel extends SubsystemBase {
     }
 
     public void start() {
-        toVelocity(1400);
+        setFlywheelRadsPerSec(1400);
     }
 
     public boolean atVelocity(double velocity) {

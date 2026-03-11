@@ -8,8 +8,8 @@ import frc.robot.subsystems.Shooter.Kicker;
 import org.littletonrobotics.junction.Logger;
 
 public class Kick extends Command {
-    private Flywheel flywheel;
-    private Kicker kicker;
+    private final Flywheel flywheel;
+    private final Kicker kicker;
 
     public Kick(Flywheel flywheel, Kicker kicker) {
         this.flywheel = flywheel;
