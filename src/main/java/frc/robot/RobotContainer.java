@@ -106,6 +106,7 @@ public class RobotContainer {
         */
 
         shooter.getKicker().setDefaultCommand(new Kick(shooter.getFlywheel(), shooter.getKicker()));
+        shooter.getHood().setDefaultCommand(new RunHood(shooter.getHood()));
 
         configureBindings();
     }
@@ -129,11 +130,11 @@ public class RobotContainer {
         // operatorController.y().whileTrue(new HoodUp(shooter, swerve, odometry));
         // operatorController.a().whileTrue(new HoodDown(shooter, swerve, odometry));
 
-        operatorController.x().whileTrue(new SpinIntake(intake.getFunnel()));
+        // operatorController.x().whileTrue(new SpinIntake(intake.getFunnel()));
         // operatorController.a().whileTrue(new SpinIndexer(storage.getIndexer()));
         operatorController.povUp().whileTrue(new HoodUp(shooter.getHood()));
         operatorController.povDown().whileTrue(new HoodDown(shooter.getHood()));
-        operatorController.rightTrigger().whileTrue(new Shoot(shooter.getFlywheel()));
+        // operatorController.rightTrigger().whileTrue(new Shoot(shooter.getFlywheel()));
     }
 
     /**

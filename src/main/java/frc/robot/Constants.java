@@ -144,15 +144,16 @@ public final class Constants {
         public static final double kKickerVoltage = 5;
         public static final boolean kKickerInverted = true;
 
-        public static final double kHoodLower = 0.1;
-        public static final double kHoodUpper = 6.0;
+        public static final double kHoodLower = 0.01;
+        public static final double kHoodUpper = 0.35;
 
-        public static final double kHoodMotorReduction = 25.0;
-        public static final double kHoodGearReduction = 168.0 / 10.0;
-        public static final double kHoodEncoderOffset =
-                1.341 + 0.716 - 0.617 - 1.291 - 0.554 - Math.PI - (Math.PI - 1.94);
+        public static final double kHoodGearboxReduction = 25.0;
+        public static final double kHoodRackReduction = 168.0 / 10.0;
+        public static final double kHoodEncoderOffset = -0.0992;
         public static final double kHoodVoltage = 10;
-        public static final boolean kHoodInverted = false;
+        public static final boolean kHoodInverted = true;
+        public static final boolean kHoodAbsoluteEncoderInverted = false;
+        public static final boolean kHoodRelativeEncoderInverted = true;
 
         // PID values
         public static final LoggedTunableNumber kFlywheelP =
@@ -167,7 +168,7 @@ public final class Constants {
         public static final LoggedTunableNumber kFlywheelV =
                 new LoggedTunableNumber("FlywheelV", 0.0018015);
 
-        public static final double kHoodP = 0.1;
+        public static final double kHoodP = 5.0;
         public static final double kHoodI = 0.0;
         public static final double kHoodD = 0.0;
     }
@@ -236,7 +237,8 @@ public final class Constants {
         public static final int kHoodEncoderPort = 0;
 
         public static final int kPivotPort = 5;
-        public static final int kPivotEncoderPort = 0;
+        public static final int kPivotEncoderPort = 1;
+
         public static final int kFunnelPort = 6;
 
         public static final int kIndexerPort = 7;

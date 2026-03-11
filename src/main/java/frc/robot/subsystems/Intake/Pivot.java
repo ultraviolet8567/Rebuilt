@@ -6,13 +6,11 @@ import com.revrobotics.ResetMode;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.config.SparkMaxConfig;
-
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.wpilibj.DutyCycleEncoder;
 import frc.robot.Constants.CAN;
 import frc.robot.Constants.IntakeConstants;
-import frc.robot.Constants.ShooterConstants;
 
 public class Pivot {
     private final SparkMax pivotMotor; // Spark Max Raises
@@ -38,9 +36,7 @@ public class Pivot {
 
         pidController =
                 new PIDController(
-                        IntakeConstants.kPivotP,
-                        IntakeConstants.kPivotI,
-                        IntakeConstants.kPivotD);
+                        IntakeConstants.kPivotP, IntakeConstants.kPivotI, IntakeConstants.kPivotD);
     }
 
     public double getAbsoluteRotationRads() {
@@ -61,7 +57,5 @@ public class Pivot {
         relativeEncoder.setPosition(absoluteEncoder.get());
     }
 
-    public void setPivotRads(double velocity) {
-        
-    }
+    public void setPivotRads(double velocity) {}
 }
