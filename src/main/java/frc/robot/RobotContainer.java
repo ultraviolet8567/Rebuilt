@@ -20,6 +20,7 @@ import frc.robot.subsystems.AutoChooser;
 import frc.robot.subsystems.Intake.Intake;
 import frc.robot.subsystems.Odometry;
 import frc.robot.subsystems.Shooter.Shooter;
+import frc.robot.subsystems.Storage.Storage;
 import frc.robot.subsystems.Swerve;
 
 /**
@@ -35,8 +36,7 @@ public class RobotContainer {
     private final Shooter shooter;
     private final AutoChooser autoChooser;
     private final Intake intake;
-    // private final Storage storage;
-    // private final Intake intake;
+    private final Storage storage;
 
     // Replace with CommandPS4Controller or CommandJoystick if needed
     private static final CommandXboxController driverController =
@@ -52,7 +52,7 @@ public class RobotContainer {
         odometry = new Odometry(swerve);
         shooter = new Shooter();
         intake = new Intake();
-        // storage = new Storage();
+        storage = new Storage();
 
         // Configure the PathPlanner auto-builder
 
@@ -131,10 +131,10 @@ public class RobotContainer {
         // operatorController.a().whileTrue(new HoodDown(shooter, swerve, odometry));
 
         // operatorController.x().whileTrue(new SpinIntake(intake.getFunnel()));
-        // operatorController.a().whileTrue(new SpinIndexer(storage.getIndexer()));
+        operatorController.a().whileTrue(new SpinIndexer(storage.getIndexer()));
         operatorController.povUp().whileTrue(new MoveHood(shooter.getHood(), false));
         operatorController.povDown().whileTrue(new MoveHood(shooter.getHood(), true));
-        // operatorController.rightTrigger().whileTrue(new Shoot(shooter.getFlywheel()));
+        operatorController.rightTrigger().whileTrue(new Shoot(shooter.getFlywheel()));
     }
 
     /**

@@ -138,7 +138,7 @@ public final class Constants {
         public static final double kFlywheelReduction = 1.0;
         public static final double kFlywheelVoltage = 10;
         public static final boolean kFlywheelInverted = true;
-        public static final double kFlywheelMaxVelocity = 2400;
+        public static final double kFlywheelMaxVelocity = 2250;
 
         public static final double kKickerReduction = 3.0;
         public static final double kKickerVoltage = 5;
@@ -205,9 +205,9 @@ public final class Constants {
 
     public static final class StorageConstants {
         // change later
-        public static final double kIndexerMaxVoltage = 10;
+        public static final double kIndexerMaxVoltage = 3;
         public static final double kIndexerReduction = 1.0;
-        public static final boolean kIndexerInverted = false;
+        public static final boolean kIndexerInverted = true;
     }
 
     public static class AutoConstants {
