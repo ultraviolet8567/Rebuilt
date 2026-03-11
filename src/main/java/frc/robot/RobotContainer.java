@@ -35,7 +35,7 @@ public class RobotContainer {
     private final Shooter shooter;
     private final AutoChooser autoChooser;
     private final Intake intake;
-    // private final Hopper hopper;
+    // private final Storage storage;
     // private final Intake intake;
 
     // Replace with CommandPS4Controller or CommandJoystick if needed
@@ -52,7 +52,7 @@ public class RobotContainer {
         odometry = new Odometry(swerve);
         shooter = new Shooter();
         intake = new Intake();
-        // hopper = new Hopper();
+        // storage = new Storage();
 
         // Configure the PathPlanner auto-builder
 
@@ -129,8 +129,8 @@ public class RobotContainer {
         // operatorController.y().whileTrue(new HoodUp(shooter, swerve, odometry));
         // operatorController.a().whileTrue(new HoodDown(shooter, swerve, odometry));
 
-        operatorController.x().whileTrue(new SpinIntake(intake.getMouth()));
-        // operatorController.a().whileTrue(new SpinIndexer(hopper.getIndexer()));
+        operatorController.x().whileTrue(new SpinIntake(intake.getFunnel()));
+        // operatorController.a().whileTrue(new SpinIndexer(storage.getIndexer()));
         operatorController.povUp().whileTrue(new HoodUp(shooter.getHood()));
         operatorController.povDown().whileTrue(new HoodDown(shooter.getHood()));
         operatorController.rightTrigger().whileTrue(new Shoot(shooter.getFlywheel()));

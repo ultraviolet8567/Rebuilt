@@ -1,11 +1,11 @@
-package frc.robot.subsystems.Hopper;
+package frc.robot.subsystems.Storage;
 
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
-public class Hopper extends SubsystemBase {
+public class Storage extends SubsystemBase {
     private final Indexer indexer;
 
-    public Hopper() {
+    public Storage() {
         indexer = new Indexer();
     }
 

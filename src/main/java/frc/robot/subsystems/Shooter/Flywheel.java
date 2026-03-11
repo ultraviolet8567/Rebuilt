@@ -18,15 +18,14 @@ import org.littletonrobotics.junction.Logger;
 public class Flywheel extends SubsystemBase {
     private final SparkFlex leadMotor, followerMotor;
     private final SparkFlexConfig globalConfig, followerConfig;
-    private final RelativeEncoder leadEncoder, followerEncoder;
+    private final RelativeEncoder relativeEncoder;
     private final PIDController pidController;
     private final SimpleMotorFeedforward feedforwardController;
 
     public Flywheel() {
         leadMotor = new SparkFlex(CAN.kFlywheelLeadPort, MotorType.kBrushless);
-        leadEncoder = leadMotor.getEncoder();
+        relativeEncoder = leadMotor.getEncoder();
         followerMotor = new SparkFlex(CAN.kFlywheelFollowerPort, MotorType.kBrushless);
-        followerEncoder = leadMotor.getEncoder();
 
         globalConfig = new SparkFlexConfig();
         globalConfig.encoder.velocityConversionFactor(1.0 / ShooterConstants.kFlywheelReduction);
@@ -65,14 +64,14 @@ public class Flywheel extends SubsystemBase {
     }
 
     public double getVelocity() {
-        return leadEncoder.getVelocity();
+        return relativeEncoder.getVelocity();
     }
 
     public void toVelocity(double targetVelocity) {
         double voltage =
                 MathUtil.clamp(
-                        pidController.calculate(leadEncoder.getVelocity(), targetVelocity)
-                                + feedforwardController.calculate(leadEncoder.getVelocity()),
+                        pidController.calculate(getVelocity(), targetVelocity)
+                                + feedforwardController.calculate(getVelocity()),
                         -ShooterConstants.kFlywheelVoltage,
                         ShooterConstants.kFlywheelVoltage);
         voltage *= ShooterConstants.kFlywheelInverted ? -1 : 1;

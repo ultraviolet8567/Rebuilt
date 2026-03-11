@@ -1,4 +1,4 @@
-package frc.robot.subsystems.Hopper;
+package frc.robot.subsystems.Storage;
 
 import com.revrobotics.PersistMode;
 import com.revrobotics.RelativeEncoder;
@@ -9,7 +9,7 @@ import com.revrobotics.spark.config.SparkFlexConfig;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.CAN;
-import frc.robot.Constants.HopperConstants;
+import frc.robot.Constants.StorageConstants;
 
 public class Indexer extends SubsystemBase {
 
@@ -26,7 +26,7 @@ public class Indexer extends SubsystemBase {
         indexerMotorConfig = new SparkFlexConfig();
         indexerEncoder = indexerMotor.getEncoder();
         indexerMotorConfig.encoder.velocityConversionFactor(
-                1.0 / HopperConstants.kIndexerReduction);
+                1.0 / StorageConstants.kIndexerReduction);
         indexerMotorConfig.smartCurrentLimit(80);
         indexerMotor.configure(
                 indexerMotorConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
@@ -41,16 +41,16 @@ public class Indexer extends SubsystemBase {
         voltage =
                 MathUtil.clamp(
                         voltage,
-                        -HopperConstants.kIndexerMaxVoltage,
-                        HopperConstants.kIndexerMaxVoltage);
-        voltage *= HopperConstants.kSpinInverted ? 1 : -1;
+                        -StorageConstants.kIndexerMaxVoltage,
+                        StorageConstants.kIndexerMaxVoltage);
+        voltage *= StorageConstants.kIndexerInverted ? 1 : -1;
         indexerMotor.set(voltage);
     }
 
     // help pls 💔
 
     public void start() {
-        setIndexerVoltage(HopperConstants.kIndexerMaxVoltage);
+        setIndexerVoltage(StorageConstants.kIndexerMaxVoltage);
     }
 
     public void stop() {
