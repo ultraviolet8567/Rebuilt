@@ -75,9 +75,12 @@ public class Pivot {
     public void setPivotRads(double angle) {
         double voltage =
                 pidController.calculate(
-                        getRelativeRotationRads(),
-                        MathUtil.clamp(
-                                angle, ShooterConstants.kHoodLower, ShooterConstants.kHoodUpper))+feedforwardController.calculate(angle, 0);
+                                getRelativeRotationRads(),
+                                MathUtil.clamp(
+                                        angle,
+                                        ShooterConstants.kHoodLower,
+                                        ShooterConstants.kHoodUpper))
+                        + feedforwardController.calculate(angle, 0);
         setPivotVoltage(voltage);
     }
 

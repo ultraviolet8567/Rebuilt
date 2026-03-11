@@ -182,8 +182,8 @@ public final class Constants {
         public static final boolean kPivotAbsoluteEncoderInverted = false;
         public static final boolean kPivotRelativeEncoderInverted = true;
 
-		public static final double kPivotRetractedAngle = 0.0;
-		public static final double kPivotExtendedAngle = 0.0;
+        public static final double kPivotRetractedAngle = 0.0;
+        public static final double kPivotExtendedAngle = 0.0;
 
         // Software limit
         // public static final double kRaiseUpper = ;

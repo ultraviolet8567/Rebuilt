@@ -8,7 +8,7 @@ public class MoveHood extends Command {
     private final Hood hood;
     private final boolean reversed;
 
-    public MoveHood(Hood hood,boolean reversed) {
+    public MoveHood(Hood hood, boolean reversed) {
         this.hood = hood;
         this.reversed = reversed;
 
@@ -17,6 +17,6 @@ public class MoveHood extends Command {
 
     @Override
     public void execute() {
-        hood.setTargetPosition(hood.getTargetPosition() + (reversed?-0.01:0.01));
+        hood.setTargetPosition(hood.getTargetPosition() + (reversed ? -0.01 : 0.01));
     }
 }
