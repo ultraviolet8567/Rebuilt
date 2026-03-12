@@ -157,16 +157,19 @@ public final class Constants {
 
         // PID values
         public static final LoggedTunableNumber kFlywheelP =
-                new LoggedTunableNumber("FlywheelP", 0.15);
+                new LoggedTunableNumber("FlywheelP", 0.00245);
         public static final LoggedTunableNumber kFlywheelI =
                 new LoggedTunableNumber("FlywheelI", 0.0);
         public static final LoggedTunableNumber kFlywheelD =
                 new LoggedTunableNumber("FlywheelD", 0.0);
 
         public static final LoggedTunableNumber kFlywheelS =
-                new LoggedTunableNumber("FlywheelS", 0.0091151);
+                new LoggedTunableNumber("FlywheelS", 0.00);
         public static final LoggedTunableNumber kFlywheelV =
-                new LoggedTunableNumber("FlywheelV", 0.0018015);
+                new LoggedTunableNumber("FlywheelV", 0.00);
+
+        public static final LoggedTunableNumber kFlywheelVelocity =
+                new LoggedTunableNumber("TargetVelocity", 1400);
 
         public static final LoggedTunableNumber kHoodP = new LoggedTunableNumber("HoodP", 5);
         public static final LoggedTunableNumber kHoodI = new LoggedTunableNumber("HoodI", 0.0);
@@ -176,14 +179,15 @@ public final class Constants {
     public static final class IntakeConstants {
         public static final double kPivotGearboxReduction = 4.0;
         public static final double kPivotChainReduction = 40.0 / 16.0;
-        public static final double kPivotEncoderOffset = 0;
+        public static final double kPivotEncoderOffset =
+                -2.223 - 6.086 - Math.PI / 2 - 2.968 - 5.72 - 0.009;
         public static final double kPivotVoltage = 10;
         public static final boolean kPivotInverted = false;
-        public static final boolean kPivotAbsoluteEncoderInverted = false;
-        public static final boolean kPivotRelativeEncoderInverted = true;
+        public static final boolean kPivotAbsoluteEncoderInverted = true;
+        public static final boolean kPivotRelativeEncoderInverted = false;
 
-        public static final double kPivotRetractedAngle = 0.0;
-        public static final double kPivotExtendedAngle = 0.0;
+        public static final double kPivotLower = 0.0;
+        public static final double kPivotUpper = 2.00;
 
         // Software limit
         // public static final double kRaiseUpper = ;

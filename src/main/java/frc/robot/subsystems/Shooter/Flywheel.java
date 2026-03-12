@@ -22,6 +22,9 @@ public class Flywheel extends SubsystemBase {
     private final PIDController pidController;
     private final SimpleMotorFeedforward feedforwardController;
 
+    private double targetVelocity;
+    private boolean running;
+
     public Flywheel() {
         leadMotor = new SparkFlex(CAN.kFlywheelLeadPort, MotorType.kBrushless);
         relativeEncoder = leadMotor.getEncoder();
@@ -48,6 +51,9 @@ public class Flywheel extends SubsystemBase {
         feedforwardController =
                 new SimpleMotorFeedforward(
                         ShooterConstants.kFlywheelS.get(), ShooterConstants.kFlywheelV.get());
+
+        targetVelocity = ShooterConstants.kFlywheelMaxVelocity;
+        running = false;
     }
 
     public void periodic() {
@@ -61,6 +67,12 @@ public class Flywheel extends SubsystemBase {
         pidController.setD(ShooterConstants.kFlywheelD.get());
         feedforwardController.setKs(ShooterConstants.kFlywheelS.get());
         feedforwardController.setKv(ShooterConstants.kFlywheelV.get());
+
+        if (running) {
+            setFlywheelRadsPerSec(targetVelocity);
+        } else {
+            stop();
+        }
     }
 
     public double getVelocity() {
@@ -70,8 +82,7 @@ public class Flywheel extends SubsystemBase {
     public void setFlywheelRadsPerSec(double targetVelocity) {
         double voltage =
                 MathUtil.clamp(
-                        pidController.calculate(getVelocity(), targetVelocity)
-                                + feedforwardController.calculate(getVelocity()),
+                        feedforwardController.calculate(getVelocity()),
                         -ShooterConstants.kFlywheelVoltage,
                         ShooterConstants.kFlywheelVoltage);
         voltage *= ShooterConstants.kFlywheelInverted ? -1 : 1;
@@ -92,15 +103,25 @@ public class Flywheel extends SubsystemBase {
     }
 
     public void stop() {
+        running = false;
         setFlywheelVoltage(0);
     }
 
-    public void start() {
-        setFlywheelRadsPerSec(1400);
+    public void start(double velocity) {
+        running = true;
+        setTargetVelocity(velocity);
     }
 
     public boolean atVelocity(double velocity) {
         return Math.abs(Math.abs(velocity) - Math.abs(getVelocity()))
                 < ShooterConstants.kFlywheelVelocityTolerance;
+    }
+
+    public void setTargetVelocity(double velocity) {
+        targetVelocity = velocity;
+    }
+
+    public double getTargetVelocity() {
+        return targetVelocity;
     }
 }

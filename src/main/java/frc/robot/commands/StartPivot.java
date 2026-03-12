@@ -3,6 +3,7 @@ package frc.robot.commands;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Constants.IntakeConstants;
 import frc.robot.subsystems.Intake.Pivot;
+import org.littletonrobotics.junction.Logger;
 
 public class StartPivot extends Command {
     private final Pivot pivot;
@@ -13,6 +14,13 @@ public class StartPivot extends Command {
 
     @Override
     public void execute() {
-        pivot.setPivotRads(IntakeConstants.kPivotExtendedAngle);
+        pivot.setPivotRads(IntakeConstants.kPivotUpper);
+        Logger.recordOutput("Intake/Pivot/Running", true);
+    }
+
+    @Override
+    public void end(boolean interrupted) {
+        pivot.stop();
+        Logger.recordOutput("Intake/Pivot/Running", false);
     }
 }

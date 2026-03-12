@@ -10,11 +10,12 @@ import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.ArmFeedforward;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.wpilibj.DutyCycleEncoder;
+import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.CAN;
 import frc.robot.Constants.IntakeConstants;
-import frc.robot.Constants.ShooterConstants;
+import org.littletonrobotics.junction.Logger;
 
-public class Pivot {
+public class Pivot extends SubsystemBase {
     private final SparkMax pivotMotor; // Spark Max Raises
     private final SparkMaxConfig pivotMotorConfig;
     private final RelativeEncoder relativeEncoder;
@@ -47,6 +48,23 @@ public class Pivot {
                         IntakeConstants.kPivotS.get(),
                         IntakeConstants.kPivotG.get(),
                         IntakeConstants.kPivotV.get());
+
+        resetRelativeEncoder();
+    }
+
+    public void periodic() {
+        Logger.recordOutput("Intake/Pivot/AbsoluteRotation", getAbsoluteRotationRads());
+        Logger.recordOutput("Intake/Pivot/RelativeRotation", getRelativeRotationRads());
+
+        pidController.setP(IntakeConstants.kPivotP.get());
+        pidController.setI(IntakeConstants.kPivotP.get());
+        pidController.setD(IntakeConstants.kPivotP.get());
+        feedforwardController.setKs(IntakeConstants.kPivotS.get());
+        feedforwardController.setKg(IntakeConstants.kPivotG.get());
+        feedforwardController.setKv(IntakeConstants.kPivotV.get());
+
+        double diff = Math.abs(getAbsoluteRotationRads() - getRelativeRotationRads());
+        if (diff > 0.01 && diff < 0.1) resetRelativeEncoder();
     }
 
     public double getAbsoluteRotationRads() {
@@ -55,7 +73,7 @@ public class Pivot {
         angle *= IntakeConstants.kPivotAbsoluteEncoderInverted ? -1 : 1;
         angle /= IntakeConstants.kPivotChainReduction;
         angle += IntakeConstants.kPivotEncoderOffset;
-        angle = MathUtil.inputModulus(angle, 0, Math.PI * 2);
+        angle = MathUtil.inputModulus(angle, -Math.PI * 2, Math.PI);
         return angle;
     }
 
@@ -73,22 +91,25 @@ public class Pivot {
     }
 
     public void setPivotRads(double angle) {
-        double voltage =
+        double pidVoltage =
                 pidController.calculate(
-                                getRelativeRotationRads(),
-                                MathUtil.clamp(
-                                        angle,
-                                        ShooterConstants.kHoodLower,
-                                        ShooterConstants.kHoodUpper))
-                        + feedforwardController.calculate(angle, 0);
-        setPivotVoltage(voltage);
+                        getRelativeRotationRads(),
+                        MathUtil.clamp(
+                                angle, IntakeConstants.kPivotLower, IntakeConstants.kPivotUpper));
+        double ffVoltage =
+                feedforwardController.calculate(getRelativeRotationRads() + 2.36 + Math.PI / 2, 0);
+
+        Logger.recordOutput("Intake/Pivot/ffVoltage", ffVoltage);
+        Logger.recordOutput("Intake/Pivot/Voltage", pidVoltage + ffVoltage);
+
+        setPivotVoltage(pidVoltage + ffVoltage);
     }
 
     public void setPivotVoltage(double voltage) {
         voltage =
                 MathUtil.clamp(
-                        voltage, -ShooterConstants.kHoodVoltage, ShooterConstants.kHoodVoltage);
-        voltage *= ShooterConstants.kHoodInverted ? -1 : 1;
+                        voltage, -IntakeConstants.kPivotVoltage, IntakeConstants.kPivotVoltage);
+        voltage *= IntakeConstants.kPivotInverted ? -1 : 1;
         pivotMotor.setVoltage(voltage);
     }
 
