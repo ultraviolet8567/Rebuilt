@@ -7,6 +7,8 @@ public class Intake extends SubsystemBase {
     private final Pivot pivot;
 
     public Intake() {
+        System.out.println("[Init] Creating Intake");
+
         funnel = new Funnel();
         pivot = new Pivot();
     }

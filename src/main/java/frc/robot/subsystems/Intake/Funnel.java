@@ -20,7 +20,7 @@ public class Funnel extends SubsystemBase {
     private final RelativeEncoder relativeEncoder;
 
     public Funnel() {
-        System.out.println("[Init] Creating Intake");
+        System.out.println("[Init] Creating Funnel");
 
         funnelMotor = new SparkFlex(CAN.kFunnelPort, MotorType.kBrushless);
         funnelMotorConfig = new SparkFlexConfig();

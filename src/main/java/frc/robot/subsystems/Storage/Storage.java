@@ -6,6 +6,8 @@ public class Storage extends SubsystemBase {
     private final Indexer indexer;
 
     public Storage() {
+        System.out.println("[Init] Creating Storage");
+
         indexer = new Indexer();
     }
 

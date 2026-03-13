@@ -26,6 +26,8 @@ public class Flywheel extends SubsystemBase {
     private boolean running;
 
     public Flywheel() {
+        System.out.println("[Init] Creating Flywheel");
+
         leadMotor = new SparkFlex(CAN.kFlywheelLeadPort, MotorType.kBrushless);
         relativeEncoder = leadMotor.getEncoder();
         followerMotor = new SparkFlex(CAN.kFlywheelFollowerPort, MotorType.kBrushless);

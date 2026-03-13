@@ -11,8 +11,6 @@ public class MoveHood extends Command {
     public MoveHood(Hood hood, boolean reversed) {
         this.hood = hood;
         this.reversed = reversed;
-
-        addRequirements(hood);
     }
 
     @Override

@@ -5,10 +5,10 @@ import frc.robot.Constants.IntakeConstants;
 import frc.robot.subsystems.Intake.Pivot;
 import org.littletonrobotics.junction.Logger;
 
-public class StartPivot extends Command {
+public class LowerPivot extends Command {
     private final Pivot pivot;
 
-    public StartPivot(Pivot pivot) {
+    public LowerPivot(Pivot pivot) {
         this.pivot = pivot;
     }
 
@@ -16,7 +16,7 @@ public class StartPivot extends Command {
     public void execute() {
         pivot.setPivotRads(IntakeConstants.kPivotUpper);
         Logger.recordOutput("Intake/Pivot/Running", true);
-    }
+/    }
 
     @Override
     public void end(boolean interrupted) {

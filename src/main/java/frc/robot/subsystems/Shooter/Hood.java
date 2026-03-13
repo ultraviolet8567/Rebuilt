@@ -25,6 +25,8 @@ public class Hood extends SubsystemBase {
     private double targetPosition;
 
     public Hood() {
+        System.out.println("[Init] Creating Hood");
+
         hoodMotor = new SparkMax(CAN.kHoodPort, MotorType.kBrushless);
         hoodEncoder = hoodMotor.getEncoder();
         hoodMotorConfig = new SparkMaxConfig();

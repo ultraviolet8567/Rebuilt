@@ -8,8 +8,6 @@ public class RunHood extends Command {
 
     public RunHood(Hood hood) {
         this.hood = hood;
-
-        addRequirements(hood);
     }
 
     @Override

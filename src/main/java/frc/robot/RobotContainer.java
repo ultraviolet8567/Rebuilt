@@ -5,6 +5,8 @@
 package frc.robot;
 
 import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.auto.NamedCommands;
+
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.XboxController;
@@ -55,29 +57,6 @@ public class RobotContainer {
         storage = new Storage();
 
         // Configure the PathPlanner auto-builder
-
-        /*
-        ModuleConfig robotModuleConfig = new ModuleConfig(ModuleConstants.kWheelDiameterMeters / 2,
-                DriveConstants.kPhysicalMaxSpeedMetersPerSecond, 1, // friction coefficient between wheel and carpet,
-                                                                    // (unsure so 1.0)
-                DCMotor.getNEO(1), 1 / swerve.driveGearRatio, 80, 1);
-
-        RobotConfig robotConfig = new RobotConfig(DriveConstants.kRobotMass, // mass, kg
-                DriveConstants.kRobotMOI, // moment of inertia (why), kgm^2
-                robotModuleConfig, // module config
-                DriveConstants.kDriveKinematics.getModules()); // locations of modules relative of robot center
-
-        AutoBuilder.configure(odometry::getPose, odometry::resetPose, swerve::getRobotRelativeSpeeds,
-                swerve::setModuleStates, AutoConstants.kHolonomicController, // rotational PID
-                robotConfig, () -> {
-                    if (DriverStation.getAlliance().isPresent()) {
-                        return DriverStation.getAlliance().get() == Alliance.Red;
-                    }
-                    return false;
-                }, swerve);
-        */
-
-        // Configure the PathPlanner auto-builder
         AutoBuilder.configure(
                 odometry::getPose,
                 odometry::resetPose,
@@ -94,19 +73,22 @@ public class RobotContainer {
                 swerve);
         autoChooser = new AutoChooser();
 
-        /*
+        NamedCommands.registerCommand("Intake", new SpinIntake(intake.getFunnel()));
+        NamedCommands.registerCommand("Index", new SpinIndexer(storage.getIndexer()));
+        NamedCommands.registerCommand("Shoot", new Shoot(shooter.getFlywheel()));
+
         swerve.setDefaultCommand(
                 new SwerveTeleOp(
                         swerve,
                         odometry,
-                        () -> -driverController.getLeftY(),
-                        () -> -driverController.getLeftX(),
-                        () -> -driverController.getRightX(),
+                        () -> driverController.getLeftY(),
+                        () -> driverController.getLeftX(),
+                        () -> driverController.getRightX(),
                         () -> driverController.getHID().getRightBumperButton()));
-        */
 
         shooter.getKicker().setDefaultCommand(new Kick(shooter.getFlywheel(), shooter.getKicker()));
         shooter.getHood().setDefaultCommand(new RunHood(shooter.getHood()));
+        intake.getPivot().setDefaultCommand(new LowerPivot(intake.getPivot()));
 
         configureBindings();
     }
@@ -122,20 +104,11 @@ public class RobotContainer {
      */
     private void configureBindings() {
         driverController.back().onTrue(new InstantCommand(() -> odometry.resetGyrometerHeading()));
-        // operatorController.rightBumper().whileTrue(new SpinUp(shooter));
-        // operatorController.rightBumper().whileTrue(new InstantCommand(() -> shooter.shoot(0.75)))
-        //     .onFalse(new InstantCommand(() -> shooter.stopFlywheel()));
-        // operatorController.rightTrigger().whileTrue(new DirectShoot(shooter, swerve, odometry));
-        // operatorController.leftTrigger().whileTrue(new Kick(shooter));
-        // operatorController.y().whileTrue(new HoodUp(shooter, swerve, odometry));
-        // operatorController.a().whileTrue(new HoodDown(shooter, swerve, odometry));
-
-        operatorController.x().whileTrue(new SpinIntake(intake.getFunnel()));
+        operatorController.leftBumper().whileTrue(new SpinIntake(intake.getFunnel()));
         operatorController.a().whileTrue(new SpinIndexer(storage.getIndexer()));
         operatorController.povUp().whileTrue(new MoveHood(shooter.getHood(), false));
         operatorController.povDown().whileTrue(new MoveHood(shooter.getHood(), true));
         operatorController.rightTrigger().whileTrue(new Shoot(shooter.getFlywheel()));
-        operatorController.leftTrigger().whileTrue(new StartPivot(intake.getPivot()));
     }
 
     /**

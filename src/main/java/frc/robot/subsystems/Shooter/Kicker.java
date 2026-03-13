@@ -19,6 +19,8 @@ public class Kicker extends SubsystemBase {
     private boolean kickerRunning;
 
     public Kicker() {
+        System.out.println("[Init] Creating Kicker");
+
         kickerMotor = new SparkMax(CAN.kKickerPort, MotorType.kBrushless);
         kickerEncoder = kickerMotor.getEncoder();
         kickerMotorConfig = new SparkMaxConfig();

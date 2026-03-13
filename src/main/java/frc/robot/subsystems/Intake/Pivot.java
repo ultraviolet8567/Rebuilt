@@ -25,6 +25,8 @@ public class Pivot extends SubsystemBase {
     private final ArmFeedforward feedforwardController;
 
     public Pivot() {
+        System.out.println("[Init] Creating Pivot");
+
         pivotMotor = new SparkMax(CAN.kPivotPort, MotorType.kBrushless);
         pivotMotorConfig = new SparkMaxConfig();
         relativeEncoder = pivotMotor.getEncoder();

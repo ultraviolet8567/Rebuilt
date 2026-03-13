@@ -8,6 +8,8 @@ public class Shooter extends SubsystemBase {
     private final Kicker kicker;
 
     public Shooter() {
+        System.out.println("[Init] Creating Shooter");
+
         flywheel = new Flywheel();
         hood = new Hood();
         kicker = new Kicker();
