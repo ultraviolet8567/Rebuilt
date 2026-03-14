@@ -157,7 +157,7 @@ public final class Constants {
 
         // PID values
         public static final LoggedTunableNumber kFlywheelP =
-                new LoggedTunableNumber("FlywheelP", 0.00245);
+                new LoggedTunableNumber("FlywheelP", 0.80);
         public static final LoggedTunableNumber kFlywheelI =
                 new LoggedTunableNumber("FlywheelI", 0.0);
         public static final LoggedTunableNumber kFlywheelD =
@@ -166,7 +166,9 @@ public final class Constants {
         public static final LoggedTunableNumber kFlywheelS =
                 new LoggedTunableNumber("FlywheelS", 0.00);
         public static final LoggedTunableNumber kFlywheelV =
-                new LoggedTunableNumber("FlywheelV", 0.00);
+                new LoggedTunableNumber("FlywheelV", 0.33);
+        public static final LoggedTunableNumber kFlywheelA =
+                new LoggedTunableNumber("FlywheelA", 0.63);
 
         public static final LoggedTunableNumber kFlywheelVelocity =
                 new LoggedTunableNumber("TargetVelocity", 2400);
@@ -202,9 +204,9 @@ public final class Constants {
         public static final LoggedTunableNumber kPivotI = new LoggedTunableNumber("PivotI", 0.0);
         public static final LoggedTunableNumber kPivotD = new LoggedTunableNumber("PivotD", 0.0);
 
-        public static final LoggedTunableNumber kPivotS = new LoggedTunableNumber("PivotS", 0.0);
-        public static final LoggedTunableNumber kPivotG = new LoggedTunableNumber("PivotG", 0.0);
-        public static final LoggedTunableNumber kPivotV = new LoggedTunableNumber("PivotV", 0.0);
+        public static final LoggedTunableNumber kPivotS = new LoggedTunableNumber("PivotS",-1.37);
+        public static final LoggedTunableNumber kPivotG = new LoggedTunableNumber("PivotG", 1.22);
+        public static final LoggedTunableNumber kPivotV = new LoggedTunableNumber("PivotV", 0.39);
     }
 
     public static final class StorageConstants {

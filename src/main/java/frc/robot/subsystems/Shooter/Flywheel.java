@@ -53,8 +53,7 @@ public class Flywheel extends SubsystemBase {
                         ShooterConstants.kFlywheelI.get(),
                         ShooterConstants.kFlywheelD.get());
         feedforwardController =
-                new SimpleMotorFeedforward(
-                        ShooterConstants.kFlywheelS.get(), ShooterConstants.kFlywheelV.get());
+                new SimpleMotorFeedforward(ShooterConstants.kFlywheelS.get(), ShooterConstants.kFlywheelV.get(),ShooterConstants.kFlywheelA.get());
 
         targetVelocity = ShooterConstants.kFlywheelMaxVelocity;
         running = false;
@@ -64,6 +63,7 @@ public class Flywheel extends SubsystemBase {
         LoggedTunableNumber.ifChanged(hashCode(), () -> pidController.setP(ShooterConstants.kFlywheelD.get()),ShooterConstants.kFlywheelD);
         LoggedTunableNumber.ifChanged(hashCode(), () -> feedforwardController.setKs(ShooterConstants.kFlywheelS.get()),ShooterConstants.kFlywheelS);
         LoggedTunableNumber.ifChanged(hashCode(), () -> feedforwardController.setKv(ShooterConstants.kFlywheelV.get()),ShooterConstants.kFlywheelV);
+        LoggedTunableNumber.ifChanged(hashCode(), () -> feedforwardController.setKa(ShooterConstants.kFlywheelA.get()),ShooterConstants.kFlywheelA);
     }
 
     public void periodic() {
