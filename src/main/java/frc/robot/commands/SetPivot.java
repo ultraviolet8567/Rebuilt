@@ -16,6 +16,5 @@ public class SetPivot extends Command {
     @Override
     public void initialize() {
         pivot.setTargetPosition(angle);
-        Logger.recordOutput("Intake/Pivot/Running", true);
     }
 }

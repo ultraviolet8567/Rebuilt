@@ -13,6 +13,8 @@ import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.CAN;
 import frc.robot.Constants.ShooterConstants;
+import frc.robot.util.LoggedTunableNumber;
+
 import org.littletonrobotics.junction.Logger;
 
 public class Flywheel extends SubsystemBase {
@@ -56,6 +58,12 @@ public class Flywheel extends SubsystemBase {
 
         targetVelocity = ShooterConstants.kFlywheelMaxVelocity;
         running = false;
+
+        LoggedTunableNumber.ifChanged(hashCode(), () -> pidController.setP(ShooterConstants.kFlywheelP.get()),ShooterConstants.kFlywheelP);
+        LoggedTunableNumber.ifChanged(hashCode(), () -> pidController.setP(ShooterConstants.kFlywheelI.get()),ShooterConstants.kFlywheelI);
+        LoggedTunableNumber.ifChanged(hashCode(), () -> pidController.setP(ShooterConstants.kFlywheelD.get()),ShooterConstants.kFlywheelD);
+        LoggedTunableNumber.ifChanged(hashCode(), () -> feedforwardController.setKs(ShooterConstants.kFlywheelS.get()),ShooterConstants.kFlywheelS);
+        LoggedTunableNumber.ifChanged(hashCode(), () -> feedforwardController.setKv(ShooterConstants.kFlywheelV.get()),ShooterConstants.kFlywheelV);
     }
 
     public void periodic() {
@@ -64,11 +72,16 @@ public class Flywheel extends SubsystemBase {
                 "Shooter/Flywheel/MeasuredVoltage",
                 leadMotor.getAppliedOutput() * leadMotor.getBusVoltage());
 
-        pidController.setP(ShooterConstants.kFlywheelP.get());
-        pidController.setI(ShooterConstants.kFlywheelI.get());
-        pidController.setD(ShooterConstants.kFlywheelD.get());
-        feedforwardController.setKs(ShooterConstants.kFlywheelS.get());
-        feedforwardController.setKv(ShooterConstants.kFlywheelV.get());
+        /*
+        LoggedTunableNumber.ifChanged(hashCode(), () -> pidController.setP(ShooterConstants.kFlywheelP.get()));
+        LoggedTunableNumber.ifChanged(hashCode(), () -> pidController.setP(ShooterConstants.kFlywheelI.get()));
+        LoggedTunableNumber.ifChanged(hashCode(), () -> pidController.setP(ShooterConstants.kFlywheelD.get()));
+        LoggedTunableNumber.ifChanged(hashCode(), () -> feedforwardController.setKs(ShooterConstants.kFlywheelS.get()));
+        LoggedTunableNumber.ifChanged(hashCode(), () -> feedforwardController.setKv(ShooterConstants.kFlywheelV.get()));
+         */
+
+        Logger.recordOutput("Shooter/Flywheel/Ks", feedforwardController.getKs());
+        Logger.recordOutput("Shooter/Flywheel/Kv", feedforwardController.getKv());
 
         if (running) {
             setFlywheelRadsPerSec(targetVelocity);
@@ -82,15 +95,12 @@ public class Flywheel extends SubsystemBase {
     }
 
     public void setFlywheelRadsPerSec(double targetVelocity) {
-        double voltage =
-                MathUtil.clamp(
-                        feedforwardController.calculate(getVelocity()),
-                        -ShooterConstants.kFlywheelVoltage,
-                        ShooterConstants.kFlywheelVoltage);
-        voltage *= ShooterConstants.kFlywheelInverted ? -1 : 1;
+        double pidVoltage = pidController.calculate(getVelocity(),targetVelocity);
+        double ffVoltage = feedforwardController.calculate(targetVelocity);
 
-        Logger.recordOutput("Shooter/Flywheel/SetVoltage", voltage);
-        leadMotor.setVoltage(voltage);
+        Logger.recordOutput("Shooter/Flywheel/pidVoltage", pidVoltage);
+        Logger.recordOutput("Shooter/Flywheel/ffVoltage", ffVoltage);
+        setFlywheelVoltage(pidVoltage+ffVoltage);
     }
 
     public void setFlywheelVoltage(double voltage) {

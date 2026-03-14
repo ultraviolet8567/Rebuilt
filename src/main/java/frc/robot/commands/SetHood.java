@@ -4,11 +4,11 @@ import edu.wpi.first.wpilibj2.command.Command;
 // import frc.robot.FieldConstants;
 import frc.robot.subsystems.Shooter.Hood;
 
-public class MoveHood extends Command {
+public class SetHood extends Command {
     private final Hood hood;
     private final boolean reversed;
 
-    public MoveHood(Hood hood, boolean reversed) {
+    public SetHood(Hood hood, boolean reversed) {
         this.hood = hood;
         this.reversed = reversed;
     }

@@ -62,7 +62,7 @@ public class Hood extends SubsystemBase {
         double diff = Math.abs(getAbsoluteRotationRads() - getRelativeRotationRads());
         if (diff > 0.001 && diff < 0.1) resetRelativeEncoder();
 
-        // setAngleRads(targetPosition);
+        setAngleRads(targetPosition);
     }
 
     public double getAbsoluteRotationRads() {
@@ -88,7 +88,7 @@ public class Hood extends SubsystemBase {
         hoodEncoder.setPosition(angle);
     }
 
-    public void setHoodRads(double angle) {
+    public void setAngleRads(double angle) {
         double voltage =
                 pidController.calculate(
                         getRelativeRotationRads(),

@@ -13,7 +13,7 @@ import edu.wpi.first.wpilibj.DutyCycleEncoder;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.CAN;
 import frc.robot.Constants.IntakeConstants;
-import frc.robot.Constants.ShooterConstants;
+import frc.robot.util.LoggedTunableNumber;
 
 import org.littletonrobotics.junction.Logger;
 
@@ -58,18 +58,27 @@ public class Pivot extends SubsystemBase {
         resetRelativeEncoder();
 
         targetPosition = getAbsoluteRotationRads();
+
+        LoggedTunableNumber.ifChanged(hashCode(), () -> pidController.setP(IntakeConstants.kPivotP.get()),IntakeConstants.kPivotP);
+        LoggedTunableNumber.ifChanged(hashCode(), () -> pidController.setP(IntakeConstants.kPivotI.get()),IntakeConstants.kPivotI);
+        LoggedTunableNumber.ifChanged(hashCode(), () -> pidController.setP(IntakeConstants.kPivotD.get()),IntakeConstants.kPivotD);
+        LoggedTunableNumber.ifChanged(hashCode(), () -> feedforwardController.setKs(IntakeConstants.kPivotS.get()),IntakeConstants.kPivotS);
+        LoggedTunableNumber.ifChanged(hashCode(), () -> feedforwardController.setKg(IntakeConstants.kPivotG.get()),IntakeConstants.kPivotG);
+        LoggedTunableNumber.ifChanged(hashCode(), () -> feedforwardController.setKv(IntakeConstants.kPivotV.get()),IntakeConstants.kPivotV);
     }
 
     public void periodic() {
         Logger.recordOutput("Intake/Pivot/AbsoluteRotation", getAbsoluteRotationRads());
         Logger.recordOutput("Intake/Pivot/RelativeRotation", getRelativeRotationRads());
 
+        /*
         pidController.setP(IntakeConstants.kPivotP.get());
         pidController.setI(IntakeConstants.kPivotP.get());
         pidController.setD(IntakeConstants.kPivotP.get());
         feedforwardController.setKs(IntakeConstants.kPivotS.get());
         feedforwardController.setKg(IntakeConstants.kPivotG.get());
         feedforwardController.setKv(IntakeConstants.kPivotV.get());
+         */
 
         double diff = Math.abs(getAbsoluteRotationRads() - getRelativeRotationRads());
         if (diff > 0.01 && diff < 0.1) resetRelativeEncoder();
@@ -108,9 +117,9 @@ public class Pivot extends SubsystemBase {
                                 angle, IntakeConstants.kPivotLower, IntakeConstants.kPivotUpper));
         double ffVoltage =
                 feedforwardController.calculate(getRelativeRotationRads() + 2.36 + Math.PI / 2, 0);
-
+        
+        Logger.recordOutput("Intake/Pivot/pidVoltage", pidVoltage);
         Logger.recordOutput("Intake/Pivot/ffVoltage", ffVoltage);
-        Logger.recordOutput("Intake/Pivot/Voltage", pidVoltage + ffVoltage);
 
         setPivotVoltage(pidVoltage + ffVoltage);
     }
@@ -130,7 +139,7 @@ public class Pivot extends SubsystemBase {
     public void setTargetPosition(double targetPosition) {
         this.targetPosition =
                 MathUtil.clamp(
-                        targetPosition, ShooterConstants.kHoodLower, ShooterConstants.kHoodUpper);
+                        targetPosition, IntakeConstants.kPivotLower, IntakeConstants.kPivotUpper);
     }
 
     public double getTargetPosition() {
