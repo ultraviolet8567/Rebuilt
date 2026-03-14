@@ -13,6 +13,8 @@ import edu.wpi.first.wpilibj.DutyCycleEncoder;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.CAN;
 import frc.robot.Constants.IntakeConstants;
+import frc.robot.Constants.ShooterConstants;
+
 import org.littletonrobotics.junction.Logger;
 
 public class Pivot extends SubsystemBase {
@@ -23,6 +25,8 @@ public class Pivot extends SubsystemBase {
 
     private final PIDController pidController;
     private final ArmFeedforward feedforwardController;
+
+    private double targetPosition;
 
     public Pivot() {
         System.out.println("[Init] Creating Pivot");
@@ -52,6 +56,8 @@ public class Pivot extends SubsystemBase {
                         IntakeConstants.kPivotV.get());
 
         resetRelativeEncoder();
+
+        targetPosition = getAbsoluteRotationRads();
     }
 
     public void periodic() {
@@ -67,6 +73,8 @@ public class Pivot extends SubsystemBase {
 
         double diff = Math.abs(getAbsoluteRotationRads() - getRelativeRotationRads());
         if (diff > 0.01 && diff < 0.1) resetRelativeEncoder();
+
+        setAngleRads(targetPosition);
     }
 
     public double getAbsoluteRotationRads() {
@@ -92,7 +100,7 @@ public class Pivot extends SubsystemBase {
         relativeEncoder.setPosition(angle);
     }
 
-    public void setPivotRads(double angle) {
+    public void setAngleRads(double angle) {
         double pidVoltage =
                 pidController.calculate(
                         getRelativeRotationRads(),
@@ -117,5 +125,15 @@ public class Pivot extends SubsystemBase {
 
     public void stop() {
         setPivotVoltage(0);
+    }
+
+    public void setTargetPosition(double targetPosition) {
+        this.targetPosition =
+                MathUtil.clamp(
+                        targetPosition, ShooterConstants.kHoodLower, ShooterConstants.kHoodUpper);
+    }
+
+    public double getTargetPosition() {
+        return targetPosition;
     }
 }

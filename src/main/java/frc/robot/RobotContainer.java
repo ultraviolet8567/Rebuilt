@@ -86,9 +86,7 @@ public class RobotContainer {
                         () -> driverController.getRightX(),
                         () -> driverController.getHID().getRightBumperButton()));
 
-        shooter.getKicker().setDefaultCommand(new Kick(shooter.getFlywheel(), shooter.getKicker()));
-        shooter.getHood().setDefaultCommand(new RunHood(shooter.getHood()));
-        intake.getPivot().setDefaultCommand(new LowerPivot(intake.getPivot()));
+        shooter.getKicker().setDefaultCommand(new RunKicker(shooter.getFlywheel(), shooter.getKicker()));
 
         configureBindings();
     }
@@ -105,10 +103,13 @@ public class RobotContainer {
     private void configureBindings() {
         driverController.back().onTrue(new InstantCommand(() -> odometry.resetGyrometerHeading()));
         operatorController.leftBumper().whileTrue(new SpinIntake(intake.getFunnel()));
-        operatorController.a().whileTrue(new SpinIndexer(storage.getIndexer()));
-        operatorController.povUp().whileTrue(new MoveHood(shooter.getHood(), false));
-        operatorController.povDown().whileTrue(new MoveHood(shooter.getHood(), true));
+        operatorController.leftTrigger().whileTrue(new SpinIndexer(storage.getIndexer()));
+        operatorController.povUp().whileTrue(new SetHood(shooter.getHood(), false));
+        operatorController.povDown().whileTrue(new SetHood(shooter.getHood(), true));
         operatorController.rightTrigger().whileTrue(new Shoot(shooter.getFlywheel()));
+
+        operatorController.y().whileTrue(new SetPivot(intake.getPivot(),IntakeConstants.kPivotLower));
+        operatorController.a().whileTrue(new SetPivot(intake.getPivot(),IntakeConstants.kPivotUpper));
     }
 
     /**
