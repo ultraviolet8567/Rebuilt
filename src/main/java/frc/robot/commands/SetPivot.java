@@ -17,4 +17,14 @@ public class SetPivot extends Command {
     public void initialize() {
         pivot.setTargetPosition(angle);
     }
+
+    @Override
+    public void execute() {
+        pivot.setAngleRads(pivot.getTargetPosition());
+    }
+
+    @Override
+    public void end(boolean interrupted) {
+        pivot.stop();
+    }
 }
