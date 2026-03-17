@@ -13,8 +13,6 @@ import edu.wpi.first.wpilibj.DutyCycleEncoder;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.CAN;
 import frc.robot.Constants.IntakeConstants;
-import frc.robot.util.LoggedTunableNumber;
-
 import org.littletonrobotics.junction.Logger;
 
 public class Pivot extends SubsystemBase {
@@ -53,37 +51,72 @@ public class Pivot extends SubsystemBase {
                 new ArmFeedforward(
                         IntakeConstants.kPivotS.get(),
                         IntakeConstants.kPivotG.get(),
-                        IntakeConstants.kPivotV.get());
+                        IntakeConstants.kPivotV.get(),
+                        IntakeConstants.kPivotA.get());
 
         resetRelativeEncoder();
 
         targetPosition = getAbsoluteRotationRads();
 
-        LoggedTunableNumber.ifChanged(hashCode(), () -> pidController.setP(IntakeConstants.kPivotP.get()),IntakeConstants.kPivotP);
-        LoggedTunableNumber.ifChanged(hashCode(), () -> pidController.setP(IntakeConstants.kPivotI.get()),IntakeConstants.kPivotI);
-        LoggedTunableNumber.ifChanged(hashCode(), () -> pidController.setP(IntakeConstants.kPivotD.get()),IntakeConstants.kPivotD);
-        LoggedTunableNumber.ifChanged(hashCode(), () -> feedforwardController.setKs(IntakeConstants.kPivotS.get()),IntakeConstants.kPivotS);
-        LoggedTunableNumber.ifChanged(hashCode(), () -> feedforwardController.setKg(IntakeConstants.kPivotG.get()),IntakeConstants.kPivotG);
-        LoggedTunableNumber.ifChanged(hashCode(), () -> feedforwardController.setKv(IntakeConstants.kPivotV.get()),IntakeConstants.kPivotV);
+        /*
+        LoggedTunableNumber.ifChanged(
+                hashCode(),
+                () -> pidController.setP(IntakeConstants.kPivotP.get()),
+                IntakeConstants.kPivotP);
+        LoggedTunableNumber.ifChanged(
+                hashCode(),
+                () -> pidController.setI(IntakeConstants.kPivotI.get()),
+                IntakeConstants.kPivotI);
+        LoggedTunableNumber.ifChanged(
+                hashCode(),
+                () -> pidController.setD(IntakeConstants.kPivotD.get()),
+                IntakeConstants.kPivotD);
+        LoggedTunableNumber.ifChanged(
+                hashCode(),
+                () -> feedforwardController.setKs(IntakeConstants.kPivotS.get()),
+                IntakeConstants.kPivotS);
+        LoggedTunableNumber.ifChanged(
+                hashCode(),
+                () -> feedforwardController.setKg(IntakeConstants.kPivotG.get()),
+                IntakeConstants.kPivotG);
+        LoggedTunableNumber.ifChanged(
+                hashCode(),
+                () -> feedforwardController.setKv(IntakeConstants.kPivotV.get()),
+                IntakeConstants.kPivotV);
+        LoggedTunableNumber.ifChanged(
+                hashCode(),
+                () -> feedforwardController.setKa(IntakeConstants.kPivotA.get()),
+                IntakeConstants.kPivotA);
+         */
     }
 
     public void periodic() {
         Logger.recordOutput("Intake/Pivot/AbsoluteRotation", getAbsoluteRotationRads());
         Logger.recordOutput("Intake/Pivot/RelativeRotation", getRelativeRotationRads());
+        Logger.recordOutput(
+                "Intake/Pivot/FFRotation",
+                getRelativeRotationRads() + IntakeConstants.kPivotFeedforwardOffset);
 
-        /*
+        Logger.recordOutput("Intake/Pivot/Gains/pidP", pidController.getP());
+        Logger.recordOutput("Intake/Pivot/Gains/pidI", pidController.getI());
+        Logger.recordOutput("Intake/Pivot/Gains/pidD", pidController.getD());
+        Logger.recordOutput("Intake/Pivot/Gains/ffS", feedforwardController.getKs());
+        Logger.recordOutput("Intake/Pivot/Gains/ffG", feedforwardController.getKg());
+        Logger.recordOutput("Intake/Pivot/Gains/ffV", feedforwardController.getKv());
+        Logger.recordOutput("Intake/Pivot/Gains/ffA", feedforwardController.getKa());
+
         pidController.setP(IntakeConstants.kPivotP.get());
-        pidController.setI(IntakeConstants.kPivotP.get());
-        pidController.setD(IntakeConstants.kPivotP.get());
+        pidController.setI(IntakeConstants.kPivotI.get());
+        pidController.setD(IntakeConstants.kPivotD.get());
         feedforwardController.setKs(IntakeConstants.kPivotS.get());
         feedforwardController.setKg(IntakeConstants.kPivotG.get());
         feedforwardController.setKv(IntakeConstants.kPivotV.get());
-         */
+        feedforwardController.setKa(IntakeConstants.kPivotA.get());
 
         double diff = Math.abs(getAbsoluteRotationRads() - getRelativeRotationRads());
         if (diff > 0.01 && diff < 0.1) resetRelativeEncoder();
 
-        //setAngleRads(targetPosition);
+        setAngleRads(targetPosition);
     }
 
     public double getAbsoluteRotationRads() {
@@ -116,8 +149,10 @@ public class Pivot extends SubsystemBase {
                         MathUtil.clamp(
                                 angle, IntakeConstants.kPivotLower, IntakeConstants.kPivotUpper));
         double ffVoltage =
-                feedforwardController.calculate(getRelativeRotationRads() + 2.36 + Math.PI / 2, 0);
-        
+                feedforwardController.calculate(
+                        getRelativeRotationRads() + IntakeConstants.kPivotFeedforwardOffset, 0);
+
+        Logger.recordOutput("Intake/Pivot/TargetRotation", angle);
         Logger.recordOutput("Intake/Pivot/pidVoltage", pidVoltage);
         Logger.recordOutput("Intake/Pivot/ffVoltage", ffVoltage);
 

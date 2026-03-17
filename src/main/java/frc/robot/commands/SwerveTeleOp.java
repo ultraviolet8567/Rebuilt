@@ -18,7 +18,7 @@ public class SwerveTeleOp extends Command {
     private final Swerve swerve;
     private final Odometry odometry;
     private final Supplier<Double> xSpdFunction, ySpdFunction, turningSpdFunction;
-    private final Supplier<Boolean> rightBumper;
+    private final Supplier<Boolean> rightBumper, xButton;
     private final SlewRateLimiter xLimiter, yLimiter, turningLimiter;
 
     public SwerveTeleOp(
@@ -27,13 +27,15 @@ public class SwerveTeleOp extends Command {
             Supplier<Double> xSpdFunction,
             Supplier<Double> ySpdFunction,
             Supplier<Double> turningSpdFunction,
-            Supplier<Boolean> rightBumper) {
+            Supplier<Boolean> rightBumper,
+            Supplier<Boolean> xButton) {
         this.swerve = swerve;
         this.odometry = odometry;
         this.xSpdFunction = xSpdFunction;
         this.ySpdFunction = ySpdFunction;
         this.turningSpdFunction = turningSpdFunction;
         this.rightBumper = rightBumper;
+        this.xButton = xButton;
         this.xLimiter = new SlewRateLimiter(DriveConstants.kTeleDriveMaxAccelerationUnitsPerSecond);
         this.yLimiter = new SlewRateLimiter(DriveConstants.kTeleDriveMaxAccelerationUnitsPerSecond);
         this.turningLimiter =
@@ -47,6 +49,11 @@ public class SwerveTeleOp extends Command {
 
     @Override
     public void execute() {
+        if (xButton.get()) {
+            swerve.lockWheels();
+            return;
+        }
+
         double xSpeed = xSpdFunction.get();
         double ySpeed = ySpdFunction.get();
         double turningSpeed = turningSpdFunction.get();

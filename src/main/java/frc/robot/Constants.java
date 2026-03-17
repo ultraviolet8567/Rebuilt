@@ -8,8 +8,10 @@ import com.pathplanner.lib.config.ModuleConfig;
 import com.pathplanner.lib.config.PIDConstants;
 import com.pathplanner.lib.config.RobotConfig;
 import com.pathplanner.lib.controllers.PPHolonomicDriveController;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
+import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.system.plant.DCMotor;
 // import com.pathplanner.lib.util.HolonomicPathFollowerConfig;
 // import com.pathplanner.lib.util.PIDConstants;
@@ -115,6 +117,14 @@ public final class Constants {
         public static final double kRobotMass = 48.5;
         public static final double kRobotMOI = 7.0;
 
+        public static final SwerveModuleState[] kLockStates =
+                new SwerveModuleState[] {
+                    new SwerveModuleState(0, new Rotation2d(Math.PI / 4)),
+                    new SwerveModuleState(0, new Rotation2d(-Math.PI / 4)),
+                    new SwerveModuleState(0, new Rotation2d(Math.PI / 4)),
+                    new SwerveModuleState(0, new Rotation2d(-Math.PI / 4))
+                };
+
         public static final ModuleConfig kRobotModuleConfig =
                 new ModuleConfig(
                         ModuleConstants.kWheelDiameterMeters / 2,
@@ -134,11 +144,11 @@ public final class Constants {
     }
 
     public static final class ShooterConstants {
-        public static final double kFlywheelVelocityTolerance = 100;
+        public static final double kFlywheelVelocityTolerance = 300;
         public static final double kFlywheelReduction = 1.0;
         public static final double kFlywheelVoltage = 10;
         public static final boolean kFlywheelInverted = true;
-        public static final double kFlywheelMaxVelocity = 2250;
+        public static final double kFlywheelMaxVelocity = 2200;
 
         public static final double kKickerReduction = 3.0;
         public static final double kKickerVoltage = 5;
@@ -157,56 +167,59 @@ public final class Constants {
 
         // PID values
         public static final LoggedTunableNumber kFlywheelP =
-                new LoggedTunableNumber("FlywheelP", 0.80);
+                new LoggedTunableNumber("FlywheelPidP", 0.80);
         public static final LoggedTunableNumber kFlywheelI =
-                new LoggedTunableNumber("FlywheelI", 0.0);
+                new LoggedTunableNumber("FlywheelPidI", 0.0);
         public static final LoggedTunableNumber kFlywheelD =
-                new LoggedTunableNumber("FlywheelD", 0.0);
+                new LoggedTunableNumber("FlywheelPidD", 0.0);
 
         public static final LoggedTunableNumber kFlywheelS =
-                new LoggedTunableNumber("FlywheelS", 0.00);
+                new LoggedTunableNumber("FlywheelFfS", 0.00);
         public static final LoggedTunableNumber kFlywheelV =
-                new LoggedTunableNumber("FlywheelV", 0.33);
+                new LoggedTunableNumber("FlywheelFfV", 0.33);
         public static final LoggedTunableNumber kFlywheelA =
-                new LoggedTunableNumber("FlywheelA", 0.63);
+                new LoggedTunableNumber("FlywheelFfA", 0.63);
 
         public static final LoggedTunableNumber kFlywheelVelocity =
-                new LoggedTunableNumber("TargetVelocity", 2400);
+                new LoggedTunableNumber("TargetVelocity", 2200);
 
-        public static final LoggedTunableNumber kHoodP = new LoggedTunableNumber("HoodP", 1);
-        public static final LoggedTunableNumber kHoodI = new LoggedTunableNumber("HoodI", 0.0);
-        public static final LoggedTunableNumber kHoodD = new LoggedTunableNumber("HoodD", 0.0);
+        public static final LoggedTunableNumber kHoodP = new LoggedTunableNumber("HoodPidP", 1);
+        public static final LoggedTunableNumber kHoodI = new LoggedTunableNumber("HoodPidI", 0.0);
+        public static final LoggedTunableNumber kHoodD = new LoggedTunableNumber("HoodPidD", 0.0);
     }
 
     public static final class IntakeConstants {
-        public static final double kPivotGearboxReduction = 4.0;
+        public static final double kPivotGearboxReduction = 5.0;
         public static final double kPivotChainReduction = 40.0 / 16.0;
         public static final double kPivotEncoderOffset =
-                -2.223 - 6.086 - Math.PI / 2 - 2.968 - 5.72 - 0.009;
+                -2.223 - 6.086 - Math.PI / 2 - 2.968 - 5.72 - 0.009 + 0.507;
+        public static final double kPivotFeedforwardOffset =
+                2.36 + Math.PI / 2 - 4.505 + Math.PI / 2;
         public static final double kPivotVoltage = 10;
         public static final boolean kPivotInverted = false;
         public static final boolean kPivotAbsoluteEncoderInverted = true;
         public static final boolean kPivotRelativeEncoderInverted = false;
 
-        public static final double kPivotLower = 0.0;
-        public static final double kPivotUpper = 2.00;
+        public static final double kPivotLower = 0.2;
+        public static final double kPivotUpper = 2.20;
 
         // Software limit
         // public static final double kRaiseUpper = ;
         // public static final double kRaiseLower = ;
 
         public static final double kFunnelReduction = 1.0;
-        public static final double kFunnelVoltage = 3;
+        public static final double kFunnelVoltage = 4;
         public static final double kFunnelMaxVoltage = 12;
         public static final boolean kFunnelInverted = false;
 
-        public static final LoggedTunableNumber kPivotP = new LoggedTunableNumber("PivotP", 0.0);
-        public static final LoggedTunableNumber kPivotI = new LoggedTunableNumber("PivotI", 0.0);
-        public static final LoggedTunableNumber kPivotD = new LoggedTunableNumber("PivotD", 0.0);
+        public static final LoggedTunableNumber kPivotP = new LoggedTunableNumber("PivotPidP", 1);
+        public static final LoggedTunableNumber kPivotI = new LoggedTunableNumber("PivotPidI", 0.0);
+        public static final LoggedTunableNumber kPivotD = new LoggedTunableNumber("PivotPidD", 0.0);
 
-        public static final LoggedTunableNumber kPivotS = new LoggedTunableNumber("PivotS",-1.37);
-        public static final LoggedTunableNumber kPivotG = new LoggedTunableNumber("PivotG", 1.22);
-        public static final LoggedTunableNumber kPivotV = new LoggedTunableNumber("PivotV", 0.39);
+        public static final LoggedTunableNumber kPivotS = new LoggedTunableNumber("PivotFfS", 0.0);
+        public static final LoggedTunableNumber kPivotG = new LoggedTunableNumber("PivotFfG", 0.0);
+        public static final LoggedTunableNumber kPivotV = new LoggedTunableNumber("PivotFfV", 0.0);
+        public static final LoggedTunableNumber kPivotA = new LoggedTunableNumber("PivotFfA", 0.0);
     }
 
     public static final class StorageConstants {
