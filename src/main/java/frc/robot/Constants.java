@@ -159,7 +159,7 @@ public final class Constants {
 
         public static final double kHoodGearboxReduction = 25.0;
         public static final double kHoodRackReduction = 168.0 / 10.0;
-        public static final double kHoodEncoderOffset = -0.0992;
+        public static final double kHoodEncoderOffset = -0.0992 - 6.276 + 0.01;
         public static final double kHoodVoltage = 10;
         public static final boolean kHoodInverted = true;
         public static final boolean kHoodAbsoluteEncoderInverted = false;

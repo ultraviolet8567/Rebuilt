@@ -62,7 +62,7 @@ public class Hood extends SubsystemBase {
         double diff = Math.abs(getAbsoluteRotationRads() - getRelativeRotationRads());
         if (diff > 0.001 && diff < 0.1) resetRelativeEncoder();
 
-        setAngleRads(targetPosition);
+        // setAngleRads(targetPosition);
     }
 
     public double getAbsoluteRotationRads() {
