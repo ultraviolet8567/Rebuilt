@@ -59,10 +59,14 @@ public class Hood extends SubsystemBase {
                 "Shooter/Hood/AppliedVoltage",
                 hoodMotor.getAppliedOutput() * hoodMotor.getBusVoltage());
 
+        pidController.setP(ShooterConstants.kHoodP.get());
+        pidController.setI(ShooterConstants.kHoodI.get());
+        pidController.setD(ShooterConstants.kHoodD.get());
+
         double diff = Math.abs(getAbsoluteRotationRads() - getRelativeRotationRads());
         if (diff > 0.001 && diff < 0.1) resetRelativeEncoder();
 
-        // setAngleRads(targetPosition);
+        setAngleRads(targetPosition);
     }
 
     public double getAbsoluteRotationRads() {
