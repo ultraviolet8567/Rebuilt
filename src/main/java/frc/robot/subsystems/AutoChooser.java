@@ -16,6 +16,7 @@ import org.littletonrobotics.junction.Logger;
 
 public class AutoChooser extends VirtualSubsystem {
     private static final ShuffleboardTab main = Shuffleboard.getTab("Main");
+    private final SendableChooser<String> side;
     private final SendableChooser<String> driveOut;
     private final GenericEntry autoName;
 
@@ -24,15 +25,25 @@ public class AutoChooser extends VirtualSubsystem {
     public AutoChooser() {
         System.out.println("[Init] Creating AutoChooser");
 
+        side = new SendableChooser<>();
+        side.setDefaultOption("None", "");
+        side.addOption("Middle", "Middle");
+        side.addOption("Left", "Left");
+        side.addOption("Right", "Right");
+
         driveOut = new SendableChooser<>();
         driveOut.setDefaultOption("None", "");
         driveOut.addOption("Drive Out", "Drive Out");
 
         // add selectors to shuffleboard
-        main.add("Drive Out", driveOut)
+        main.add("Side", side)
                 .withWidget(BuiltInWidgets.kComboBoxChooser)
                 .withSize(2, 1)
                 .withPosition(0, 3);
+        main.add("Drive Out", driveOut)
+                .withWidget(BuiltInWidgets.kComboBoxChooser)
+                .withSize(2, 1)
+                .withPosition(1, 3);
         autoName =
                 main.add("Auto Name", "")
                         .withWidget(BuiltInWidgets.kTextView)
@@ -59,13 +70,7 @@ public class AutoChooser extends VirtualSubsystem {
 
     // Returns name of pre-defined autonomous command based on Shuffleboard input
     public String getAutoCommandName() {
-        String name;
-        if (driveOut.getSelected().equals("Drive Out")) {
-            name = "Test";
-        } else {
-            name = "";
-        }
-
+        String name = driveOut.getSelected() + " " + side.getSelected();
         return name;
     }
 

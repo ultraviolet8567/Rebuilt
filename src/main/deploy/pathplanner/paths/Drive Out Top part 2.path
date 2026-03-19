@@ -1,0 +1,86 @@
+{
+  "version": "2025.0",
+  "waypoints": [
+    {
+      "anchor": {
+        "x": 3.45681883024251,
+        "y": 7.444336661911555
+      },
+      "prevControl": null,
+      "nextControl": {
+        "x": 4.45681883024251,
+        "y": 7.444336661911555
+      },
+      "isLocked": false,
+      "linkedName": "Drive Out End"
+    },
+    {
+      "anchor": {
+        "x": 6.018673323823109,
+        "y": 7.444336661911555
+      },
+      "prevControl": {
+        "x": 5.391088672808209,
+        "y": 7.6761685930598285
+      },
+      "nextControl": {
+        "x": 6.64625797483801,
+        "y": 7.212504730763281
+      },
+      "isLocked": false,
+      "linkedName": null
+    },
+    {
+      "anchor": {
+        "x": 7.778330955777461,
+        "y": 7.573723252496434
+      },
+      "prevControl": {
+        "x": 7.531302086466408,
+        "y": 7.661410057583781
+      },
+      "nextControl": {
+        "x": 8.025359825088513,
+        "y": 7.486036447409086
+      },
+      "isLocked": false,
+      "linkedName": null
+    },
+    {
+      "anchor": {
+        "x": 7.90771754636234,
+        "y": 6.784465049928673
+      },
+      "prevControl": {
+        "x": 7.946533523537805,
+        "y": 7.418508351054302
+      },
+      "nextControl": null,
+      "isLocked": false,
+      "linkedName": "Drive Out Middle"
+    }
+  ],
+  "rotationTargets": [],
+  "constraintZones": [],
+  "pointTowardsZones": [],
+  "eventMarkers": [],
+  "globalConstraints": {
+    "maxVelocity": 3.0,
+    "maxAcceleration": 3.0,
+    "maxAngularVelocity": 540.0,
+    "maxAngularAcceleration": 720.0,
+    "nominalVoltage": 12.0,
+    "unlimited": false
+  },
+  "goalEndState": {
+    "velocity": 0,
+    "rotation": -90.0
+  },
+  "reversed": false,
+  "folder": null,
+  "idealStartingState": {
+    "velocity": 0,
+    "rotation": 0.0
+  },
+  "useDefaultConstraints": true
+}

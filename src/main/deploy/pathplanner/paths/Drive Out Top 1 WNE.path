@@ -3,29 +3,29 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 1.7352289156626508,
-        "y": 6.0
+        "x": 1.309048192771084,
+        "y": 7.116614457831325
       },
       "prevControl": null,
       "nextControl": {
-        "x": 2.735228915662651,
-        "y": 6.0
+        "x": 2.3090481927710824,
+        "y": 7.116614457831325
       },
       "isLocked": false,
       "linkedName": null
     },
     {
       "anchor": {
-        "x": 4.0,
-        "y": 6.0
+        "x": 3.45681883024251,
+        "y": 7.444336661911555
       },
       "prevControl": {
-        "x": 3.0,
-        "y": 6.0
+        "x": 2.45681883024251,
+        "y": 7.444336661911555
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": null
+      "linkedName": "Between Drive out 1 and 2"
     }
   ],
   "rotationTargets": [],
