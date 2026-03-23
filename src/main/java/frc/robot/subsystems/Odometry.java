@@ -4,8 +4,13 @@ import com.ctre.phoenix6.hardware.Pigeon2;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.DriveConstants;
+import frc.robot.Constants.OdometryConstants;
+import frc.robot.util.LoggedTunableNumber;
+import frc.robot.LimelightHelpers;
 import org.littletonrobotics.junction.Logger;
 
 public class Odometry extends SubsystemBase {
@@ -30,6 +35,15 @@ public class Odometry extends SubsystemBase {
                         gyro.getRotation2d(),
                         swerve.getModulePositions(),
                         new Pose2d());
+
+        LimelightHelpers.setCameraPose_RobotSpace(
+                OdometryConstants.kActiveCamera,
+                OdometryConstants.kTranslationOffset.getX(),
+                OdometryConstants.kTranslationOffset.getY(),
+                OdometryConstants.kTranslationOffset.getZ(),
+                OdometryConstants.kRotationOffset.getX(),
+                OdometryConstants.kRotationOffset.getY(),
+                OdometryConstants.kRotationOffset.getZ());
     }
 
     /* Runs periodically (about once every 20 ms) */
@@ -42,21 +56,17 @@ public class Odometry extends SubsystemBase {
         // Odometry
         poseEstimator.update(getGyrometerHeading(), swerve.getModulePositions());
 
-        /*
-        LimelightHelpers.PoseEstimate pos_cev =
-            LimelightHelpers.getBotPoseEstimate_wpiBlue("limelight-cev");
-        LimelightHelpers.PoseEstimate pos_uni =
-            LimelightHelpers.getBotPoseEstimate_wpiBlue("limelight-uni");
+        double[] visionRawPose =
+                NetworkTableInstance.getDefault()
+                        .getTable("limelight-"+OdometryConstants.kActiveCamera)
+                        .getEntry("botpose")
+                        .getDoubleArray(new double[6]);
+        Pose2d visionPose =
+                new Pose2d(visionRawPose[0], visionRawPose[1], new Rotation2d(visionRawPose[4]));
+        
+        Logger.recordOutput("visionPose", visionPose);
 
-        poseEstimator.setVisionMeasurementStdDevs(VecBuilder.fill(0.5, 0.5, 9999999));
-
-        if (pos_cev.tagCount > 0 && pos_cev.rawFiducials[0].ambiguity < 0.7) {
-          poseEstimator.addVisionMeasurement(pos_cev.pose, pos_cev.timestampSeconds);
-        }
-        if (pos_uni.tagCount > 0 && pos_uni.rawFiducials[0].ambiguity < 0.7) {
-          poseEstimator.addVisionMeasurement(pos_uni.pose, pos_cev.timestampSeconds);
-        }
-        */
+        poseEstimator.addVisionMeasurement(visionPose, Timer.getFPGATimestamp());
     }
 
     public Pose2d getPose() {

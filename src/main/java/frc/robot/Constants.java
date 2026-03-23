@@ -9,7 +9,9 @@ import com.pathplanner.lib.config.PIDConstants;
 import com.pathplanner.lib.config.RobotConfig;
 import com.pathplanner.lib.controllers.PPHolonomicDriveController;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.system.plant.DCMotor;
@@ -186,6 +188,13 @@ public final class Constants {
         public static final LoggedTunableNumber kHoodP = new LoggedTunableNumber("HoodPidP", 5);
         public static final LoggedTunableNumber kHoodI = new LoggedTunableNumber("HoodPidI", 0.0);
         public static final LoggedTunableNumber kHoodD = new LoggedTunableNumber("HoodPidD", 0.0);
+    }
+
+    public static final class OdometryConstants {
+        public static final String kActiveCamera = "cev";
+
+        public static final Translation3d kTranslationOffset = new Translation3d(0, 0, 0);
+        public static final Rotation3d kRotationOffset = new Rotation3d(0, 0, 0);
     }
 
     public static final class IntakeConstants {
