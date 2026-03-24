@@ -120,7 +120,7 @@ public class RobotContainer {
                 .whileTrue(new SetPivot(intake.getPivot(), IntakeConstants.kPivotLower));
         operatorController
                 .x()
-                .whileTrue(new SetPivot(intake.getPivot(), IntakeConstants.kPivotUpper - 0.2));
+                .whileTrue(new SetPivot(intake.getPivot(), IntakeConstants.kPivotMiddle));
         operatorController
                 .a()
                 .whileTrue(new SetPivot(intake.getPivot(), IntakeConstants.kPivotUpper));

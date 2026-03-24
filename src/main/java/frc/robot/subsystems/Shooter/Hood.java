@@ -21,6 +21,7 @@ public class Hood extends SubsystemBase {
     private final RelativeEncoder hoodEncoder;
     private final DutyCycleEncoder absoluteEncoder;
     private final PIDController pidController;
+    // private final SimpleMotorFeedforward feedforwardController;
 
     private double targetPosition;
 
@@ -75,7 +76,7 @@ public class Hood extends SubsystemBase {
         angle *= ShooterConstants.kHoodAbsoluteEncoderInverted ? -1 : 1;
         angle /= ShooterConstants.kHoodRackReduction;
         angle += ShooterConstants.kHoodEncoderOffset;
-        angle = MathUtil.inputModulus(angle, 0, Math.PI * 2);
+        angle = MathUtil.inputModulus(angle, -Math.PI, Math.PI);
         return angle;
     }
 

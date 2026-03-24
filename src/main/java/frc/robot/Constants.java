@@ -159,11 +159,14 @@ public final class Constants {
 
         public static final double kHoodGearboxReduction = 25.0;
         public static final double kHoodRackReduction = 168.0 / 10.0;
-        public static final double kHoodEncoderOffset = -0.0992 - 6.276 + 0.001 - 0.024;
+        public static final double kHoodEncoderOffset = -0.0992 - 6.276 + 0.001 - 0.024 - 6.264;
         public static final double kHoodVoltage = 10;
         public static final boolean kHoodInverted = true;
         public static final boolean kHoodAbsoluteEncoderInverted = false;
         public static final boolean kHoodRelativeEncoderInverted = true;
+
+        public static final LoggedTunableNumber kHoodTestVoltage =
+                new LoggedTunableNumber("HoodTestVoltage", 0.1);
 
         // PID values
         public static final LoggedTunableNumber kFlywheelP =
@@ -192,15 +195,16 @@ public final class Constants {
         public static final double kPivotGearboxReduction = 5.0;
         public static final double kPivotChainReduction = 40.0 / 16.0;
         public static final double kPivotEncoderOffset =
-                -2.223 - 6.086 - Math.PI / 2 - 2.968 - 5.72 - 0.009 + 0.507;
+                -2.223 - 6.086 - Math.PI / 2 - 2.968 - 5.72 - 0.009 + 0.507 - 0.041;
         public static final double kPivotFeedforwardOffset =
-                2.36 + Math.PI / 2 - 4.505 + Math.PI / 2;
+                2.36 + Math.PI / 2 - 4.505 + Math.PI - 1.604;
         public static final double kPivotVoltage = 10;
         public static final boolean kPivotInverted = false;
         public static final boolean kPivotAbsoluteEncoderInverted = true;
         public static final boolean kPivotRelativeEncoderInverted = false;
 
         public static final double kPivotLower = 0.2;
+        public static final double kPivotMiddle = 1.0;
         public static final double kPivotUpper = 2.20;
 
         // Software limit
@@ -212,13 +216,13 @@ public final class Constants {
         public static final double kFunnelMaxVoltage = 12;
         public static final boolean kFunnelInverted = false;
 
-        public static final LoggedTunableNumber kPivotP = new LoggedTunableNumber("PivotPidP", 1);
+        public static final LoggedTunableNumber kPivotP = new LoggedTunableNumber("PivotPidP", 3);
         public static final LoggedTunableNumber kPivotI = new LoggedTunableNumber("PivotPidI", 0.0);
-        public static final LoggedTunableNumber kPivotD = new LoggedTunableNumber("PivotPidD", 0.0);
+        public static final LoggedTunableNumber kPivotD = new LoggedTunableNumber("PivotPidD", 0.3);
 
-        public static final LoggedTunableNumber kPivotS = new LoggedTunableNumber("PivotFfS", 0.0);
-        public static final LoggedTunableNumber kPivotG = new LoggedTunableNumber("PivotFfG", 0.0);
-        public static final LoggedTunableNumber kPivotV = new LoggedTunableNumber("PivotFfV", 0.0);
+        public static final LoggedTunableNumber kPivotS = new LoggedTunableNumber("PivotFfS", 6);
+        public static final LoggedTunableNumber kPivotG = new LoggedTunableNumber("PivotFfG", 1.67);
+        public static final LoggedTunableNumber kPivotV = new LoggedTunableNumber("PivotFfV", 1);
         public static final LoggedTunableNumber kPivotA = new LoggedTunableNumber("PivotFfA", 0.0);
     }
 
