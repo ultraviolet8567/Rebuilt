@@ -194,7 +194,7 @@ public final class Constants {
     }
 
     public static final class OdometryConstants {
-        public static final String kActiveCamera = "cev";
+        public static final String kActiveCamera = "nip";
 
         public static final Translation3d kTranslationOffset = new Translation3d(0, 0, 0);
         public static final Rotation3d kRotationOffset = new Rotation3d(0, 0, 0);

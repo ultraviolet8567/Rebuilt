@@ -5,14 +5,10 @@ import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.networktables.NetworkTableInstance;
-import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.LimelightHelpers;
 import frc.robot.Constants.DriveConstants;
 import frc.robot.Constants.OdometryConstants;
-import frc.robot.util.LoggedTunableNumber;
 import frc.robot.LimelightHelpers;
 import org.littletonrobotics.junction.Logger;
 
@@ -61,12 +57,12 @@ public class Odometry extends SubsystemBase {
 
         double[] visionRawPose =
                 NetworkTableInstance.getDefault()
-                        .getTable("limelight-"+OdometryConstants.kActiveCamera)
+                        .getTable("limelight-" + OdometryConstants.kActiveCamera)
                         .getEntry("botpose")
                         .getDoubleArray(new double[6]);
         Pose2d visionPose =
                 new Pose2d(visionRawPose[0], visionRawPose[1], new Rotation2d(visionRawPose[4]));
-        
+
         Logger.recordOutput("visionPose", visionPose);
 
         poseEstimator.addVisionMeasurement(visionPose, Timer.getFPGATimestamp());
@@ -75,7 +71,6 @@ public class Odometry extends SubsystemBase {
     public Pose2d getPose() {
         return poseEstimator.getEstimatedPosition();
     }
-
 
     public Rotation2d getHeading() {
         return poseEstimator.getEstimatedPosition().getRotation();

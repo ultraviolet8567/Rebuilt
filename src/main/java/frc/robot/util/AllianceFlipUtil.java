@@ -68,6 +68,7 @@ public class AllianceFlipUtil {
     }
 
     public static boolean shouldFlip() {
-        return DriverStation.getAlliance().isPresent() && DriverStation.getAlliance().get() == Alliance.Red;
+        return DriverStation.getAlliance().isPresent()
+                && DriverStation.getAlliance().get() == Alliance.Red;
     }
 }

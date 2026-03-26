@@ -13,15 +13,14 @@ import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.CAN;
 import frc.robot.Constants.ShooterConstants;
-import frc.robot.util.LoggedTunableNumber;
 import org.littletonrobotics.junction.Logger;
 
 public class Flywheel extends SubsystemBase {
     private final SparkFlex leadMotor, followerMotor;
     private final SparkFlexConfig globalConfig, followerConfig;
-    private final RelativeEncoder relativeEncoder;
-    private final PIDController pidController;
-    private final SimpleMotorFeedforward feedforwardController;
+    private final RelativeEncoder leadEncoder, followerEncoder;
+    private final PIDController leadPIDController, followerPIDController;
+    private final SimpleMotorFeedforward leadFeedforwardController, followerFeedforwardController;
 
     private double targetVelocity;
     private boolean running;
@@ -30,8 +29,9 @@ public class Flywheel extends SubsystemBase {
         System.out.println("[Init] Creating Flywheel");
 
         leadMotor = new SparkFlex(CAN.kFlywheelLeadPort, MotorType.kBrushless);
-        relativeEncoder = leadMotor.getEncoder();
+        leadEncoder = leadMotor.getEncoder();
         followerMotor = new SparkFlex(CAN.kFlywheelFollowerPort, MotorType.kBrushless);
+        followerEncoder = followerMotor.getEncoder();
 
         globalConfig = new SparkFlexConfig();
         globalConfig.encoder.velocityConversionFactor(1.0 / ShooterConstants.kFlywheelReduction);
@@ -46,12 +46,23 @@ public class Flywheel extends SubsystemBase {
         followerMotor.configure(
                 followerConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
 
-        pidController =
+        leadPIDController =
                 new PIDController(
                         ShooterConstants.kFlywheelP.get(),
                         ShooterConstants.kFlywheelI.get(),
                         ShooterConstants.kFlywheelD.get());
-        feedforwardController =
+        leadFeedforwardController =
+                new SimpleMotorFeedforward(
+                        ShooterConstants.kFlywheelS.get(),
+                        ShooterConstants.kFlywheelV.get(),
+                        ShooterConstants.kFlywheelA.get());
+
+        followerPIDController =
+                new PIDController(
+                        ShooterConstants.kFlywheelP.get(),
+                        ShooterConstants.kFlywheelI.get(),
+                        ShooterConstants.kFlywheelD.get());
+        followerFeedforwardController =
                 new SimpleMotorFeedforward(
                         ShooterConstants.kFlywheelS.get(),
                         ShooterConstants.kFlywheelV.get(),
@@ -59,41 +70,37 @@ public class Flywheel extends SubsystemBase {
 
         targetVelocity = ShooterConstants.kFlywheelMaxVelocity;
         running = false;
-
-        LoggedTunableNumber.ifChanged(
-                hashCode(),
-                () -> pidController.setP(ShooterConstants.kFlywheelP.get()),
-                ShooterConstants.kFlywheelP);
-        LoggedTunableNumber.ifChanged(
-                hashCode(),
-                () -> pidController.setP(ShooterConstants.kFlywheelI.get()),
-                ShooterConstants.kFlywheelI);
-        LoggedTunableNumber.ifChanged(
-                hashCode(),
-                () -> pidController.setP(ShooterConstants.kFlywheelD.get()),
-                ShooterConstants.kFlywheelD);
-        LoggedTunableNumber.ifChanged(
-                hashCode(),
-                () -> feedforwardController.setKs(ShooterConstants.kFlywheelS.get()),
-                ShooterConstants.kFlywheelS);
-        LoggedTunableNumber.ifChanged(
-                hashCode(),
-                () -> feedforwardController.setKv(ShooterConstants.kFlywheelV.get()),
-                ShooterConstants.kFlywheelV);
-        LoggedTunableNumber.ifChanged(
-                hashCode(),
-                () -> feedforwardController.setKa(ShooterConstants.kFlywheelA.get()),
-                ShooterConstants.kFlywheelA);
     }
 
     public void periodic() {
-        Logger.recordOutput("Shooter/Flywheel/Velocity", getVelocity());
-        Logger.recordOutput(
-                "Shooter/Flywheel/MeasuredVoltage",
-                leadMotor.getAppliedOutput() * leadMotor.getBusVoltage());
+        leadPIDController.setP(ShooterConstants.kFlywheelP.get());
+        leadPIDController.setI(ShooterConstants.kFlywheelI.get());
+        leadPIDController.setD(ShooterConstants.kFlywheelD.get());
 
-        Logger.recordOutput("Shooter/Flywheel/Ks", feedforwardController.getKs());
-        Logger.recordOutput("Shooter/Flywheel/Kv", feedforwardController.getKv());
+        followerPIDController.setP(ShooterConstants.kFlywheelP.get());
+        followerPIDController.setI(ShooterConstants.kFlywheelI.get());
+        followerPIDController.setD(ShooterConstants.kFlywheelD.get());
+
+        leadFeedforwardController.setKs(ShooterConstants.kFlywheelS.get());
+        leadFeedforwardController.setKv(ShooterConstants.kFlywheelV.get());
+        leadFeedforwardController.setKa(ShooterConstants.kFlywheelA.get());
+
+        followerFeedforwardController.setKs(ShooterConstants.kFlywheelS.get());
+        followerFeedforwardController.setKv(ShooterConstants.kFlywheelV.get());
+        followerFeedforwardController.setKa(ShooterConstants.kFlywheelA.get());
+
+        Logger.recordOutput("Shooter/Flywheel/Lead/Velocity", getVelocity(leadMotor));
+        Logger.recordOutput("Shooter/Flywheel/Follower/Velocity", getVelocity(followerMotor));
+        Logger.recordOutput(
+                "Shooter/Flywheel/Lead/MeasuredVoltage",
+                leadMotor.getAppliedOutput() * leadMotor.getBusVoltage());
+        Logger.recordOutput(
+                "Shooter/Flywheel/Follower/MeasuredVoltage",
+                followerMotor.getAppliedOutput() * followerMotor.getBusVoltage());
+
+        Logger.recordOutput("Shooter/Flywheel/Ks", leadFeedforwardController.getKs());
+        Logger.recordOutput("Shooter/Flywheel/Kv", leadFeedforwardController.getKv());
+        Logger.recordOutput("Shooter/Flywheel/Ka", leadFeedforwardController.getKa());
 
         if (running) {
             setFlywheelRadsPerSec(targetVelocity);
@@ -102,20 +109,31 @@ public class Flywheel extends SubsystemBase {
         }
     }
 
-    public double getVelocity() {
-        return relativeEncoder.getVelocity();
+    public double getVelocity(SparkFlex motor) {
+        return motor.getEncoder().getVelocity();
     }
 
     public void setFlywheelRadsPerSec(double targetVelocity) {
-        double pidVoltage = pidController.calculate(getVelocity(), targetVelocity);
-        double ffVoltage = feedforwardController.calculate(targetVelocity);
+        double pidVoltage, ffVoltage;
 
-        Logger.recordOutput("Shooter/Flywheel/pidVoltage", pidVoltage);
-        Logger.recordOutput("Shooter/Flywheel/ffVoltage", ffVoltage);
-        setFlywheelVoltage(pidVoltage + ffVoltage);
+        pidVoltage = leadPIDController.calculate(getVelocity(leadMotor), targetVelocity);
+        ffVoltage = leadFeedforwardController.calculate(targetVelocity);
+
+        Logger.recordOutput("Shooter/Flywheel/Lead/pidVoltage", pidVoltage);
+        Logger.recordOutput("Shooter/Flywheel/Lead/ffVoltage", ffVoltage);
+
+        setMotorVoltage(leadMotor, pidVoltage + ffVoltage);
+
+        pidVoltage = followerPIDController.calculate(getVelocity(followerMotor), targetVelocity);
+        ffVoltage = followerFeedforwardController.calculate(targetVelocity);
+
+        Logger.recordOutput("Shooter/Flywheel/Follower/pidVoltage", pidVoltage);
+        Logger.recordOutput("Shooter/Flywheel/Follower/ffVoltage", ffVoltage);
+
+        setMotorVoltage(followerMotor, pidVoltage + ffVoltage);
     }
 
-    public void setFlywheelVoltage(double voltage) {
+    public void setMotorVoltage(SparkFlex motor, double voltage) {
         voltage =
                 MathUtil.clamp(
                         voltage,
@@ -123,7 +141,12 @@ public class Flywheel extends SubsystemBase {
                         ShooterConstants.kFlywheelVoltage);
         voltage *= ShooterConstants.kFlywheelInverted ? -1 : 1;
 
-        leadMotor.setVoltage(voltage);
+        motor.setVoltage(voltage);
+    }
+
+    public void setFlywheelVoltage(double voltage) {
+        setMotorVoltage(leadMotor, voltage);
+        setMotorVoltage(followerMotor, voltage);
     }
 
     public void stop() {
@@ -137,7 +160,8 @@ public class Flywheel extends SubsystemBase {
     }
 
     public boolean atVelocity(double velocity) {
-        return Math.abs(getVelocity()) > Math.abs(velocity);
+        return Math.abs(getVelocity(leadMotor)) > Math.abs(velocity)
+                && Math.abs(getVelocity(followerMotor)) > Math.abs(velocity);
         // return Math.abs(Math.abs(velocity) - Math.abs(getVelocity()))
         //        < ShooterConstants.kFlywheelVelocityTolerance;
     }
@@ -148,5 +172,13 @@ public class Flywheel extends SubsystemBase {
 
     public double getTargetVelocity() {
         return targetVelocity;
+    }
+
+    public SparkFlex getLeadMotor() {
+        return leadMotor;
+    }
+
+    public SparkFlex getFollowerMotor() {
+        return followerMotor;
     }
 }
