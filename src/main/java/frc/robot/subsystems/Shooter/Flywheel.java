@@ -44,7 +44,7 @@ public class Flywheel extends SubsystemBase {
         leadMotor.configure(
                 globalConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
         followerMotor.configure(
-                followerConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+                globalConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
 
         leadPIDController =
                 new PIDController(
@@ -103,9 +103,9 @@ public class Flywheel extends SubsystemBase {
         Logger.recordOutput("Shooter/Flywheel/Ka", leadFeedforwardController.getKa());
 
         if (running) {
-            setFlywheelRadsPerSec(targetVelocity);
+            // setFlywheelRadsPerSec(targetVelocity);
         } else {
-            stop();
+            // stop();
         }
     }
 

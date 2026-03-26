@@ -4,8 +4,10 @@
 
 package frc.robot;
 
+import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import frc.robot.Constants.OdometryConstants;
 import org.littletonrobotics.junction.LoggedRobot;
 import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.NT4Publisher;
@@ -61,7 +63,13 @@ public class Robot extends LoggedRobot {
 
     /** This function is called once each time the robot enters Disabled mode. */
     @Override
-    public void disabledInit() {}
+    public void disabledInit() {
+        LimelightHelpers.setLEDMode_ForceOn("limelight-" + OdometryConstants.kActiveCamera);
+        NetworkTableInstance.getDefault()
+                .getTable("limelight-" + OdometryConstants.kActiveCamera)
+                .getEntry("throttle_set")
+                .setNumber(200);
+    }
 
     @Override
     public void disabledPeriodic() {}
@@ -77,6 +85,12 @@ public class Robot extends LoggedRobot {
         if (m_autonomousCommand != null) {
             m_autonomousCommand.schedule();
         }
+
+        LimelightHelpers.setLEDMode_PipelineControl("limelight-" + OdometryConstants.kActiveCamera);
+        NetworkTableInstance.getDefault()
+                .getTable("limelight-" + OdometryConstants.kActiveCamera)
+                .getEntry("throttle_set")
+                .setNumber(0);
     }
 
     /** This function is called periodically during autonomous. */
@@ -92,6 +106,12 @@ public class Robot extends LoggedRobot {
         if (m_autonomousCommand != null) {
             m_autonomousCommand.cancel();
         }
+
+        LimelightHelpers.setLEDMode_PipelineControl("limelight-" + OdometryConstants.kActiveCamera);
+        NetworkTableInstance.getDefault()
+                .getTable("limelight-" + OdometryConstants.kActiveCamera)
+                .getEntry("throttle_set")
+                .setNumber(0);
     }
 
     /** This function is called periodically during operator control. */
@@ -102,6 +122,12 @@ public class Robot extends LoggedRobot {
     public void testInit() {
         // Cancels all running commands at the start of test mode.
         CommandScheduler.getInstance().cancelAll();
+
+        LimelightHelpers.setLEDMode_PipelineControl("limelight-" + OdometryConstants.kActiveCamera);
+        NetworkTableInstance.getDefault()
+                .getTable("limelight-" + OdometryConstants.kActiveCamera)
+                .getEntry("throttle_set")
+                .setNumber(0);
     }
 
     /** This function is called periodically during test mode. */
@@ -110,7 +136,13 @@ public class Robot extends LoggedRobot {
 
     /** This function is called once when the robot is first started up. */
     @Override
-    public void simulationInit() {}
+    public void simulationInit() {
+        LimelightHelpers.setLEDMode_PipelineControl("limelight-" + OdometryConstants.kActiveCamera);
+        NetworkTableInstance.getDefault()
+                .getTable("limelight-" + OdometryConstants.kActiveCamera)
+                .getEntry("throttle_set")
+                .setNumber(0);
+    }
 
     /** This function is called periodically whilst in simulation. */
     @Override

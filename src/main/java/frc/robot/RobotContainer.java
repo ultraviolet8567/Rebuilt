@@ -80,6 +80,7 @@ public class RobotContainer {
         NamedCommands.registerCommand(
                 "PivotDown", new SetPivot(intake.getPivot(), IntakeConstants.kPivotUpper));
 
+        /*
         swerve.setDefaultCommand(
                 new SwerveTeleOp(
                         swerve,
@@ -89,6 +90,7 @@ public class RobotContainer {
                         () -> driverController.getRightX(),
                         () -> driverController.getHID().getRightBumperButton(),
                         () -> driverController.getHID().getXButton()));
+         */
 
         shooter.getKicker()
                 .setDefaultCommand(new RunKicker(shooter.getFlywheel(), shooter.getKicker()));
@@ -113,7 +115,7 @@ public class RobotContainer {
         operatorController.rightBumper().whileTrue(new ManualKicker(shooter.getKicker()));
         operatorController.povUp().whileTrue(new SetHood(shooter.getHood(), false));
         operatorController.povDown().whileTrue(new SetHood(shooter.getHood(), true));
-        operatorController.rightTrigger().whileTrue(new Shoot(shooter.getFlywheel()));
+        operatorController.rightTrigger().whileTrue(new DirectShoot(shooter.getFlywheel()));
 
         operatorController
                 .y()
