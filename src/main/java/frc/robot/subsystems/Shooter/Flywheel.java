@@ -103,9 +103,9 @@ public class Flywheel extends SubsystemBase {
         Logger.recordOutput("Shooter/Flywheel/Ka", leadFeedforwardController.getKa());
 
         if (running) {
-            // setFlywheelRadsPerSec(targetVelocity);
+            setFlywheelRadsPerSec(targetVelocity);
         } else {
-            // stop();
+            stop();
         }
     }
 
@@ -116,7 +116,7 @@ public class Flywheel extends SubsystemBase {
     public void setFlywheelRadsPerSec(double targetVelocity) {
         double pidVoltage, ffVoltage;
 
-        pidVoltage = leadPIDController.calculate(getVelocity(leadMotor), targetVelocity);
+        pidVoltage = leadPIDController.calculate(-getVelocity(leadMotor), targetVelocity);
         ffVoltage = leadFeedforwardController.calculate(targetVelocity);
 
         Logger.recordOutput("Shooter/Flywheel/Lead/pidVoltage", pidVoltage);
@@ -124,7 +124,7 @@ public class Flywheel extends SubsystemBase {
 
         setMotorVoltage(leadMotor, pidVoltage + ffVoltage);
 
-        pidVoltage = followerPIDController.calculate(getVelocity(followerMotor), targetVelocity);
+        pidVoltage = followerPIDController.calculate(-getVelocity(followerMotor), targetVelocity);
         ffVoltage = followerFeedforwardController.calculate(targetVelocity);
 
         Logger.recordOutput("Shooter/Flywheel/Follower/pidVoltage", pidVoltage);

@@ -172,18 +172,18 @@ public final class Constants {
 
         // PID values
         public static final LoggedTunableNumber kFlywheelP =
-                new LoggedTunableNumber("FlywheelPidP", 0.80);
+                new LoggedTunableNumber("FlywheelPidP", 0.0001);
         public static final LoggedTunableNumber kFlywheelI =
-                new LoggedTunableNumber("FlywheelPidI", 0.0);
+                new LoggedTunableNumber("FlywheelPidI", 0.0001);
         public static final LoggedTunableNumber kFlywheelD =
                 new LoggedTunableNumber("FlywheelPidD", 0.0);
 
         public static final LoggedTunableNumber kFlywheelS =
                 new LoggedTunableNumber("FlywheelFfS", 0.00);
         public static final LoggedTunableNumber kFlywheelV =
-                new LoggedTunableNumber("FlywheelFfV", 0.33);
+                new LoggedTunableNumber("FlywheelFfV", 0.0018);
         public static final LoggedTunableNumber kFlywheelA =
-                new LoggedTunableNumber("FlywheelFfA", 0.63);
+                new LoggedTunableNumber("FlywheelFfA", 0.0);
 
         public static final LoggedTunableNumber kFlywheelVelocity =
                 new LoggedTunableNumber("TargetVelocity", 2200);
