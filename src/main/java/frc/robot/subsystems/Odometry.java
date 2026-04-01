@@ -4,12 +4,11 @@ import com.ctre.phoenix6.hardware.Pigeon2;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.networktables.NetworkTableInstance;
-import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.DriveConstants;
 import frc.robot.Constants.OdometryConstants;
 import frc.robot.LimelightHelpers;
+import frc.robot.LimelightHelpers.PoseEstimate;
 import org.littletonrobotics.junction.Logger;
 
 public class Odometry extends SubsystemBase {
@@ -36,7 +35,7 @@ public class Odometry extends SubsystemBase {
                         new Pose2d());
 
         LimelightHelpers.setCameraPose_RobotSpace(
-                OdometryConstants.kActiveCamera,
+                "limelight-" + OdometryConstants.kActiveCamera,
                 OdometryConstants.kTranslationOffset.getX(),
                 OdometryConstants.kTranslationOffset.getY(),
                 OdometryConstants.kTranslationOffset.getZ(),
@@ -55,17 +54,31 @@ public class Odometry extends SubsystemBase {
         // Odometry
         poseEstimator.update(getGyrometerHeading(), swerve.getModulePositions());
 
+        /*
         double[] visionRawPose =
                 NetworkTableInstance.getDefault()
                         .getTable("limelight-" + OdometryConstants.kActiveCamera)
                         .getEntry("botpose")
                         .getDoubleArray(new double[6]);
-        Pose2d visionPose =
-                new Pose2d(visionRawPose[0], visionRawPose[1], new Rotation2d(visionRawPose[4]));
+        */
 
-        Logger.recordOutput("visionPose", visionPose);
+        LimelightHelpers.SetRobotOrientation(
+                "limelight-" + OdometryConstants.kActiveCamera,
+                180 + getGyrometerHeading().getRadians() / Math.PI * 180,
+                0,
+                0,
+                0,
+                0,
+                0);
 
-        poseEstimator.addVisionMeasurement(visionPose, Timer.getFPGATimestamp());
+        PoseEstimate visionPose =
+                LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2(
+                        "limelight-" + OdometryConstants.kActiveCamera);
+
+        Logger.recordOutput("Odometry/visionPose", visionPose.pose);
+
+        if (LimelightHelpers.validPoseEstimate(visionPose))
+            poseEstimator.addVisionMeasurement(visionPose.pose, visionPose.timestampSeconds);
     }
 
     public Pose2d getPose() {
@@ -88,7 +101,7 @@ public class Odometry extends SubsystemBase {
         poseEstimator.resetPosition(gyro.getRotation2d(), swerve.getModulePositions(), pose);
     }
 
-    public void resetGyrometerHeading() {
+    public void resetHeading() {
         gyro.reset();
     }
 }

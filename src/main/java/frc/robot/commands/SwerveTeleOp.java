@@ -11,6 +11,7 @@ import frc.robot.Constants.OIConstants;
 import frc.robot.RobotContainer;
 import frc.robot.subsystems.Odometry;
 import frc.robot.subsystems.Swerve;
+import frc.robot.util.AllianceFlipUtil;
 import java.util.function.Supplier;
 import org.littletonrobotics.junction.Logger;
 
@@ -99,7 +100,10 @@ public class SwerveTeleOp extends Command {
         if (Constants.fieldOriented) {
             chassisSpeeds =
                     ChassisSpeeds.fromFieldRelativeSpeeds(
-                            xSpeed, ySpeed, turningSpeed, odometry.getHeading());
+                            xSpeed,
+                            ySpeed,
+                            turningSpeed,
+                            AllianceFlipUtil.apply(odometry.getHeading()));
         } else {
             chassisSpeeds = new ChassisSpeeds(xSpeed, ySpeed, turningSpeed);
         }

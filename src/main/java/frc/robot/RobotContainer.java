@@ -14,8 +14,6 @@ import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants.*;
-import frc.robot.Constants.ModuleConstants;
-import frc.robot.Constants.OperatorConstants;
 import frc.robot.commands.*;
 import frc.robot.subsystems.AutoChooser;
 import frc.robot.subsystems.Intake.Intake;
@@ -84,8 +82,8 @@ public class RobotContainer {
                 new SwerveTeleOp(
                         swerve,
                         odometry,
-                        () -> driverController.getLeftY(),
-                        () -> driverController.getLeftX(),
+                        () -> -driverController.getLeftY(),
+                        () -> -driverController.getLeftX(),
                         () -> driverController.getRightX(),
                         () -> driverController.getHID().getRightBumperButton(),
                         () -> driverController.getHID().getXButton()));
@@ -106,7 +104,7 @@ public class RobotContainer {
      * joysticks}.
      */
     private void configureBindings() {
-        driverController.back().onTrue(new InstantCommand(() -> odometry.resetGyrometerHeading()));
+        driverController.back().onTrue(new InstantCommand(() -> odometry.resetHeading()));
         // driverController.x().onTrue(new LockWheels(swerve));
         operatorController.leftBumper().whileTrue(new SpinIntake(intake.getFunnel()));
         operatorController.leftTrigger().whileTrue(new SpinIndexer(storage.getIndexer(), false));

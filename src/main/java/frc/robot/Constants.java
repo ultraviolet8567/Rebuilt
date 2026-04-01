@@ -196,8 +196,9 @@ public final class Constants {
     public static final class OdometryConstants {
         public static final String kActiveCamera = "nip";
 
-        public static final Translation3d kTranslationOffset = new Translation3d(0, 0, 0);
-        public static final Rotation3d kRotationOffset = new Rotation3d(0, 0, 0);
+        public static final Translation3d kTranslationOffset =
+                new Translation3d(0.0414, 0.2604, 0.4738);
+        public static final Rotation3d kRotationOffset = new Rotation3d(0, -30, 0);
     }
 
     public static final class IntakeConstants {
@@ -221,7 +222,7 @@ public final class Constants {
         // public static final double kRaiseLower = ;
 
         public static final double kFunnelReduction = 1.0;
-        public static final double kFunnelVoltage = 4;
+        public static final double kFunnelVoltage = 6;
         public static final double kFunnelMaxVoltage = 12;
         public static final boolean kFunnelInverted = false;
 
