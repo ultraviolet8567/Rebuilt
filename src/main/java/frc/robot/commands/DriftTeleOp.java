@@ -1,6 +1,7 @@
 package frc.robot.commands;
 
 import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.GenericHID.RumbleType;
@@ -15,32 +16,39 @@ import frc.robot.util.AllianceFlipUtil;
 import java.util.function.Supplier;
 import org.littletonrobotics.junction.Logger;
 
-public class SwerveTeleOp extends Command {
+public class DriftTeleOp extends Command {
     private final Swerve swerve;
     private final Odometry odometry;
-    private final Supplier<Double> xSpdFunction, ySpdFunction, turningSpdFunction;
+    private final Supplier<Double> xSpdFunction, ySpdFunction, targetAngle;
     private final Supplier<Boolean> rightBumper, xButton;
     private final SlewRateLimiter xLimiter, yLimiter, turningLimiter;
+    private final PIDController pidController;
 
-    public SwerveTeleOp(
+    public DriftTeleOp(
             Swerve swerve,
             Odometry odometry,
             Supplier<Double> xSpdFunction,
             Supplier<Double> ySpdFunction,
-            Supplier<Double> turningSpdFunction,
+            Supplier<Double> targetAngle,
             Supplier<Boolean> rightBumper,
             Supplier<Boolean> xButton) {
         this.swerve = swerve;
         this.odometry = odometry;
         this.xSpdFunction = xSpdFunction;
         this.ySpdFunction = ySpdFunction;
-        this.turningSpdFunction = turningSpdFunction;
+        this.targetAngle = targetAngle;
         this.rightBumper = rightBumper;
         this.xButton = xButton;
         this.xLimiter = new SlewRateLimiter(DriveConstants.kTeleDriveMaxAccelerationUnitsPerSecond);
         this.yLimiter = new SlewRateLimiter(DriveConstants.kTeleDriveMaxAccelerationUnitsPerSecond);
         this.turningLimiter =
                 new SlewRateLimiter(DriveConstants.kTeleDriveMaxAngularAccelerationUnitsPerSecond);
+
+        pidController =
+                new PIDController(
+                        DriveConstants.kSwerveP.get(),
+                        DriveConstants.kSwerveI.get(),
+                        DriveConstants.kSwerveD.get());
 
         addRequirements(swerve);
     }
@@ -50,6 +58,13 @@ public class SwerveTeleOp extends Command {
 
     @Override
     public void execute() {
+        pidController.setP(DriveConstants.kSwerveP.get());
+        pidController.setI(DriveConstants.kSwerveI.get());
+        pidController.setD(DriveConstants.kSwerveD.get());
+
+        Logger.recordOutput(
+                "SwerveTeleOp/CurrentAngle", odometry.getGyrometerHeading().getRadians());
+
         if (xButton.get()) {
             swerve.lockWheels();
             return;
@@ -57,7 +72,20 @@ public class SwerveTeleOp extends Command {
 
         double xSpeed = xSpdFunction.get();
         double ySpeed = ySpdFunction.get();
-        double turningSpeed = turningSpdFunction.get();
+
+        double target = MathUtil.inputModulus(targetAngle.get(), 0, 2 * Math.PI);
+        double heading = MathUtil.inputModulus(odometry.getHeading().getRadians(), 0, 2 * Math.PI);
+
+        Logger.recordOutput("SwerveTeleOp/Target", target);
+        Logger.recordOutput("SwerveTeleOp/Heading", heading);
+
+        double turningSpeed;
+
+        if (Math.abs(target - heading) < Math.abs(2 * Math.PI - target + heading)) {
+            turningSpeed = -pidController.calculate(heading, target);
+        } else {
+            turningSpeed = -pidController.calculate(heading, target - 2 * Math.PI);
+        }
 
         xSpeed *= (xSpeed > 0) ? (1.0 / 0.8) : (1.0 / 0.9);
         ySpeed *= (1.0 / 0.9);
@@ -68,7 +96,6 @@ public class SwerveTeleOp extends Command {
         if (Math.abs(ySpeed) < OIConstants.kDeadband) {
             ySpeed = 0;
         }
-        turningSpeed = Math.abs(turningSpeed) > OIConstants.kDeadband ? turningSpeed : 0;
 
         if (rightBumper.get()) {
             RobotContainer.getDriverJoystick().setRumble(RumbleType.kRightRumble, 0.025);
@@ -81,7 +108,6 @@ public class SwerveTeleOp extends Command {
 
         xSpeed = MathUtil.clamp(xSpeed, -1, 1);
         ySpeed = MathUtil.clamp(ySpeed, -1, 1);
-        turningSpeed = MathUtil.clamp(turningSpeed, -1, 1);
 
         // double teleMaxSpeed = Lights.getInstance().isDemo
         // ? DriveConstants.kDemoTeleDriveMaxSpeedMetersPerSecond
@@ -92,9 +118,18 @@ public class SwerveTeleOp extends Command {
 
         xSpeed = xLimiter.calculate(xSpeed) * DriveConstants.kTeleDriveMaxSpeedMetersPerSecond;
         ySpeed = yLimiter.calculate(ySpeed) * DriveConstants.kTeleDriveMaxSpeedMetersPerSecond;
+
+        /*
         turningSpeed =
                 turningLimiter.calculate(turningSpeed)
                         * DriveConstants.kTeleDriveMaxAngularSpeedRadiansPerSecond;
+         */
+
+        turningSpeed =
+                MathUtil.clamp(
+                        turningSpeed,
+                        -DriveConstants.kTeleDriveMaxAngularSpeedRadiansPerSecond,
+                        DriveConstants.kTeleDriveMaxAngularSpeedRadiansPerSecond);
 
         ChassisSpeeds chassisSpeeds;
         if (Constants.fieldOriented) {
@@ -103,7 +138,7 @@ public class SwerveTeleOp extends Command {
                             xSpeed,
                             ySpeed,
                             turningSpeed,
-                            AllianceFlipUtil.apply(odometry.getHeading()));
+                            AllianceFlipUtil.apply(odometry.getHeading().unaryMinus()));
         } else {
             chassisSpeeds = new ChassisSpeeds(xSpeed, ySpeed, turningSpeed);
         }

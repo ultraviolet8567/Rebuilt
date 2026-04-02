@@ -79,11 +79,11 @@ public class RobotContainer {
                 "PivotDown", new SetPivot(intake.getPivot(), IntakeConstants.kPivotUpper));
 
         swerve.setDefaultCommand(
-                new SwerveTeleOp(
+                new ManualTeleOp(
                         swerve,
                         odometry,
-                        () -> -driverController.getLeftY(),
-                        () -> -driverController.getLeftX(),
+                        () -> driverController.getLeftY(),
+                        () -> driverController.getLeftX(),
                         () -> driverController.getRightX(),
                         () -> driverController.getHID().getRightBumperButton(),
                         () -> driverController.getHID().getXButton()));
@@ -105,6 +105,18 @@ public class RobotContainer {
      */
     private void configureBindings() {
         driverController.back().onTrue(new InstantCommand(() -> odometry.resetHeading()));
+        driverController
+                .rightTrigger()
+                .whileTrue(
+                        new DriftTeleOp(
+                                swerve,
+                                odometry,
+                                () -> driverController.getLeftY(),
+                                () -> driverController.getLeftX(),
+                                () -> odometry.angleToHub().getRadians(),
+                                () -> driverController.getHID().getRightBumperButton(),
+                                () -> driverController.getHID().getXButton()));
+
         // driverController.x().onTrue(new LockWheels(swerve));
         operatorController.leftBumper().whileTrue(new SpinIntake(intake.getFunnel()));
         operatorController.leftTrigger().whileTrue(new SpinIndexer(storage.getIndexer(), false));

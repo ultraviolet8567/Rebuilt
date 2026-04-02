@@ -4,8 +4,11 @@ import com.ctre.phoenix6.hardware.Pigeon2;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.DriveConstants;
+import frc.robot.Constants.FieldConstants;
 import frc.robot.Constants.OdometryConstants;
 import frc.robot.LimelightHelpers;
 import frc.robot.LimelightHelpers.PoseEstimate;
@@ -64,7 +67,8 @@ public class Odometry extends SubsystemBase {
 
         LimelightHelpers.SetRobotOrientation(
                 "limelight-" + OdometryConstants.kActiveCamera,
-                180 + getGyrometerHeading().getRadians() / Math.PI * 180,
+                ((DriverStation.getAlliance().get() == Alliance.Red) ? 180 : 0)
+                        + getGyrometerHeading().getRadians() / Math.PI * 180,
                 0,
                 0,
                 0,
@@ -77,6 +81,10 @@ public class Odometry extends SubsystemBase {
 
         Logger.recordOutput("Odometry/visionPose", visionPose.pose);
 
+        Logger.recordOutput("Odometry/AngleToHub", angleToHub());
+        Logger.recordOutput("Odometry/GyrometerAngle", getGyrometerHeading().getRadians());
+        Logger.recordOutput("Odometry/GyrometerRots", getGyrometerHeading().getRotations());
+
         if (LimelightHelpers.validPoseEstimate(visionPose))
             poseEstimator.addVisionMeasurement(visionPose.pose, visionPose.timestampSeconds);
     }
@@ -87,6 +95,23 @@ public class Odometry extends SubsystemBase {
 
     public Rotation2d getHeading() {
         return poseEstimator.getEstimatedPosition().getRotation();
+    }
+
+    public Rotation2d angleToHub() {
+        return (getPose()
+                        .getTranslation()
+                        .minus(
+                                (DriverStation.getAlliance().get() == Alliance.Blue
+                                                ? FieldConstants.kBlueHub
+                                                : FieldConstants.kRedHub)
+                                        .getTranslation()))
+                .getAngle()
+                .plus(new Rotation2d(Math.PI));
+
+        // return (higherAngle.minus(getGyrometerHeading()).getRadians()
+        //                > getGyrometerHeading().minus(lowerAngle).getRadians()
+        //        ? lowerAngle
+        //        : higherAngle);
     }
 
     public Rotation2d getGyrometerHeading() {
@@ -102,6 +127,6 @@ public class Odometry extends SubsystemBase {
     }
 
     public void resetHeading() {
-        gyro.reset();
+        gyro.setYaw(((DriverStation.getAlliance().get() == Alliance.Red) ? 0 : Math.PI));
     }
 }

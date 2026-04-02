@@ -19,15 +19,12 @@ import edu.wpi.first.wpilibj.DriverStation.Alliance;
 
 /** Utility functions for flipping from the blue to red alliance. */
 public class AllianceFlipUtil {
-    /**
-     * Flips an x coordinate to the correct side of the field based on the current alliance color.
-     */
-    public static double apply(double xCoordinate) {
+    /** Flips an x velocity to the opposite side based on the current alliance color. */
+    public static double apply(double xVelocity) {
         if (shouldFlip()) {
-            return 0.0;
-            // return FieldConstants.fieldLength - xCoordinate;
+            return -xVelocity;
         } else {
-            return xCoordinate;
+            return xVelocity;
         }
     }
 
@@ -69,6 +66,6 @@ public class AllianceFlipUtil {
 
     public static boolean shouldFlip() {
         return DriverStation.getAlliance().isPresent()
-                && DriverStation.getAlliance().get() == Alliance.Blue;
+                && DriverStation.getAlliance().get() == Alliance.Red;
     }
 }

@@ -8,6 +8,7 @@ import com.pathplanner.lib.config.ModuleConfig;
 import com.pathplanner.lib.config.PIDConstants;
 import com.pathplanner.lib.config.RobotConfig;
 import com.pathplanner.lib.controllers.PPHolonomicDriveController;
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Translation2d;
@@ -143,6 +144,13 @@ public final class Constants {
                         kRobotModuleConfig, // module config
                         kDriveKinematics
                                 .getModules()); // locations of modules relative of robot center
+
+        public static final LoggedTunableNumber kSwerveP = new LoggedTunableNumber("SwerveP", 1);
+        public static final LoggedTunableNumber kSwerveI = new LoggedTunableNumber("SwerveI", 0);
+        public static final LoggedTunableNumber kSwerveD = new LoggedTunableNumber("SwerveD", 0);
+
+        public static final LoggedTunableNumber kTestAngle =
+                new LoggedTunableNumber("SwerveTestAngle", 0);
     }
 
     public static final class ShooterConstants {
@@ -199,6 +207,11 @@ public final class Constants {
         public static final Translation3d kTranslationOffset =
                 new Translation3d(0.0414, 0.2604, 0.4738);
         public static final Rotation3d kRotationOffset = new Rotation3d(0, -30, 0);
+    }
+
+    public static final class FieldConstants {
+        public static final Pose2d kRedHub = new Pose2d(11.56, 3.74, new Rotation2d(0));
+        public static final Pose2d kBlueHub = new Pose2d(4.45, 3.74, new Rotation2d(0));
     }
 
     public static final class IntakeConstants {
