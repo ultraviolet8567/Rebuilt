@@ -13,6 +13,8 @@ import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.CAN;
 import frc.robot.Constants.ShooterConstants;
+import frc.robot.Constants.FieldConstants;
+import frc.robot.subsystems.Odometry;
 import org.littletonrobotics.junction.Logger;
 
 public class Flywheel extends SubsystemBase {
@@ -21,6 +23,7 @@ public class Flywheel extends SubsystemBase {
     private final RelativeEncoder leadEncoder, followerEncoder;
     private final PIDController leadPIDController, followerPIDController;
     private final SimpleMotorFeedforward leadFeedforwardController, followerFeedforwardController;
+
 
     private double targetVelocity;
     private boolean running;
@@ -168,6 +171,16 @@ public class Flywheel extends SubsystemBase {
 
     public void setTargetVelocity(double velocity) {
         targetVelocity = velocity;
+    }
+
+    public void setTargetVelocity() {
+        targetVelocity = calculateTargetVelocity(Odometry.getDistToRobot());
+    }
+
+    public double calculateTargetVelocity(double dist) {
+        return Math.sqrt((FieldConstants.kG * dist * dist)
+            / (2 * Math.pow(Math.cos(ShooterConstants.kShooterAngle), 2) 
+            * (Math.tan(ShooterConstants.kShooterAngle) * dist - FieldConstants.kHubHeightDiff)));
     }
 
     public double getTargetVelocity() {

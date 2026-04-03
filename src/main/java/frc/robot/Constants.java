@@ -175,6 +175,8 @@ public final class Constants {
         public static final boolean kHoodAbsoluteEncoderInverted = false;
         public static final boolean kHoodRelativeEncoderInverted = true;
 
+        public static final double kShooterAngle = 1.222;
+
         public static final LoggedTunableNumber kHoodTestVoltage =
                 new LoggedTunableNumber("HoodTestVoltage", 0.1);
 
@@ -212,6 +214,8 @@ public final class Constants {
     public static final class FieldConstants {
         public static final Pose2d kRedHub = new Pose2d(11.56, 3.74, new Rotation2d(0));
         public static final Pose2d kBlueHub = new Pose2d(4.45, 3.74, new Rotation2d(0));
+        public static final double kG = 9.8;
+        public static final double kHubHeightDiff = 1.0885;
     }
 
     public static final class IntakeConstants {

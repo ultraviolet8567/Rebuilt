@@ -104,7 +104,7 @@ public class RobotContainer {
      * joysticks}.
      */
     private void configureBindings() {
-        driverController.back().onTrue(new InstantCommand(() -> odometry.resetHeading()));
+        driverController.back().onTrue(new InstantCommand(() -> odometry.resetGyrometerHeading()));
         driverController
                 .rightTrigger()
                 .whileTrue(
