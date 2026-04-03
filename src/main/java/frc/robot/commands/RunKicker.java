@@ -1,7 +1,6 @@
 package frc.robot.commands;
 
 import edu.wpi.first.wpilibj2.command.Command;
-import frc.robot.Constants.ShooterConstants;
 import frc.robot.subsystems.Shooter.Flywheel;
 // import frc.robot.FieldConstants;
 import frc.robot.subsystems.Shooter.Kicker;
@@ -20,7 +19,7 @@ public class RunKicker extends Command {
 
     @Override
     public void execute() {
-        if (flywheel.atVelocity(ShooterConstants.kFlywheelVelocity.get())) {
+        if (flywheel.atVelocity(flywheel.getTargetVelocity())) {
             Logger.recordOutput("Shooter/Kicking", true);
             kicker.start();
         } else {

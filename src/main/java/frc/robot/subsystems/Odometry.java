@@ -1,6 +1,8 @@
 package frc.robot.subsystems;
 
 import com.ctre.phoenix6.hardware.Pigeon2;
+
+import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -37,6 +39,8 @@ public class Odometry extends SubsystemBase {
                         swerve.getModulePositions(),
                         new Pose2d());
 
+        //poseEstimator.setVisionMeasurementStdDevs(new Matrix<>())
+
         LimelightHelpers.setCameraPose_RobotSpace(
                 "limelight-" + OdometryConstants.kActiveCamera,
                 OdometryConstants.kTranslationOffset.getX(),
@@ -67,8 +71,7 @@ public class Odometry extends SubsystemBase {
 
         LimelightHelpers.SetRobotOrientation(
                 "limelight-" + OdometryConstants.kActiveCamera,
-                ((DriverStation.getAlliance().get() == Alliance.Red) ? 180 : 0)
-                        + getGyrometerHeading().getRadians() / Math.PI * 180,
+                getGyrometerHeading().getDegrees(),
                 0,
                 0,
                 0,
@@ -79,14 +82,19 @@ public class Odometry extends SubsystemBase {
                 LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2(
                         "limelight-" + OdometryConstants.kActiveCamera);
 
-        Logger.recordOutput("Odometry/visionPose", visionPose.pose);
+        // Logger.recordOutput("Odometry/visionPose", visionPose.pose);
 
         Logger.recordOutput("Odometry/AngleToHub", angleToHub());
         Logger.recordOutput("Odometry/GyrometerAngle", getGyrometerHeading().getRadians());
         Logger.recordOutput("Odometry/GyrometerRots", getGyrometerHeading().getRotations());
 
-        if (LimelightHelpers.validPoseEstimate(visionPose))
-            poseEstimator.addVisionMeasurement(visionPose.pose, visionPose.timestampSeconds);
+        Logger.recordOutput("Odometry/DistToHub", distToHub());
+
+        Logger.recordOutput("Odometry/BlueHub", FieldConstants.kBlueHub);
+        Logger.recordOutput("Odometry/RedHub", FieldConstants.kRedHub);
+
+        // if (LimelightHelpers.validPoseEstimate(visionPose))
+        //    poseEstimator.addVisionMeasurement(visionPose.pose, visionPose.timestampSeconds);
     }
 
     public Pose2d getPose() {
@@ -98,13 +106,7 @@ public class Odometry extends SubsystemBase {
     }
 
     public Rotation2d angleToHub() {
-        return (getPose()
-                        .getTranslation()
-                        .minus(
-                                (DriverStation.getAlliance().get() == Alliance.Blue
-                                                ? FieldConstants.kBlueHub
-                                                : FieldConstants.kRedHub)
-                                        .getTranslation()))
+        return (getPose().getTranslation().minus(getHub().getTranslation()))
                 .getAngle()
                 .plus(new Rotation2d(Math.PI));
 
@@ -127,6 +129,17 @@ public class Odometry extends SubsystemBase {
     }
 
     public void resetHeading() {
-        gyro.setYaw(((DriverStation.getAlliance().get() == Alliance.Red) ? 0 : Math.PI));
+        gyro.reset();
+        // gyro.setYaw(((DriverStation.getAlliance().get() == Alliance.Blue) ? 0 : 180));
+    }
+
+    public Pose2d getHub() {
+        return (DriverStation.getAlliance().get() == Alliance.Blue
+                ? FieldConstants.kBlueHub
+                : FieldConstants.kRedHub);
+    }
+
+    public double distToHub() {
+        return getPose().getTranslation().getDistance(getHub().getTranslation());
     }
 }

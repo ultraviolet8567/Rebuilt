@@ -3,7 +3,10 @@ package frc.robot.commands;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.filter.SlewRateLimiter;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Constants;
@@ -81,10 +84,18 @@ public class DriftTeleOp extends Command {
 
         double turningSpeed;
 
-        if (Math.abs(target - heading) < Math.abs(2 * Math.PI - target + heading)) {
-            turningSpeed = -pidController.calculate(heading, target);
+        if (target < heading) {
+            if (heading - target < Math.PI) {
+                turningSpeed = -pidController.calculate(heading, target);
+            } else {
+                turningSpeed = -pidController.calculate(heading, target + 2 * Math.PI);
+            }
         } else {
-            turningSpeed = -pidController.calculate(heading, target - 2 * Math.PI);
+            if (target - heading < Math.PI) {
+                turningSpeed = -pidController.calculate(heading, target);
+            } else {
+                turningSpeed = -pidController.calculate(heading, target - 2 * Math.PI);
+            }
         }
 
         xSpeed *= (xSpeed > 0) ? (1.0 / 0.8) : (1.0 / 0.9);
@@ -131,14 +142,16 @@ public class DriftTeleOp extends Command {
                         -DriveConstants.kTeleDriveMaxAngularSpeedRadiansPerSecond,
                         DriveConstants.kTeleDriveMaxAngularSpeedRadiansPerSecond);
 
+        Rotation2d currentHeading = odometry.getHeading();
+        if (DriverStation.getAlliance().get() == Alliance.Red)
+            currentHeading = currentHeading.unaryMinus();
+        currentHeading = AllianceFlipUtil.apply(currentHeading);
+
         ChassisSpeeds chassisSpeeds;
         if (Constants.fieldOriented) {
             chassisSpeeds =
                     ChassisSpeeds.fromFieldRelativeSpeeds(
-                            xSpeed,
-                            ySpeed,
-                            turningSpeed,
-                            AllianceFlipUtil.apply(odometry.getHeading().unaryMinus()));
+                            xSpeed, ySpeed, turningSpeed, currentHeading);
         } else {
             chassisSpeeds = new ChassisSpeeds(xSpeed, ySpeed, turningSpeed);
         }

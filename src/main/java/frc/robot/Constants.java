@@ -154,14 +154,14 @@ public final class Constants {
     }
 
     public static final class ShooterConstants {
-        public static final double kFlywheelVelocityTolerance = 300;
+        public static final double kFlywheelVelocityTolerance = 100;
         public static final double kFlywheelReduction = 1.0;
         public static final double kFlywheelVoltage = 10;
         public static final boolean kFlywheelInverted = true;
         public static final double kFlywheelMaxVelocity = 2200;
 
         public static final double kKickerReduction = 3.0;
-        public static final double kKickerVoltage = 5;
+        public static final double kKickerVoltage = 7;
         public static final boolean kKickerInverted = true;
 
         public static final double kHoodLower = 0.01;
@@ -239,7 +239,7 @@ public final class Constants {
         // public static final double kRaiseLower = ;
 
         public static final double kFunnelReduction = 1.0;
-        public static final double kFunnelVoltage = 6;
+        public static final double kFunnelVoltage = 5;
         public static final double kFunnelMaxVoltage = 12;
         public static final boolean kFunnelInverted = false;
 

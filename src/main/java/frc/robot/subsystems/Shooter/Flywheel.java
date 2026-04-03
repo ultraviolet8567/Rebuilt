@@ -13,8 +13,6 @@ import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.CAN;
 import frc.robot.Constants.ShooterConstants;
-import frc.robot.Constants.FieldConstants;
-import frc.robot.subsystems.Odometry;
 import org.littletonrobotics.junction.Logger;
 
 public class Flywheel extends SubsystemBase {
@@ -23,7 +21,6 @@ public class Flywheel extends SubsystemBase {
     private final RelativeEncoder leadEncoder, followerEncoder;
     private final PIDController leadPIDController, followerPIDController;
     private final SimpleMotorFeedforward leadFeedforwardController, followerFeedforwardController;
-
 
     private double targetVelocity;
     private boolean running;
@@ -132,6 +129,7 @@ public class Flywheel extends SubsystemBase {
 
         Logger.recordOutput("Shooter/Flywheel/Follower/pidVoltage", pidVoltage);
         Logger.recordOutput("Shooter/Flywheel/Follower/ffVoltage", ffVoltage);
+        Logger.recordOutput("Shooter/Flywheel/TargetVelocity", targetVelocity);
 
         setMotorVoltage(followerMotor, pidVoltage + ffVoltage);
     }
@@ -165,22 +163,23 @@ public class Flywheel extends SubsystemBase {
     public boolean atVelocity(double velocity) {
         // return Math.abs(getVelocity(leadMotor)) > Math.abs(velocity)
         //        && Math.abs(getVelocity(followerMotor)) > Math.abs(velocity);
-        return Math.abs(Math.abs(velocity) - Math.abs(getVelocity(leadMotor)))
-                < ShooterConstants.kFlywheelVelocityTolerance;
+        return Math.abs(getVelocity(leadMotor))
+                > Math.abs(velocity) - ShooterConstants.kFlywheelVelocityTolerance;
     }
 
     public void setTargetVelocity(double velocity) {
         targetVelocity = velocity;
     }
 
-    public void setTargetVelocity() {
-        targetVelocity = calculateTargetVelocity(Odometry.getDistToRobot());
-    }
-
     public double calculateTargetVelocity(double dist) {
-        return Math.sqrt((FieldConstants.kG * dist * dist)
-            / (2 * Math.pow(Math.cos(ShooterConstants.kShooterAngle), 2) 
-            * (Math.tan(ShooterConstants.kShooterAngle) * dist - FieldConstants.kHubHeightDiff)));
+        /*return Math.sqrt(
+                (FieldConstants.kG * dist * dist)
+                        / (2
+                                * Math.pow(Math.cos(ShooterConstants.kShooterAngle), 2)
+                                * (Math.tan(ShooterConstants.kShooterAngle) * dist
+                                        - FieldConstants.kHubHeightDiff)));
+        */
+        return 2619 * Math.pow(dist, 0.364) + 100;
     }
 
     public double getTargetVelocity() {
