@@ -145,9 +145,9 @@ public final class Constants {
                         kDriveKinematics
                                 .getModules()); // locations of modules relative of robot center
 
-        public static final LoggedTunableNumber kSwerveP = new LoggedTunableNumber("SwerveP", 1);
+        public static final LoggedTunableNumber kSwerveP = new LoggedTunableNumber("SwerveP", 6);
         public static final LoggedTunableNumber kSwerveI = new LoggedTunableNumber("SwerveI", 0);
-        public static final LoggedTunableNumber kSwerveD = new LoggedTunableNumber("SwerveD", 0);
+        public static final LoggedTunableNumber kSwerveD = new LoggedTunableNumber("SwerveD", 1);
 
         public static final LoggedTunableNumber kTestAngle =
                 new LoggedTunableNumber("SwerveTestAngle", 0);
@@ -196,7 +196,7 @@ public final class Constants {
                 new LoggedTunableNumber("FlywheelFfA", 0.0);
 
         public static final LoggedTunableNumber kFlywheelVelocity =
-                new LoggedTunableNumber("TargetVelocity", 3500);
+                new LoggedTunableNumber("TargetVelocity", 4500);
 
         public static final LoggedTunableNumber kHoodP = new LoggedTunableNumber("HoodPidP", 5);
         public static final LoggedTunableNumber kHoodI = new LoggedTunableNumber("HoodPidI", 0.0);
@@ -207,13 +207,13 @@ public final class Constants {
         public static final String kActiveCamera = "nip";
 
         public static final Translation3d kTranslationOffset =
-                new Translation3d(0.0414, 0.2604, 0.4738);
+                new Translation3d(-0.0414, 0.2604, 0.4738);
         public static final Rotation3d kRotationOffset = new Rotation3d(0, -30, 0);
     }
 
     public static final class FieldConstants {
-        public static final Pose2d kRedHub = new Pose2d(11.56, 3.74, new Rotation2d(0));
-        public static final Pose2d kBlueHub = new Pose2d(4.45, 3.74, new Rotation2d(0));
+        public static final Pose2d kRedHub = new Pose2d(11.91, 4.041, new Rotation2d(0));
+        public static final Pose2d kBlueHub = new Pose2d(4.623, 4.041, new Rotation2d(0));
         public static final double kG = 9.8;
         public static final double kHubHeightDiff = 1.0885;
     }
@@ -222,15 +222,15 @@ public final class Constants {
         public static final double kPivotGearboxReduction = 5.0;
         public static final double kPivotChainReduction = 40.0 / 16.0;
         public static final double kPivotEncoderOffset =
-                -2.223 - 6.086 - Math.PI / 2 - 2.968 - 5.72 - 0.009 + 0.507 - 0.041;
+                -0.040 - 2.223 - 6.086 - Math.PI / 2 - 2.968 - 5.72 - 0.009 + 0.507 - 0.041;
         public static final double kPivotFeedforwardOffset =
-                2.36 + Math.PI / 2 - 4.505 + Math.PI - 1.604;
+                2.36 + Math.PI / 2 - 4.505 + Math.PI - 1.604 - 1.535 + Math.PI / 2;
         public static final double kPivotVoltage = 10;
         public static final boolean kPivotInverted = false;
         public static final boolean kPivotAbsoluteEncoderInverted = true;
         public static final boolean kPivotRelativeEncoderInverted = false;
 
-        public static final double kPivotLower = 0.2;
+        public static final double kPivotLower = 0.05; // 0.2
         public static final double kPivotMiddle = 1.0;
         public static final double kPivotUpper = 2.20;
 
@@ -255,7 +255,7 @@ public final class Constants {
 
     public static final class StorageConstants {
         // change later
-        public static final double kIndexerMaxVoltage = 3;
+        public static final double kIndexerMaxVoltage = 4;
         public static final double kIndexerReduction = 1.0;
         public static final boolean kIndexerInverted = true;
     }

@@ -179,7 +179,7 @@ public class Flywheel extends SubsystemBase {
                                 * (Math.tan(ShooterConstants.kShooterAngle) * dist
                                         - FieldConstants.kHubHeightDiff)));
         */
-        return 2619 * Math.pow(dist, 0.364) + 100;
+        return 2654 * Math.pow(dist, 0.336);
     }
 
     public double getTargetVelocity() {

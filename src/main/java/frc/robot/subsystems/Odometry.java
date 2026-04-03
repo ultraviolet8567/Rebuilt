@@ -1,8 +1,6 @@
 package frc.robot.subsystems;
 
 import com.ctre.phoenix6.hardware.Pigeon2;
-
-import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -39,7 +37,7 @@ public class Odometry extends SubsystemBase {
                         swerve.getModulePositions(),
                         new Pose2d());
 
-        //poseEstimator.setVisionMeasurementStdDevs(new Matrix<>())
+        // poseEstimator.setVisionMeasurementStdDevs(new Matrix<>())
 
         LimelightHelpers.setCameraPose_RobotSpace(
                 "limelight-" + OdometryConstants.kActiveCamera,
@@ -93,8 +91,11 @@ public class Odometry extends SubsystemBase {
         Logger.recordOutput("Odometry/BlueHub", FieldConstants.kBlueHub);
         Logger.recordOutput("Odometry/RedHub", FieldConstants.kRedHub);
 
-        // if (LimelightHelpers.validPoseEstimate(visionPose))
-        //    poseEstimator.addVisionMeasurement(visionPose.pose, visionPose.timestampSeconds);
+        // poseEstimator.setVisionMeasurementStdDevs(VecBuilder.fill(9999999, 9999999, 9999999));
+
+        if (LimelightHelpers.validPoseEstimate(visionPose)) {
+            poseEstimator.addVisionMeasurement(visionPose.pose, visionPose.timestampSeconds);
+        }
     }
 
     public Pose2d getPose() {
@@ -102,7 +103,7 @@ public class Odometry extends SubsystemBase {
     }
 
     public Rotation2d getHeading() {
-        return poseEstimator.getEstimatedPosition().getRotation();
+        return getGyrometerHeading();
     }
 
     public Rotation2d angleToHub() {
@@ -129,8 +130,8 @@ public class Odometry extends SubsystemBase {
     }
 
     public void resetHeading() {
-        gyro.reset();
-        // gyro.setYaw(((DriverStation.getAlliance().get() == Alliance.Blue) ? 0 : 180));
+        // gyro.reset();
+        gyro.setYaw(((DriverStation.getAlliance().get() == Alliance.Blue) ? 0 : 180));
     }
 
     public Pose2d getHub() {
