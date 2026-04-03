@@ -194,7 +194,7 @@ public final class Constants {
                 new LoggedTunableNumber("FlywheelFfA", 0.0);
 
         public static final LoggedTunableNumber kFlywheelVelocity =
-                new LoggedTunableNumber("TargetVelocity", 2200);
+                new LoggedTunableNumber("TargetVelocity", 3500);
 
         public static final LoggedTunableNumber kHoodP = new LoggedTunableNumber("HoodPidP", 5);
         public static final LoggedTunableNumber kHoodI = new LoggedTunableNumber("HoodPidI", 0.0);
