@@ -230,7 +230,7 @@ public final class Constants {
         public static final boolean kPivotAbsoluteEncoderInverted = true;
         public static final boolean kPivotRelativeEncoderInverted = false;
 
-        public static final double kPivotLower = 0.05; // 0.2
+        public static final double kPivotLower = 0.2; // 0.2
         public static final double kPivotMiddle = 1.0;
         public static final double kPivotUpper = 2.20;
 

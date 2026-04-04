@@ -34,6 +34,7 @@ public class AutoChooser extends VirtualSubsystem {
         driveOut = new SendableChooser<>();
         driveOut.setDefaultOption("None", "");
         driveOut.addOption("Drive Out", "Drive Out");
+        driveOut.addOption("Shoot", "Shoot");
 
         // add selectors to shuffleboard
         main.add("Side", side)

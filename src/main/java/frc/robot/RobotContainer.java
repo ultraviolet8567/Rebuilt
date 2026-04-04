@@ -77,6 +77,8 @@ public class RobotContainer {
                 "PivotUp", new SetPivot(intake.getPivot(), IntakeConstants.kPivotLower));
         NamedCommands.registerCommand(
                 "PivotDown", new SetPivot(intake.getPivot(), IntakeConstants.kPivotUpper));
+        NamedCommands.registerCommand(
+                "CalculatedShoot", new CalculatedShoot(shooter.getFlywheel(), odometry));
 
         swerve.setDefaultCommand(
                 new ManualTeleOp(

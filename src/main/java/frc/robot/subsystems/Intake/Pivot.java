@@ -116,7 +116,7 @@ public class Pivot extends SubsystemBase {
         double diff = Math.abs(getAbsoluteRotationRads() - getRelativeRotationRads());
         if (diff > 0.01 && diff < 0.1) resetRelativeEncoder();
 
-        // setAngleRads(targetPosition);
+        setAngleRads(targetPosition);
     }
 
     public double getAbsoluteRotationRads() {
