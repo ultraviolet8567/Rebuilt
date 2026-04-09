@@ -1,11 +1,6 @@
 package frc.robot.subsystems.Intake;
 
-import com.revrobotics.PersistMode;
-import com.revrobotics.RelativeEncoder;
-import com.revrobotics.ResetMode;
-import com.revrobotics.spark.SparkFlex;
-import com.revrobotics.spark.SparkLowLevel.MotorType;
-import com.revrobotics.spark.config.SparkFlexConfig;
+import com.ctre.phoenix6.hardware.TalonFX;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.CAN;
@@ -15,20 +10,12 @@ public class Funnel extends SubsystemBase {
 
     // Idk what variables 🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🍅
 
-    private final SparkFlex funnelMotor; // Spark Flex Spins
-    private final SparkFlexConfig funnelMotorConfig;
-    private final RelativeEncoder relativeEncoder;
+    private final TalonFX funnelMotor; // Kraken Spins
 
     public Funnel() {
         System.out.println("[Init] Creating Funnel");
 
-        funnelMotor = new SparkFlex(CAN.kFunnelPort, MotorType.kBrushless);
-        funnelMotorConfig = new SparkFlexConfig();
-        relativeEncoder = funnelMotor.getEncoder();
-        funnelMotorConfig.encoder.velocityConversionFactor(1.0 / IntakeConstants.kFunnelReduction);
-        funnelMotorConfig.smartCurrentLimit(80);
-        funnelMotor.configure(
-                funnelMotorConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+        funnelMotor = new TalonFX(CAN.kFunnelPort);
     }
 
     // Intake Constructer Close Bracket
