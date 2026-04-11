@@ -11,10 +11,17 @@ public class SetHood extends Command {
     public SetHood(Hood hood, boolean reversed) {
         this.hood = hood;
         this.reversed = reversed;
+
+        addRequirements(hood);
     }
 
     @Override
     public void execute() {
         hood.setTargetPosition(hood.getTargetPosition() + (reversed ? -0.01 : 0.01));
+    }
+
+    @Override
+    public void end(boolean interrupted) {
+        hood.stop();
     }
 }

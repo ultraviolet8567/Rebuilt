@@ -15,6 +15,12 @@ public class Shooter extends SubsystemBase {
         kicker = new Kicker();
     }
 
+    @Override
+    public void periodic() {
+        flywheel.periodic();
+        hood.periodic();
+    }
+
     public Flywheel getFlywheel() {
         return flywheel;
     }

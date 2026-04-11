@@ -43,7 +43,7 @@ public class Indexer extends SubsystemBase {
                         voltage,
                         -StorageConstants.kIndexerVoltage,
                         StorageConstants.kIndexerVoltage);
-        voltage *= StorageConstants.kIndexerInverted ? 1 : -1;
+        voltage *= StorageConstants.kIndexerInverted ? -1 : 1;
         indexerMotor.setVoltage(voltage);
     }
 

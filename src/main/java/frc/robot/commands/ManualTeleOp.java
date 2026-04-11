@@ -4,8 +4,6 @@ import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
-import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Constants;
@@ -106,10 +104,7 @@ public class ManualTeleOp extends Command {
         ySpeed *= DriveConstants.kTeleDriveMaxSpeedMetersPerSecond;
         turningSpeed *= DriveConstants.kTeleDriveMaxAngularSpeedRadiansPerSecond;
 
-        Rotation2d currentHeading = odometry.getHeading();
-        if (DriverStation.getAlliance().get() == Alliance.Red)
-            currentHeading = currentHeading.unaryMinus();
-        currentHeading = AllianceFlipUtil.apply(currentHeading);
+        Rotation2d currentHeading = AllianceFlipUtil.apply(odometry.getHeading());
 
         ChassisSpeeds chassisSpeeds;
         if (Constants.fieldOriented) {

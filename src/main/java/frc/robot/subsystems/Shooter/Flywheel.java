@@ -126,7 +126,7 @@ public class Flywheel extends SubsystemBase {
     public void setFlywheelRadsPerSec(double targetVelocity) {
         double pidVoltage, ffVoltage;
 
-        pidVoltage = leadPIDController.calculate(-getVelocity(leadMotor), targetVelocity);
+        pidVoltage = leadPIDController.calculate(getVelocity(leadMotor), targetVelocity);
         ffVoltage = leadFeedforwardController.calculate(targetVelocity);
 
         Logger.recordOutput("Shooter/Flywheel/Lead/pidVoltage", pidVoltage);

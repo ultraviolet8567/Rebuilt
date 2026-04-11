@@ -12,7 +12,7 @@ public class Shoot extends Command {
         this.flywheel = flywheel;
         this.velocity = velocity;
 
-        // addRequirements(shooter);
+        addRequirements(flywheel);
     }
 
     @Override

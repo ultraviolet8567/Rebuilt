@@ -10,6 +10,8 @@ public class DirectHood extends Command {
 
     public DirectHood(Hood hood) {
         this.hood = hood;
+
+        addRequirements(hood);
     }
 
     @Override
