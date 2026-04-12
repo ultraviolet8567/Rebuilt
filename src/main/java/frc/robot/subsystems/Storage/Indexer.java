@@ -41,8 +41,8 @@ public class Indexer extends SubsystemBase {
         voltage =
                 MathUtil.clamp(
                         voltage,
-                        -StorageConstants.kIndexerMaxVoltage,
-                        StorageConstants.kIndexerMaxVoltage);
+                        -StorageConstants.kIndexerVoltage,
+                        StorageConstants.kIndexerVoltage);
         voltage *= StorageConstants.kIndexerInverted ? 1 : -1;
         indexerMotor.setVoltage(voltage);
     }
@@ -50,7 +50,7 @@ public class Indexer extends SubsystemBase {
     // help pls 💔
 
     public void start() {
-        setIndexerVoltage(StorageConstants.kIndexerMaxVoltage);
+        setIndexerVoltage(StorageConstants.kIndexerVoltage);
     }
 
     public void stop() {

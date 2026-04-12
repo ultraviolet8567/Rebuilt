@@ -142,6 +142,10 @@ public class Pivot extends SubsystemBase {
         relativeEncoder.setPosition(angle);
     }
 
+    public boolean atPosition(double position) {
+        return Math.abs(position - getRelativeRotationRads()) < IntakeConstants.kPivotTolerance;
+    }
+
     public void setAngleRads(double angle) {
         double pidVoltage =
                 pidController.calculate(

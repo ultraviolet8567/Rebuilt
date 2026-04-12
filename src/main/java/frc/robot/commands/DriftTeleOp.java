@@ -77,7 +77,9 @@ public class DriftTeleOp extends Command {
         double ySpeed = ySpdFunction.get();
 
         double target = MathUtil.inputModulus(targetAngle.get(), 0, 2 * Math.PI);
-        double heading = MathUtil.inputModulus(odometry.getHeading().getRadians(), 0, 2 * Math.PI);
+        double heading =
+                MathUtil.inputModulus(
+                        odometry.getHeading().unaryMinus().getRadians(), 0, 2 * Math.PI);
 
         Logger.recordOutput("SwerveTeleOp/Target", target);
         Logger.recordOutput("SwerveTeleOp/Heading", heading);
@@ -142,7 +144,7 @@ public class DriftTeleOp extends Command {
                         -DriveConstants.kTeleDriveMaxAngularSpeedRadiansPerSecond,
                         DriveConstants.kTeleDriveMaxAngularSpeedRadiansPerSecond);
 
-        Rotation2d currentHeading = odometry.getHeading();
+        Rotation2d currentHeading = odometry.getGyrometerHeading();
         if (DriverStation.getAlliance().get() == Alliance.Red)
             currentHeading = currentHeading.unaryMinus();
         currentHeading = AllianceFlipUtil.apply(currentHeading);

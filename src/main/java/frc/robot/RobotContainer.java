@@ -9,6 +9,8 @@ import com.pathplanner.lib.auto.NamedCommands;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.XboxController;
+import edu.wpi.first.wpilibj.shuffleboard.BuiltInWidgets;
+import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
@@ -68,25 +70,49 @@ public class RobotContainer {
                     return false;
                 },
                 swerve);
-        autoChooser = new AutoChooser();
 
         NamedCommands.registerCommand("Intake", new SpinIntake(intake.getFunnel(), false));
         NamedCommands.registerCommand("Index", new SpinIndexer(storage.getIndexer(), false));
-        NamedCommands.registerCommand("Shoot", new Shoot(shooter.getFlywheel()));
+        NamedCommands.registerCommand("ShootMiddle", new Shoot(shooter.getFlywheel(), 3000));
         NamedCommands.registerCommand(
                 "PivotUp", new SetPivot(intake.getPivot(), IntakeConstants.kPivotLower));
         NamedCommands.registerCommand(
                 "PivotDown", new SetPivot(intake.getPivot(), IntakeConstants.kPivotUpper));
         NamedCommands.registerCommand(
                 "CalculatedShoot", new CalculatedShoot(shooter.getFlywheel(), odometry));
+        NamedCommands.registerCommand("Shoot", new Shuffle(shooter.getFlywheel()));
+        NamedCommands.registerCommand(
+                "AutoAlign",
+                new DriftTeleOp(
+                        swerve,
+                        odometry,
+                        () -> 0.0,
+                        () -> 0.0,
+                        () -> -odometry.angleToHub().getRadians(),
+                        () -> false,
+                        () -> false));
+        // NamedCommands.registerCommand(
+        //        "Kicker", new RunKicker(shooter.getFlywheel(), shooter.getKicker()));
+
+        // Shuffleboard.getTab("Main")
+        //        .add(
+        //                "Reset Pivot",
+        //                new InstantCommand(() -> intake.getPivot().resetRelativeEncoder()))
+        //        .withWidget(BuiltInWidgets.kCommand);
+
+        autoChooser = new AutoChooser();
+
+        Shuffleboard.getTab("Main")
+                .add("Pivot Up?", intake.getPivot().atPosition(IntakeConstants.kPivotLower))
+                .withWidget(BuiltInWidgets.kBooleanBox);
 
         swerve.setDefaultCommand(
                 new ManualTeleOp(
                         swerve,
                         odometry,
-                        () -> driverController.getLeftY(),
-                        () -> driverController.getLeftX(),
-                        () -> driverController.getRightX(),
+                        () -> -driverController.getLeftY(),
+                        () -> -driverController.getLeftX(),
+                        () -> -driverController.getRightX(),
                         () -> driverController.getHID().getRightBumperButton(),
                         () -> driverController.getHID().getXButton()));
 
@@ -113,9 +139,9 @@ public class RobotContainer {
                         new DriftTeleOp(
                                 swerve,
                                 odometry,
-                                () -> driverController.getLeftY(),
-                                () -> driverController.getLeftX(),
-                                () -> odometry.angleToHub().getRadians(),
+                                () -> -driverController.getLeftY(),
+                                () -> -driverController.getLeftX(),
+                                () -> -odometry.angleToHub().getRadians(),
                                 () -> driverController.getHID().getRightBumperButton(),
                                 () -> driverController.getHID().getXButton()));
 
@@ -128,7 +154,7 @@ public class RobotContainer {
         operatorController
                 .rightTrigger()
                 .whileTrue(new CalculatedShoot(shooter.getFlywheel(), odometry));
-        operatorController.rightBumper().whileTrue(new Shoot(shooter.getFlywheel()));
+        operatorController.rightBumper().whileTrue(new Shuffle(shooter.getFlywheel()));
 
         operatorController
                 .y()

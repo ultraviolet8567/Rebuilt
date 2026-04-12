@@ -21,7 +21,7 @@ public class SpinIntake extends Command {
 
     @Override
     public void initialize() {
-        funnel.setFunnelVoltage(IntakeConstants.kFunnelMaxVoltage * (reversed ? -1 : 1));
+        funnel.setFunnelVoltage(IntakeConstants.kFunnelVoltage * (reversed ? -1 : 1));
     }
 
     @Override

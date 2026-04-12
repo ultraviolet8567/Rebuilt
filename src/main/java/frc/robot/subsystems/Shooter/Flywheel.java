@@ -101,6 +101,7 @@ public class Flywheel extends SubsystemBase {
         Logger.recordOutput("Shooter/Flywheel/Ks", leadFeedforwardController.getKs());
         Logger.recordOutput("Shooter/Flywheel/Kv", leadFeedforwardController.getKv());
         Logger.recordOutput("Shooter/Flywheel/Ka", leadFeedforwardController.getKa());
+        Logger.recordOutput("Shooter/Flywheel/TargetVelocity", targetVelocity);
 
         if (running) {
             setFlywheelRadsPerSec(targetVelocity);

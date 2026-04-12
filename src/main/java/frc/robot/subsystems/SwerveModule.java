@@ -49,10 +49,6 @@ public class SwerveModule {
 
         driveConfig = new SparkFlexConfig();
         turningConfig = new SparkMaxConfig();
-        driveMotor.configure(
-                driveConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
-        turningMotor.configure(
-                turningConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
 
         driveConfig.voltageCompensation(12.0);
         driveConfig.smartCurrentLimit(40);
@@ -73,6 +69,11 @@ public class SwerveModule {
         turningPidController = new PIDController(ModuleConstants.kPTurning, 0, 0);
         turningPidController.enableContinuousInput(-Math.PI, Math.PI);
 
+        driveMotor.configure(
+                driveConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+        turningMotor.configure(
+                turningConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+
         resetEncoders();
     }
 
@@ -81,7 +82,8 @@ public class SwerveModule {
     }
 
     public double getTurningPosition() {
-        return turningMotor.getEncoder().getPosition();
+        return getAbsoluteEncoderAngle();
+        // return turningMotor.getEncoder().getPosition();
     }
 
     public double getDriveVelocity() {
@@ -116,6 +118,10 @@ public class SwerveModule {
 
     public SwerveModuleState getState() {
         return new SwerveModuleState(getDriveVelocity(), new Rotation2d(getTurningPosition()));
+    }
+
+    public SwerveModuleState getAbsoluteState() {
+        return new SwerveModuleState(getDriveVelocity(), new Rotation2d(getAbsoluteEncoderAngle()));
     }
 
     public void setDesiredState(SwerveModuleState state, double throttle) {

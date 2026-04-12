@@ -17,7 +17,7 @@ public class SpinIndexer extends Command {
 
     @Override
     public void execute() {
-        indexer.setIndexerVoltage(StorageConstants.kIndexerMaxVoltage * (reversed ? -1 : 1));
+        indexer.setIndexerVoltage(StorageConstants.kIndexerVoltage * (reversed ? -1 : 1));
     }
 
     @Override

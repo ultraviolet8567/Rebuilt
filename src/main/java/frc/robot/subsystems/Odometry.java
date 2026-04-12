@@ -27,7 +27,7 @@ public class Odometry extends SubsystemBase {
 
         /* Gyro */
         gyro = new Pigeon2(30);
-        gyro.reset();
+        resetHeading();
 
         /* Odometry */
         poseEstimator =

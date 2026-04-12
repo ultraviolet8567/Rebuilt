@@ -39,9 +39,7 @@ public class Funnel extends SubsystemBase {
 
         voltage =
                 MathUtil.clamp(
-                        voltage,
-                        -IntakeConstants.kFunnelMaxVoltage,
-                        IntakeConstants.kFunnelMaxVoltage);
+                        voltage, -IntakeConstants.kFunnelVoltage, IntakeConstants.kFunnelVoltage);
         voltage *= IntakeConstants.kFunnelInverted ? 1 : -1;
         funnelMotor.setVoltage(voltage);
     }

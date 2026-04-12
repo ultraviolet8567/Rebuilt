@@ -115,8 +115,6 @@ public class Swerve extends SubsystemBase {
                 "Swerve/FrontRight/DriveVoltage", Math.abs(frontRight.getDriveVoltage()));
         Logger.recordOutput("Swerve/BackLeft/DriveVoltage", Math.abs(backLeft.getDriveVoltage()));
         Logger.recordOutput("Swerve/BackRight/DriveVoltage", Math.abs(backRight.getDriveVoltage()));
-
-        resetEncoders();
     }
 
     public double getDriveGearRatio() {
@@ -143,6 +141,15 @@ public class Swerve extends SubsystemBase {
     public SwerveModuleState[] getModuleStates() {
         return new SwerveModuleState[] {
             frontLeft.getState(), frontRight.getState(), backLeft.getState(), backRight.getState()
+        };
+    }
+
+    public SwerveModuleState[] getAbsoluteModuleStates() {
+        return new SwerveModuleState[] {
+            frontLeft.getAbsoluteState(),
+            frontRight.getAbsoluteState(),
+            backLeft.getAbsoluteState(),
+            backRight.getAbsoluteState()
         };
     }
 
