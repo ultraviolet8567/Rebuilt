@@ -1,11 +1,13 @@
 package frc.robot.subsystems.Intake;
 
-import com.revrobotics.PersistMode;
-import com.revrobotics.RelativeEncoder;
-import com.revrobotics.ResetMode;
-import com.revrobotics.spark.SparkFlex;
-import com.revrobotics.spark.SparkLowLevel.MotorType;
-import com.revrobotics.spark.config.SparkFlexConfig;
+import static edu.wpi.first.units.Units.Amps;
+
+import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
+import com.ctre.phoenix6.configs.MotorOutputConfigs;
+import com.ctre.phoenix6.configs.TalonFXConfiguration;
+import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.signals.InvertedValue;
+import com.ctre.phoenix6.signals.NeutralModeValue;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.CAN;
@@ -15,20 +17,24 @@ public class Funnel extends SubsystemBase {
 
     // Idk what variables 🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🍅
 
-    private final SparkFlex funnelMotor; // Spark Flex Spins
-    private final SparkFlexConfig funnelMotorConfig;
-    private final RelativeEncoder relativeEncoder;
+    private final TalonFX funnelMotor; // Spark Flex Spins
+    private final TalonFXConfiguration funnelMotorConfig;
 
     public Funnel() {
         System.out.println("[Init] Creating Funnel");
 
-        funnelMotor = new SparkFlex(CAN.kFunnelPort, MotorType.kBrushless);
-        funnelMotorConfig = new SparkFlexConfig();
-        relativeEncoder = funnelMotor.getEncoder();
-        funnelMotorConfig.encoder.velocityConversionFactor(1.0 / IntakeConstants.kFunnelReduction);
-        funnelMotorConfig.smartCurrentLimit(80);
-        funnelMotor.configure(
-                funnelMotorConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+        funnelMotor = new TalonFX(CAN.kFunnelPort);
+        funnelMotorConfig = new TalonFXConfiguration();
+        funnelMotorConfig.withCurrentLimits(
+                new CurrentLimitsConfigs()
+                        .withStatorCurrentLimit(Amps.of(40))
+                        .withStatorCurrentLimitEnable(true));
+        funnelMotorConfig.withMotorOutput(
+                new MotorOutputConfigs()
+                        .withInverted(InvertedValue.Clockwise_Positive)
+                        .withNeutralMode(NeutralModeValue.Brake));
+
+        funnelMotor.getConfigurator().apply(funnelMotorConfig);
     }
 
     // Intake Constructer Close Bracket
