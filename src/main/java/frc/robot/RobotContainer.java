@@ -77,6 +77,8 @@ public class RobotContainer {
         NamedCommands.registerCommand(
                 "PivotUp", new SetPivot(intake.getPivot(), IntakeConstants.kPivotLower));
         NamedCommands.registerCommand(
+                "PivotMiddle", new SetPivot(intake.getPivot(), IntakeConstants.kPivotMiddle));
+        NamedCommands.registerCommand(
                 "PivotDown", new SetPivot(intake.getPivot(), IntakeConstants.kPivotUpper));
         NamedCommands.registerCommand(
                 "CalculatedShoot", new CalculatedShoot(shooter.getFlywheel(), odometry));
