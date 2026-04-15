@@ -93,6 +93,7 @@ public class AutoChooser extends VirtualSubsystem {
         if (autoCommandName.equals("Do Nothing")) {
             return null;
         } else {
+            Logger.recordOutput("Autos/StartPos", allAutos.get(autoCommandName).getStartingPose());
             return allAutos.get(autoCommandName);
         }
     }

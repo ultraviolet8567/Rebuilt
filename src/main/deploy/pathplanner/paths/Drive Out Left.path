@@ -20,8 +20,8 @@
         "y": 6.370427960057061
       },
       "prevControl": {
-        "x": 6.794864479315264,
-        "y": 7.379643366619114
+        "x": 7.61,
+        "y": 7.667718079469132
       },
       "nextControl": null,
       "isLocked": false,
@@ -36,7 +36,12 @@
       "name": "PivotDown",
       "waypointRelativePos": 0.5,
       "endWaypointRelativePos": null,
-      "command": null
+      "command": {
+        "type": "named",
+        "data": {
+          "name": "PivotDown"
+        }
+      }
     }
   ],
   "globalConstraints": {
@@ -49,7 +54,7 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": -68.8752808539276
+    "rotation": -90.0
   },
   "reversed": false,
   "folder": null,

@@ -117,7 +117,7 @@ public final class Constants {
         public static final double kTeleDriveMaxAccelerationUnitsPerSecond = 3;
         public static final double kTeleDriveMaxAngularAccelerationUnitsPerSecond = 3 * Math.PI;
 
-        public static final double kRobotMass = 48.5;
+        public static final double kRobotMass = 50;
         public static final double kRobotMOI = 7.0;
 
         public static final SwerveModuleState[] kLockStates =
@@ -133,7 +133,7 @@ public final class Constants {
                         ModuleConstants.kWheelDiameterMeters / 2,
                         kPhysicalMaxSpeedMetersPerSecond,
                         1, // friction coefficient between wheel and carpet, (unsure so 1.0)
-                        DCMotor.getNEO(1),
+                        DCMotor.getNeoVortex(1),
                         1 / ModuleConstants.kDriveMotorGearR2Ratio,
                         80,
                         1);
@@ -221,7 +221,8 @@ public final class Constants {
     public static final class IntakeConstants {
         public static final double kPivotGearboxReduction = 45.0;
         public static final double kPivotChainReduction = 40.0 / 16.0;
-        public static final double kPivotEncoderOffset = -18.037796326794894 + 0.189;
+        public static final double kPivotEncoderOffset =
+                -18.037796326794894 + 0.189 - 0.26 + 0.338 + 0.53;
         public static final double kPivotFeedforwardOffset =
                 2.36 - 4.505 - 1.604 - 1.535 - 1.143 - 2.012 + Math.PI;
         public static final double kPivotVoltage = 10;
@@ -230,9 +231,9 @@ public final class Constants {
         public static final boolean kPivotRelativeEncoderInverted = false;
         public static final double kPivotTolerance = 0.1;
 
-        public static final double kPivotLower = 0.2; // 0.2
-        public static final double kPivotMiddle = 1.0;
-        public static final double kPivotUpper = 2;
+        public static final double kPivotLower = 0.1; // 0.2
+        public static final double kPivotMiddle = 0.6;
+        public static final double kPivotUpper = 1.7;
 
         // Software limit
         // public static final double kRaiseUpper = ;
@@ -242,7 +243,7 @@ public final class Constants {
         public static final double kFunnelVoltage = 12;
         public static final boolean kFunnelInverted = true;
 
-        public static final LoggedTunableNumber kPivotP = new LoggedTunableNumber("PivotPidP", 6.5);
+        public static final LoggedTunableNumber kPivotP = new LoggedTunableNumber("PivotPidP", 7.5);
         public static final LoggedTunableNumber kPivotI = new LoggedTunableNumber("PivotPidI", 0.0);
         public static final LoggedTunableNumber kPivotD = new LoggedTunableNumber("PivotPidD", 0.1);
 
@@ -269,7 +270,7 @@ public final class Constants {
 
         public static final PPHolonomicDriveController kHolonomicController =
                 new PPHolonomicDriveController(
-                        new PIDConstants(0.25, 0, 0), new PIDConstants(0.5, 0, 0));
+                        new PIDConstants(0.5, 0, 0), new PIDConstants(0.5, 0, 0));
     }
 
     // CAN = computer area network
