@@ -40,16 +40,16 @@ public class AutoChooser extends VirtualSubsystem {
         main.add("Side", side)
                 .withWidget(BuiltInWidgets.kComboBoxChooser)
                 .withSize(2, 1)
-                .withPosition(0, 3);
+                .withPosition(0, 2);
         main.add("Drive Out", driveOut)
                 .withWidget(BuiltInWidgets.kComboBoxChooser)
                 .withSize(2, 1)
-                .withPosition(1, 3);
+                .withPosition(0, 3);
         autoName =
                 main.add("Auto Name", "")
                         .withWidget(BuiltInWidgets.kTextView)
                         .withSize(2, 1)
-                        .withPosition(2, 0)
+                        .withPosition(0, 1)
                         .getEntry();
 
         for (String pathName : AutoBuilder.getAllAutoNames()) {

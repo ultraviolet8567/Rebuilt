@@ -118,7 +118,8 @@ public class RobotContainer {
         Shuffleboard.getTab("Main")
                 .add("Camera", camera)
                 .withWidget(BuiltInWidgets.kCameraStream)
-                .withSize(4, 4);
+                .withSize(4, 4)
+                .withPosition(2, 0);
 
         swerve.setDefaultCommand(
                 new ManualTeleOp(
