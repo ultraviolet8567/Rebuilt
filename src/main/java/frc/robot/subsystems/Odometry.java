@@ -1,6 +1,7 @@
 package frc.robot.subsystems;
 
 import com.ctre.phoenix6.hardware.Pigeon2;
+import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -47,6 +48,8 @@ public class Odometry extends SubsystemBase {
                 OdometryConstants.kRotationOffset.getX(),
                 OdometryConstants.kRotationOffset.getY(),
                 OdometryConstants.kRotationOffset.getZ());
+
+        poseEstimator.setVisionMeasurementStdDevs(VecBuilder.fill(0.5, 0.5, 0.5));
     }
 
     /* Runs periodically (about once every 20 ms) */

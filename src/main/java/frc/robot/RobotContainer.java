@@ -6,8 +6,11 @@ package frc.robot;
 
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
+import edu.wpi.first.cameraserver.CameraServer;
+import edu.wpi.first.cscore.UsbCamera;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
+import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.shuffleboard.BuiltInWidgets;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
@@ -38,6 +41,7 @@ public class RobotContainer {
     private final AutoChooser autoChooser;
     private final Intake intake;
     private final Storage storage;
+    private final UsbCamera camera;
 
     // Replace with CommandPS4Controller or CommandJoystick if needed
     private static final CommandXboxController driverController =
@@ -54,6 +58,12 @@ public class RobotContainer {
         shooter = new Shooter();
         intake = new Intake();
         storage = new Storage();
+        camera = CameraServer.startAutomaticCapture(0);
+
+        if (RobotBase.isReal()) {
+            camera.setFPS(60);
+            camera.setResolution(320, 240);
+        }
 
         // Configure the PathPlanner auto-builder
         AutoBuilder.configure(
@@ -82,7 +92,8 @@ public class RobotContainer {
                 "PivotDown", new SetPivot(intake.getPivot(), IntakeConstants.kPivotUpper));
         NamedCommands.registerCommand(
                 "CalculatedShoot", new CalculatedShoot(shooter.getFlywheel(), odometry));
-        NamedCommands.registerCommand("Shoot", new Shuffle(shooter.getFlywheel()));
+        NamedCommands.registerCommand(
+                "Shoot", new Shuffle(shooter.getFlywheel(), shooter.getHood()));
         NamedCommands.registerCommand(
                 "AutoAlign",
                 new DriftTeleOp(
@@ -105,8 +116,9 @@ public class RobotContainer {
         autoChooser = new AutoChooser();
 
         Shuffleboard.getTab("Main")
-                .add("Pivot Up?", intake.getPivot().atPosition(IntakeConstants.kPivotLower))
-                .withWidget(BuiltInWidgets.kBooleanBox);
+                .add("Camera", camera)
+                .withWidget(BuiltInWidgets.kCameraStream)
+                .withSize(4, 4);
 
         swerve.setDefaultCommand(
                 new ManualTeleOp(
@@ -153,10 +165,13 @@ public class RobotContainer {
         // operatorController.rightBumper().whileTrue(new ManualKicker(shooter.getKicker()));
         operatorController.povUp().whileTrue(new SetHood(shooter.getHood(), false));
         operatorController.povDown().whileTrue(new SetHood(shooter.getHood(), true));
+        // operatorController.povRight().whileTrue(new ManualKicker(shooter.getKicker()));
         operatorController
                 .rightTrigger()
                 .whileTrue(new CalculatedShoot(shooter.getFlywheel(), odometry));
-        operatorController.rightBumper().whileTrue(new Shuffle(shooter.getFlywheel()));
+        operatorController
+                .rightBumper()
+                .whileTrue(new Shuffle(shooter.getFlywheel(), shooter.getHood()));
 
         operatorController
                 .y()

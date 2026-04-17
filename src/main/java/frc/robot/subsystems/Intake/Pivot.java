@@ -9,7 +9,10 @@ import com.revrobotics.spark.config.SparkMaxConfig;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.ArmFeedforward;
 import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.networktables.GenericEntry;
 import edu.wpi.first.wpilibj.DutyCycleEncoder;
+import edu.wpi.first.wpilibj.shuffleboard.BuiltInWidgets;
+import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.CAN;
 import frc.robot.Constants.IntakeConstants;
@@ -23,6 +26,8 @@ public class Pivot extends SubsystemBase {
 
     private final PIDController pidController;
     private final ArmFeedforward feedforwardController;
+
+    private final GenericEntry pivotDisplay;
 
     private double targetPosition;
 
@@ -88,6 +93,11 @@ public class Pivot extends SubsystemBase {
                 () -> feedforwardController.setKa(IntakeConstants.kPivotA.get()),
                 IntakeConstants.kPivotA);
          */
+        pivotDisplay =
+                Shuffleboard.getTab("Main")
+                        .add("Pivot Up?", atPosition(IntakeConstants.kPivotLower))
+                        .withWidget(BuiltInWidgets.kBooleanBox)
+                        .getEntry();
     }
 
     public void periodic() {
@@ -117,6 +127,7 @@ public class Pivot extends SubsystemBase {
         if (diff > 0.01 && diff < 0.1) resetRelativeEncoder();
 
         setAngleRads(targetPosition);
+        pivotDisplay.setBoolean(atPosition(IntakeConstants.kPivotLower));
     }
 
     public double getAbsoluteRotationRads() {

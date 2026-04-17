@@ -93,11 +93,15 @@ public class ManualTeleOp extends Command {
         // DriveConstants.kDemoTeleDriveMaxAngularSpeedRadiansPerSecond
         // : DriveConstants.kTeleDriveMaxAngularSpeedRadiansPerSecond;
 
-        xSpeed = xLimiter.calculate(xSpeed) * DriveConstants.kTeleDriveMaxSpeedMetersPerSecond;
-        ySpeed = yLimiter.calculate(ySpeed) * DriveConstants.kTeleDriveMaxSpeedMetersPerSecond;
-        turningSpeed =
-                turningLimiter.calculate(turningSpeed)
-                        * DriveConstants.kTeleDriveMaxAngularSpeedRadiansPerSecond;
+        // xSpeed = xLimiter.calculate(xSpeed) * DriveConstants.kTeleDriveMaxSpeedMetersPerSecond;
+        // ySpeed = yLimiter.calculate(ySpeed) * DriveConstants.kTeleDriveMaxSpeedMetersPerSecond;
+        // turningSpeed =
+        //         turningLimiter.calculate(turningSpeed)
+        //                 * DriveConstants.kTeleDriveMaxAngularSpeedRadiansPerSecond;
+
+        xSpeed *= DriveConstants.kTeleDriveMaxSpeedMetersPerSecond;
+        ySpeed *= DriveConstants.kTeleDriveMaxSpeedMetersPerSecond;
+        turningSpeed *= DriveConstants.kTeleDriveMaxAngularSpeedRadiansPerSecond;
 
         Rotation2d currentHeading = odometry.getHeading();
         if (DriverStation.getAlliance().get() == Alliance.Red)

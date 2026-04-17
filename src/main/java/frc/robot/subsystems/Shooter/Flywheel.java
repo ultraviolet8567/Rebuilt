@@ -53,9 +53,9 @@ public class Flywheel extends SubsystemBase {
                         ShooterConstants.kFlywheelD.get());
         leadFeedforwardController =
                 new SimpleMotorFeedforward(
-                        ShooterConstants.kFlywheelS.get(),
-                        ShooterConstants.kFlywheelV.get(),
-                        ShooterConstants.kFlywheelA.get());
+                        ShooterConstants.kLeadS.get(),
+                        ShooterConstants.kLeadV.get(),
+                        ShooterConstants.kLeadA.get());
 
         followerPIDController =
                 new PIDController(
@@ -64,9 +64,9 @@ public class Flywheel extends SubsystemBase {
                         ShooterConstants.kFlywheelD.get());
         followerFeedforwardController =
                 new SimpleMotorFeedforward(
-                        ShooterConstants.kFlywheelS.get(),
-                        ShooterConstants.kFlywheelV.get(),
-                        ShooterConstants.kFlywheelA.get());
+                        ShooterConstants.kFollowerS.get(),
+                        ShooterConstants.kFollowerV.get(),
+                        ShooterConstants.kFollowerA.get());
 
         targetVelocity = ShooterConstants.kFlywheelMaxVelocity;
         running = false;
@@ -81,13 +81,13 @@ public class Flywheel extends SubsystemBase {
         followerPIDController.setI(ShooterConstants.kFlywheelI.get());
         followerPIDController.setD(ShooterConstants.kFlywheelD.get());
 
-        leadFeedforwardController.setKs(ShooterConstants.kFlywheelS.get());
-        leadFeedforwardController.setKv(ShooterConstants.kFlywheelV.get());
-        leadFeedforwardController.setKa(ShooterConstants.kFlywheelA.get());
+        leadFeedforwardController.setKs(ShooterConstants.kLeadS.get());
+        leadFeedforwardController.setKv(ShooterConstants.kLeadV.get());
+        leadFeedforwardController.setKa(ShooterConstants.kLeadA.get());
 
-        followerFeedforwardController.setKs(ShooterConstants.kFlywheelS.get());
-        followerFeedforwardController.setKv(ShooterConstants.kFlywheelV.get());
-        followerFeedforwardController.setKa(ShooterConstants.kFlywheelA.get());
+        followerFeedforwardController.setKs(ShooterConstants.kFollowerS.get());
+        followerFeedforwardController.setKv(ShooterConstants.kFollowerV.get());
+        followerFeedforwardController.setKa(ShooterConstants.kFollowerA.get());
 
         Logger.recordOutput("Shooter/Flywheel/Lead/Velocity", getVelocity(leadMotor));
         Logger.recordOutput("Shooter/Flywheel/Follower/Velocity", getVelocity(followerMotor));
@@ -180,7 +180,7 @@ public class Flywheel extends SubsystemBase {
                                 * (Math.tan(ShooterConstants.kShooterAngle) * dist
                                         - FieldConstants.kHubHeightDiff)));
         */
-        return 2654 * Math.pow(dist, 0.336);
+        return 2335 + 648 * dist - 16.7 * dist * dist;
     }
 
     public double getTargetVelocity() {

@@ -108,13 +108,13 @@ public final class Constants {
         public static final double kBackRightDriveAbsoluteEncoderOffsetRad =
                 1.43 + 1.99 - 1.793 - Math.PI; // -1.529 + PI
 
-        public static final double kPhysicalMaxSpeedMetersPerSecond = 4.5;
+        public static final double kPhysicalMaxSpeedMetersPerSecond = 5;
         public static final double kPhysicalMaxAngularSpeedRadiansPerSecond = 3 * Math.PI;
 
-        public static final double kTeleDriveMaxSpeedMetersPerSecond = 3.5;
-        public static final double kTeleDriveMaxAngularSpeedRadiansPerSecond = 2.5 * Math.PI;
+        public static final double kTeleDriveMaxSpeedMetersPerSecond = 5;
+        public static final double kTeleDriveMaxAngularSpeedRadiansPerSecond = 3.5 * Math.PI;
 
-        public static final double kTeleDriveMaxAccelerationUnitsPerSecond = 3;
+        public static final double kTeleDriveMaxAccelerationUnitsPerSecond = 5;
         public static final double kTeleDriveMaxAngularAccelerationUnitsPerSecond = 3 * Math.PI;
 
         public static final double kRobotMass = 50;
@@ -161,11 +161,11 @@ public final class Constants {
         public static final double kFlywheelMaxVelocity = 2200;
 
         public static final double kKickerReduction = 3.0;
-        public static final double kKickerVoltage = 7;
+        public static final double kKickerVoltage = 12;
         public static final boolean kKickerInverted = true;
 
         public static final double kHoodLower = 0.01;
-        public static final double kHoodUpper = 0.35;
+        public static final double kHoodUpper = 0.3;
 
         public static final double kHoodGearboxReduction = 25.0;
         public static final double kHoodRackReduction = 168.0 / 10.0;
@@ -182,23 +182,28 @@ public final class Constants {
 
         // PID values
         public static final LoggedTunableNumber kFlywheelP =
-                new LoggedTunableNumber("FlywheelPidP", 0.0001);
+                new LoggedTunableNumber("FlywheelPidP", 1e-5);
         public static final LoggedTunableNumber kFlywheelI =
-                new LoggedTunableNumber("FlywheelPidI", 0.0001);
+                new LoggedTunableNumber("FlywheelPidI", 0.0);
         public static final LoggedTunableNumber kFlywheelD =
                 new LoggedTunableNumber("FlywheelPidD", 0.0);
 
-        public static final LoggedTunableNumber kFlywheelS =
-                new LoggedTunableNumber("FlywheelFfS", 0.00);
-        public static final LoggedTunableNumber kFlywheelV =
-                new LoggedTunableNumber("FlywheelFfV", 0.0018);
-        public static final LoggedTunableNumber kFlywheelA =
-                new LoggedTunableNumber("FlywheelFfA", 0.0);
+        public static final LoggedTunableNumber kLeadS = new LoggedTunableNumber("LeadFfS", 0.00);
+        public static final LoggedTunableNumber kLeadV =
+                new LoggedTunableNumber("LeadFfV", 0.00183);
+        public static final LoggedTunableNumber kLeadA = new LoggedTunableNumber("LeadFfA", 0.0);
+
+        public static final LoggedTunableNumber kFollowerS =
+                new LoggedTunableNumber("FollowerFfS", 0.00);
+        public static final LoggedTunableNumber kFollowerV =
+                new LoggedTunableNumber("FollowerFfV", 0.00185);
+        public static final LoggedTunableNumber kFollowerA =
+                new LoggedTunableNumber("FollowerFfA", 0.0);
 
         public static final LoggedTunableNumber kFlywheelVelocity =
-                new LoggedTunableNumber("TargetVelocity", 5000);
+                new LoggedTunableNumber("TargetVelocity", 5200);
 
-        public static final LoggedTunableNumber kHoodP = new LoggedTunableNumber("HoodPidP", 5);
+        public static final LoggedTunableNumber kHoodP = new LoggedTunableNumber("HoodPidP", 40);
         public static final LoggedTunableNumber kHoodI = new LoggedTunableNumber("HoodPidI", 0.0);
         public static final LoggedTunableNumber kHoodD = new LoggedTunableNumber("HoodPidD", 0.0);
     }
@@ -222,7 +227,7 @@ public final class Constants {
         public static final double kPivotGearboxReduction = 45.0;
         public static final double kPivotChainReduction = 40.0 / 16.0;
         public static final double kPivotEncoderOffset =
-                -18.037796326794894 + 0.189 - 0.26 + 0.338 + 0.53;
+                -18.037796326794894 + 0.189 - 0.26 + 0.338 + 0.53 + 0.124;
         public static final double kPivotFeedforwardOffset =
                 2.36 - 4.505 - 1.604 - 1.535 - 1.143 - 2.012 + Math.PI;
         public static final double kPivotVoltage = 10;
@@ -232,18 +237,18 @@ public final class Constants {
         public static final double kPivotTolerance = 0.1;
 
         public static final double kPivotLower = 0.1; // 0.2
-        public static final double kPivotMiddle = 0.6;
-        public static final double kPivotUpper = 1.7;
+        public static final double kPivotMiddle = 0.9;
+        public static final double kPivotUpper = 1.9;
 
         // Software limit
         // public static final double kRaiseUpper = ;
         // public static final double kRaiseLower = ;
 
-        public static final double kFunnelReduction = 1 / 5.0;
+        public static final double kFunnelReduction = 1 / 3.0;
         public static final double kFunnelVoltage = 12;
         public static final boolean kFunnelInverted = true;
 
-        public static final LoggedTunableNumber kPivotP = new LoggedTunableNumber("PivotPidP", 7.5);
+        public static final LoggedTunableNumber kPivotP = new LoggedTunableNumber("PivotPidP", 8);
         public static final LoggedTunableNumber kPivotI = new LoggedTunableNumber("PivotPidI", 0.0);
         public static final LoggedTunableNumber kPivotD = new LoggedTunableNumber("PivotPidD", 0.1);
 
@@ -270,7 +275,7 @@ public final class Constants {
 
         public static final PPHolonomicDriveController kHolonomicController =
                 new PPHolonomicDriveController(
-                        new PIDConstants(0.5, 0, 0), new PIDConstants(0.5, 0, 0));
+                        new PIDConstants(1, 0, 0), new PIDConstants(1, 0, 0));
     }
 
     // CAN = computer area network

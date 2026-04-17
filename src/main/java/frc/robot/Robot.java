@@ -36,7 +36,8 @@ public class Robot extends LoggedRobot {
 
     @Override
     public void robotInit() {
-        Logger.addDataReceiver(new WPILOGWriter("/U/logs/"));
+        // Logger.addDataReceiver(new WPILOGWriter("/U/logs/"));
+        Logger.addDataReceiver(new WPILOGWriter("/home/lvuser/logs/"));
         Logger.addDataReceiver(new NT4Publisher());
 
         Logger.start();

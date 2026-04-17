@@ -7,7 +7,7 @@
         {
           "type": "path",
           "data": {
-            "pathName": "Drive Out Left"
+            "pathName": "Drive Out Right"
           }
         },
         {
@@ -17,7 +17,7 @@
               {
                 "type": "path",
                 "data": {
-                  "pathName": "Middle Move"
+                  "pathName": "Middle Move Right"
                 }
               },
               {
@@ -32,7 +32,7 @@
         {
           "type": "path",
           "data": {
-            "pathName": "Return Left"
+            "pathName": "Return Right"
           }
         },
         {
@@ -113,7 +113,7 @@
         {
           "type": "path",
           "data": {
-            "pathName": "Center"
+            "pathName": "Center Right"
           }
         }
       ]
