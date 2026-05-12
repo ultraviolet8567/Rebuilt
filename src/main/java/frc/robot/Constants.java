@@ -34,6 +34,7 @@ public final class Constants {
 
     public static final boolean fieldOriented = true;
     public static final boolean tuningMode = true;
+public static final boolean lightsExist = false;
 
     public static class OperatorConstants {
         public static final int kDriverControllerPort = 0;
@@ -113,6 +114,10 @@ public final class Constants {
 
         public static final double kTeleDriveMaxSpeedMetersPerSecond = 5;
         public static final double kTeleDriveMaxAngularSpeedRadiansPerSecond = 3.5 * Math.PI;
+
+        public static final double swerveDemoScaleFactor = 0.25;
+        public static final double kDemoTeleDriveMaxSpeedMetersPerSecond = kTeleDriveMaxAngularSpeedRadiansPerSecond * swerveDemoScaleFactor;
+        public static final double kDemoTeleDriveMaxAngularSpeedRadiansPerSecond = kPhysicalMaxSpeedMetersPerSecond * (swerveDemoScaleFactor * 2);
 
         public static final double kTeleDriveMaxAccelerationUnitsPerSecond = 5;
         public static final double kTeleDriveMaxAngularAccelerationUnitsPerSecond = 3 * Math.PI;
@@ -203,6 +208,8 @@ public final class Constants {
         public static final LoggedTunableNumber kFlywheelVelocity =
                 new LoggedTunableNumber("TargetVelocity", 5200);
 
+        public static final double shooterDemoScaleFactor = 0.25;
+        
         public static final LoggedTunableNumber kHoodP = new LoggedTunableNumber("HoodPidP", 40);
         public static final LoggedTunableNumber kHoodI = new LoggedTunableNumber("HoodPidI", 0.0);
         public static final LoggedTunableNumber kHoodD = new LoggedTunableNumber("HoodPidD", 0.0);

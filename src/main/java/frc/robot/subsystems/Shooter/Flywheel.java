@@ -14,6 +14,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.CAN;
 import frc.robot.Constants.ShooterConstants;
 import org.littletonrobotics.junction.Logger;
+import frc.robot.subsystems.Lights;
 
 public class Flywheel extends SubsystemBase {
     private final SparkFlex leadMotor, followerMotor;
@@ -184,8 +185,15 @@ public class Flywheel extends SubsystemBase {
     }
 
     public double getTargetVelocity() {
-        return targetVelocity;
-    }
+     
+
+        if (Lights.getInstance().isDemo && targetVelocity >= 800) {
+            return ShooterConstants.shooterDemoScaleFactor * targetVelocity;
+        } else {
+            return targetVelocity;
+        }
+        }
+    
 
     public SparkFlex getLeadMotor() {
         return leadMotor;
