@@ -206,7 +206,7 @@ public static final boolean lightsExist = false;
                 new LoggedTunableNumber("FollowerFfA", 0.0);
 
         public static final LoggedTunableNumber kFlywheelVelocity =
-                new LoggedTunableNumber("TargetVelocity", 5200);
+                new LoggedTunableNumber("TargetVelocity", 5200); 
 
         public static final double shooterDemoScaleFactor = 0.25;
         

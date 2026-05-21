@@ -69,7 +69,9 @@ public class Flywheel extends SubsystemBase {
                         ShooterConstants.kFollowerV.get(),
                         ShooterConstants.kFollowerA.get());
 
-        targetVelocity = ShooterConstants.kFlywheelMaxVelocity;
+        if(!Lights.getInstance().isDemo) 
+        {targetVelocity = ShooterConstants.kFlywheelMaxVelocity;}
+        else {targetVelocity = ShooterConstants.kFlywheelMaxVelocity * ShooterConstants.shooterDemoScaleFactor;}
         running = false;
     }
 
@@ -184,15 +186,6 @@ public class Flywheel extends SubsystemBase {
         return 2335 + 648 * dist - 16.7 * dist * dist;
     }
 
-    public double getTargetVelocity() {
-     
-
-        if (Lights.getInstance().isDemo && targetVelocity >= 800) {
-            return ShooterConstants.shooterDemoScaleFactor * targetVelocity;
-        } else {
-            return targetVelocity;
-        }
-        }
     
 
     public SparkFlex getLeadMotor() {
