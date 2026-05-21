@@ -195,4 +195,8 @@ public class Flywheel extends SubsystemBase {
     public SparkFlex getFollowerMotor() {
         return followerMotor;
     }
+
+    public double getTargetVelocity() {
+        return targetVelocity;
+    }
 }
