@@ -34,7 +34,7 @@ public final class Constants {
 
     public static final boolean fieldOriented = true;
     public static final boolean tuningMode = true;
-public static final boolean lightsExist = false;
+    public static final boolean lightsExist = false;
 
     public static class OperatorConstants {
         public static final int kDriverControllerPort = 0;
@@ -116,8 +116,10 @@ public static final boolean lightsExist = false;
         public static final double kTeleDriveMaxAngularSpeedRadiansPerSecond = 3.5 * Math.PI;
 
         public static final double swerveDemoScaleFactor = 0.25;
-        public static final double kDemoTeleDriveMaxSpeedMetersPerSecond = kTeleDriveMaxAngularSpeedRadiansPerSecond * swerveDemoScaleFactor;
-        public static final double kDemoTeleDriveMaxAngularSpeedRadiansPerSecond = kPhysicalMaxSpeedMetersPerSecond * (swerveDemoScaleFactor * 2);
+        public static final double kDemoTeleDriveMaxSpeedMetersPerSecond =
+                kTeleDriveMaxAngularSpeedRadiansPerSecond * swerveDemoScaleFactor;
+        public static final double kDemoTeleDriveMaxAngularSpeedRadiansPerSecond =
+                kPhysicalMaxSpeedMetersPerSecond * (swerveDemoScaleFactor * 2);
 
         public static final double kTeleDriveMaxAccelerationUnitsPerSecond = 5;
         public static final double kTeleDriveMaxAngularAccelerationUnitsPerSecond = 3 * Math.PI;
@@ -206,10 +208,10 @@ public static final boolean lightsExist = false;
                 new LoggedTunableNumber("FollowerFfA", 0.0);
 
         public static final LoggedTunableNumber kFlywheelVelocity =
-                new LoggedTunableNumber("TargetVelocity", 5200); 
+                new LoggedTunableNumber("TargetVelocity", 5200);
 
         public static final double shooterDemoScaleFactor = 0.25;
-        
+
         public static final LoggedTunableNumber kHoodP = new LoggedTunableNumber("HoodPidP", 40);
         public static final LoggedTunableNumber kHoodI = new LoggedTunableNumber("HoodPidI", 0.0);
         public static final LoggedTunableNumber kHoodD = new LoggedTunableNumber("HoodPidD", 0.0);
@@ -234,7 +236,7 @@ public static final boolean lightsExist = false;
         public static final double kPivotGearboxReduction = 45.0;
         public static final double kPivotChainReduction = 40.0 / 16.0;
         public static final double kPivotEncoderOffset =
-                -18.037796326794894 + 0.189 - 0.26 + 0.338 + 0.53 + 0.124;
+                -18.037796326794894 + 0.189 - 0.26 + 0.338 + 0.53 + 0.124 - 0.9161;
         public static final double kPivotFeedforwardOffset =
                 2.36 - 4.505 - 1.604 - 1.535 - 1.143 - 2.012 + Math.PI;
         public static final double kPivotVoltage = 10;
@@ -245,7 +247,7 @@ public static final boolean lightsExist = false;
 
         public static final double kPivotLower = 0.1; // 0.2
         public static final double kPivotMiddle = 0.9;
-        public static final double kPivotUpper = 1.9;
+        public static final double kPivotUpper = 2;
 
         // Software limit
         // public static final double kRaiseUpper = ;

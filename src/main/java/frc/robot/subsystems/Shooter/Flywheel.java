@@ -13,8 +13,8 @@ import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.CAN;
 import frc.robot.Constants.ShooterConstants;
-import org.littletonrobotics.junction.Logger;
 import frc.robot.subsystems.Lights;
+import org.littletonrobotics.junction.Logger;
 
 public class Flywheel extends SubsystemBase {
     private final SparkFlex leadMotor, followerMotor;
@@ -69,9 +69,12 @@ public class Flywheel extends SubsystemBase {
                         ShooterConstants.kFollowerV.get(),
                         ShooterConstants.kFollowerA.get());
 
-        if(!Lights.getInstance().isDemo) 
-        {targetVelocity = ShooterConstants.kFlywheelMaxVelocity;}
-        else {targetVelocity = ShooterConstants.kFlywheelMaxVelocity * ShooterConstants.shooterDemoScaleFactor;}
+        if (!Lights.getInstance().isDemo) {
+            targetVelocity = ShooterConstants.kFlywheelMaxVelocity;
+        } else {
+            targetVelocity =
+                    ShooterConstants.kFlywheelMaxVelocity * ShooterConstants.shooterDemoScaleFactor;
+        }
         running = false;
     }
 
@@ -185,8 +188,6 @@ public class Flywheel extends SubsystemBase {
         */
         return 2335 + 648 * dist - 16.7 * dist * dist;
     }
-
-    
 
     public SparkFlex getLeadMotor() {
         return leadMotor;

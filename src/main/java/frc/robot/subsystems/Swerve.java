@@ -2,14 +2,12 @@ package frc.robot.subsystems;
 
 import edu.wpi.first.math.geometry.*;
 import edu.wpi.first.math.kinematics.*;
-import edu.wpi.first.units.measure.LinearVelocity;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.CAN;
 import frc.robot.Constants.DriveConstants;
 import frc.robot.Constants.ModuleConstants;
 import java.util.Arrays;
 import org.littletonrobotics.junction.Logger;
-import frc.robot.subsystems.Lights;
 
 public class Swerve extends SubsystemBase {
     private final SwerveModule frontLeft, frontRight, backLeft, backRight;
@@ -170,12 +168,11 @@ public class Swerve extends SubsystemBase {
         // double maxSpeed = Lights.getInstance().isDemo
         // ? DriveConstants.kDemoTeleDriveMaxSpeedMetersPerSecond
         // : DriveConstants.kTeleDriveMaxSpeedMetersPerSecond;
-       double maxSpeed = Lights.getInstance().isDemo ? 
-             DriveConstants.kDemoTeleDriveMaxSpeedMetersPerSecond : DriveConstants.kTeleDriveMaxSpeedMetersPerSecond;;
-    
-        
-        
-
+        double maxSpeed =
+                Lights.getInstance().isDemo
+                        ? DriveConstants.kDemoTeleDriveMaxSpeedMetersPerSecond
+                        : DriveConstants.kTeleDriveMaxSpeedMetersPerSecond;
+        ;
 
         SwerveDriveKinematics.desaturateWheelSpeeds(desiredStates, maxSpeed);
         frontLeft.setDesiredState(desiredStates[0], throttle);
