@@ -15,6 +15,7 @@ import frc.robot.Constants;
 import frc.robot.util.VirtualSubsystem;
 import java.util.List;
 import org.littletonrobotics.junction.Logger;
+import frc.robot.subsystems.Intake.Pivot;
 
 public class Lights extends VirtualSubsystem {
     private static Lights instance;
@@ -28,6 +29,7 @@ public class Lights extends VirtualSubsystem {
     public int loopCycleCount = 0;
     public boolean lowBattery = false;
     public boolean autoFinished = false;
+    public boolean Pivotmoving = false;
     public double autoFinishedTime = 0.0;
     public RobotState state = RobotState.DISABLED;
     public Alliance alliance = Alliance.Blue;
@@ -127,13 +129,10 @@ public class Lights extends VirtualSubsystem {
 
             // Disabled
             if (state == RobotState.DISABLED) {
-                // Purple and yellow stripes
-                stripes(
-                        Section.FULL,
-                        List.of(Color.kPurple, Color.kGoldenrod),
-                        stripeLength,
-                        stripeDuration);
+                // Orange 
+                solid(Section.FULL, Color.kOrange);
             }
+
 
             // Autonomous
             else if (state == RobotState.AUTO) {
@@ -143,14 +142,14 @@ public class Lights extends VirtualSubsystem {
 
             // Teleop
             else {
-                // Alliance colors
-                // if (alliance == Alliance.Blue) {
-                // wave(Section.FULL, Color.kLightBlue, Color.kDarkBlue, waveSlowCycleLength,
-                // waveSlowDuration);
-                // } else {
-                // wave(Section.FULL, Color.kFirstRed, Color.kRed, waveSlowCycleLength,
-                // waveSlowDuration);
-                // }
+                 //Alliance colors
+                 if (alliance == Alliance.Blue) {
+                 wave(Section.FULL, Color.kLightBlue, Color.kDarkBlue, waveSlowCycleLength,
+                 waveSlowDuration);
+                 } else {
+                 wave(Section.FULL, Color.kFirstRed, Color.kRed, waveSlowCycleLength,
+                 waveSlowDuration);
+                 }
 
                 // Pickup indicator
 
@@ -159,12 +158,13 @@ public class Lights extends VirtualSubsystem {
             // Indicate low battery in every case
             lowBattery = (RobotController.getBatteryVoltage() < lowBatteryVoltage);
             if (lowBattery) {
-                strobe(Section.BOTTOM, Color.kRed);
+                strobe(Section.BOTTOM, Color.kGray);
             }
-
+            // Demo mode is purple
             if (isDemo) {
-                rainbow(Section.FULL);
+                solid(Section.FULL, Color.kPurple);
             }
+    
 
             // Update LEDs
             leds.setData(buffer);
