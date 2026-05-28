@@ -44,7 +44,8 @@ public final class Constants {
     public static class ModuleConstants {
         public static final int kDriveMotorGearing = 2;
 
-        public static final double kWheelDiameterMeters = Units.inchesToMeters(3.95);
+        public static final double kWheelDiameterMeters =
+                Units.inchesToMeters(3.95) * 1.613 / 1.664;
         public static final double kDriveMotorGearR1Ratio = 1 / 7.03;
         public static final double kDriveMotorGearR2Ratio = 1 / 6.03;
         public static final double kDriveMotorGearR3Ratio = 1 / 5.27;
@@ -152,7 +153,7 @@ public final class Constants {
                         kDriveKinematics
                                 .getModules()); // locations of modules relative of robot center
 
-        public static final LoggedTunableNumber kSwerveP = new LoggedTunableNumber("SwerveP", 6);
+        public static final LoggedTunableNumber kSwerveP = new LoggedTunableNumber("SwerveP", 7);
         public static final LoggedTunableNumber kSwerveI = new LoggedTunableNumber("SwerveI", 0);
         public static final LoggedTunableNumber kSwerveD = new LoggedTunableNumber("SwerveD", 1);
 
@@ -284,7 +285,7 @@ public final class Constants {
 
         public static final PPHolonomicDriveController kHolonomicController =
                 new PPHolonomicDriveController(
-                        new PIDConstants(1, 0, 0), new PIDConstants(1, 0, 0));
+                        new PIDConstants(1.5, 0, 0), new PIDConstants(1.5, 0, 0));
     }
 
     // CAN = computer area network

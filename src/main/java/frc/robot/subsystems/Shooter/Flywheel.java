@@ -186,7 +186,8 @@ public class Flywheel extends SubsystemBase {
                                 * (Math.tan(ShooterConstants.kShooterAngle) * dist
                                         - FieldConstants.kHubHeightDiff)));
         */
-        return 2335 + 648 * dist - 16.7 * dist * dist;
+        return 1310.13 + 1270.33 * dist - 128.09 * dist * dist;
+        // return 3429.57 * Math.log10(dist) + 2315.54;
     }
 
     public SparkFlex getLeadMotor() {

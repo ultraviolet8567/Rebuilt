@@ -91,9 +91,11 @@ public class RobotContainer {
         NamedCommands.registerCommand(
                 "PivotDown", new SetPivot(intake.getPivot(), IntakeConstants.kPivotUpper));
         NamedCommands.registerCommand(
-                "CalculatedShoot", new CalculatedShoot(shooter.getFlywheel(), odometry));
+                "CalculatedShoot",
+                new CalculatedShoot(shooter.getFlywheel(), odometry, storage.getIndexer()));
         NamedCommands.registerCommand(
-                "Shoot", new Shuffle(shooter.getFlywheel(), shooter.getHood()));
+                "Shoot",
+                new Shuffle(shooter.getFlywheel(), shooter.getHood(), storage.getIndexer()));
         NamedCommands.registerCommand(
                 "AutoAlign",
                 new DriftTeleOp(
@@ -169,10 +171,13 @@ public class RobotContainer {
         // operatorController.povRight().whileTrue(new ManualKicker(shooter.getKicker()));
         operatorController
                 .rightTrigger()
-                .whileTrue(new CalculatedShoot(shooter.getFlywheel(), odometry));
+                .whileTrue(
+                        new CalculatedShoot(shooter.getFlywheel(), odometry, storage.getIndexer()));
         operatorController
                 .rightBumper()
-                .whileTrue(new Shuffle(shooter.getFlywheel(), shooter.getHood()));
+                .whileTrue(
+                        new Shuffle(
+                                shooter.getFlywheel(), shooter.getHood(), storage.getIndexer()));
 
         operatorController
                 .y()
