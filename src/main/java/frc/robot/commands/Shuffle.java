@@ -19,7 +19,7 @@ public class Shuffle extends Command {
         this.hood = hood;
         this.indexer = indexer;
 
-        addRequirements(flywheel);
+        addRequirements(flywheel, hood, indexer);
     }
 
     @Override

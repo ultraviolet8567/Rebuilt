@@ -43,6 +43,7 @@ public class Lights {
 
     // Constants
     private static final int length = 42;
+    private static final int bottomLength = 8;
     private static final int minLoopCycleCount = 10;
     private static final double lowBatteryVoltage = 10;
     private static final double shimmerExtremeness = 0.5;
@@ -283,11 +284,25 @@ public class Lights {
         UPPER;
 
         private int start() {
-            return 0;
+            switch (this) {
+                case UPPER:
+                    return bottomLength;
+                case FULL:
+                case BOTTOM:
+                default:
+                    return 0;
+            }
         }
 
         private int end() {
-            return length;
+            switch (this) {
+                case BOTTOM:
+                    return bottomLength;
+                case FULL:
+                case UPPER:
+                default:
+                    return length;
+            }
         }
     }
 

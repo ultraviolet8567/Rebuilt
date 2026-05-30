@@ -189,6 +189,16 @@ public class Flywheel extends SubsystemBase {
                                 * (Math.tan(ShooterConstants.kShooterAngle) * dist
                                         - FieldConstants.kHubHeightDiff)));
         */
+        // TODO: This quadratic peaks at dist = 1270.33 / (2 * 128.09) ~= 4.96 m and then
+        // DECREASES with distance. From ~5 m and beyond, the formula commands a LOWER
+        // velocity than at 5 m -- shots from far range will undershoot the hub.
+        //   dist=2m -> 3338 rpm
+        //   dist=4m -> 4342 rpm
+        //   dist=5m -> 4460 rpm  (peak)
+        //   dist=7m -> 3926 rpm  (LESS than at 5 m)
+        //   dist=8m -> 3275 rpm  (way less)
+        // Either refit on points that cover the full shooting range, switch to the log
+        // alternative below (monotonic), or clamp dist to the peak before plugging in.
         return 1310.13 + 1270.33 * dist - 128.09 * dist * dist;
         // return 3429.57 * Math.log10(dist) + 2315.54;
     }
