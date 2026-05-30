@@ -8,6 +8,8 @@ import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc.robot.Constants.OdometryConstants;
+import frc.robot.subsystems.Lights;
+import frc.robot.subsystems.Lights.RobotState;
 import org.littletonrobotics.junction.LoggedRobot;
 import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.NT4Publisher;
@@ -41,6 +43,8 @@ public class Robot extends LoggedRobot {
         Logger.addDataReceiver(new NT4Publisher());
 
         Logger.start();
+
+        Lights.getInstance();
     }
 
     /**
@@ -60,6 +64,7 @@ public class Robot extends LoggedRobot {
         // robot's periodic
         // block in order for anything in the Command-based framework to work.
         CommandScheduler.getInstance().run();
+        Lights.getInstance().run();
     }
 
     /** This function is called once each time the robot enters Disabled mode. */
@@ -70,6 +75,8 @@ public class Robot extends LoggedRobot {
                 .getTable("limelight-" + OdometryConstants.kActiveCamera)
                 .getEntry("throttle_set")
                 .setNumber(200);
+
+        Lights.getInstance().state = RobotState.DISABLED;
     }
 
     @Override
@@ -92,6 +99,8 @@ public class Robot extends LoggedRobot {
                 .getTable("limelight-" + OdometryConstants.kActiveCamera)
                 .getEntry("throttle_set")
                 .setNumber(0);
+
+        Lights.getInstance().state = RobotState.AUTO;
     }
 
     /** This function is called periodically during autonomous. */
@@ -113,6 +122,8 @@ public class Robot extends LoggedRobot {
                 .getTable("limelight-" + OdometryConstants.kActiveCamera)
                 .getEntry("throttle_set")
                 .setNumber(0);
+
+        Lights.getInstance().state = RobotState.TELEOP;
     }
 
     /** This function is called periodically during operator control. */

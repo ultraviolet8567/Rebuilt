@@ -125,17 +125,16 @@ public class SwerveModule {
     }
 
     public void setDesiredState(SwerveModuleState state, double throttle) {
+        state.optimize(getState().angle);
         if (Math.abs(state.speedMetersPerSecond) < 0.001) {
             stop();
         } else {
-            state.optimize(getState().angle);
-
             // Logger.recordOutput("SwerveModule/" + turningMotor.getDeviceId() + "/State", state);
             driveMotor.set(
                     state.speedMetersPerSecond / DriveConstants.kPhysicalMaxSpeedMetersPerSecond);
-            turningMotor.set(
-                    turningPidController.calculate(getTurningPosition(), state.angle.getRadians()));
         }
+        turningMotor.set(
+                turningPidController.calculate(getTurningPosition(), state.angle.getRadians()));
     }
 
     public SwerveModulePosition getModulePosition() {

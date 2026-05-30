@@ -11,13 +11,12 @@ import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.shuffleboard.BuiltInWidgets;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.util.Color;
+import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
-import frc.robot.util.VirtualSubsystem;
 import java.util.List;
 import org.littletonrobotics.junction.Logger;
-import frc.robot.subsystems.Intake.Pivot;
 
-public class Lights extends VirtualSubsystem {
+public class Lights extends SubsystemBase {
     private static Lights instance;
 
     public static Lights getInstance() {
@@ -29,7 +28,7 @@ public class Lights extends VirtualSubsystem {
     public int loopCycleCount = 0;
     public boolean lowBattery = false;
     public boolean autoFinished = false;
-    public boolean Pivotmoving = false;
+    public boolean pivotMoving = false;
     public double autoFinishedTime = 0.0;
     public RobotState state = RobotState.DISABLED;
     public Alliance alliance = Alliance.Blue;
@@ -42,10 +41,9 @@ public class Lights extends VirtualSubsystem {
     private GenericEntry demoToggle;
 
     // Constants
-    private static final int length = 20;
-    private static final int bottomLength = 8;
+    private static final int length = 46;
     private static final int minLoopCycleCount = 10;
-    private static final double lowBatteryVoltage = 10.0;
+    private static final double lowBatteryVoltage = 11.9;
     private static final double shimmerExtremeness = 0.5;
     private static final double shimmerSpeed = 1;
     private static final double strobeTickSkip = 15;
@@ -67,7 +65,7 @@ public class Lights extends VirtualSubsystem {
     private static final double waveAllianceDuration = 2.0;
 
     private Lights() {
-        leds = new AddressableLED(0);
+        leds = new AddressableLED(9);
         buffer = new AddressableLEDBuffer(length);
 
         leds.setLength(length);
@@ -106,7 +104,7 @@ public class Lights extends VirtualSubsystem {
                         .getEntry();
     }
 
-    public void periodic() {
+    public void run() {
         loadingNotifier.stop();
 
         Logger.recordOutput("RobotState/DemoMode", isDemo);
@@ -129,10 +127,9 @@ public class Lights extends VirtualSubsystem {
 
             // Disabled
             if (state == RobotState.DISABLED) {
-                // Orange 
+                // Orange
                 solid(Section.FULL, Color.kOrange);
             }
-
 
             // Autonomous
             else if (state == RobotState.AUTO) {
@@ -142,14 +139,22 @@ public class Lights extends VirtualSubsystem {
 
             // Teleop
             else {
-                 //Alliance colors
-                 if (alliance == Alliance.Blue) {
-                 wave(Section.FULL, Color.kLightBlue, Color.kDarkBlue, waveSlowCycleLength,
-                 waveSlowDuration);
-                 } else {
-                 wave(Section.FULL, Color.kFirstRed, Color.kRed, waveSlowCycleLength,
-                 waveSlowDuration);
-                 }
+                // Alliance colors
+                if (alliance == Alliance.Blue) {
+                    wave(
+                            Section.FULL,
+                            Color.kLightBlue,
+                            Color.kDarkBlue,
+                            waveSlowCycleLength,
+                            waveSlowDuration);
+                } else {
+                    wave(
+                            Section.FULL,
+                            Color.kFirstRed,
+                            Color.kRed,
+                            waveSlowCycleLength,
+                            waveSlowDuration);
+                }
 
                 // Pickup indicator
 
@@ -164,7 +169,6 @@ public class Lights extends VirtualSubsystem {
             if (isDemo) {
                 solid(Section.FULL, Color.kPurple);
             }
-    
 
             // Update LEDs
             leds.setData(buffer);
@@ -264,29 +268,11 @@ public class Lights extends VirtualSubsystem {
         UPPER;
 
         private int start() {
-            switch (this) {
-                case FULL:
-                    return 0;
-                case BOTTOM:
-                    return 0;
-                case UPPER:
-                    return bottomLength;
-                default:
-                    return 0;
-            }
+            return 0;
         }
 
         private int end() {
-            switch (this) {
-                case FULL:
-                    return length;
-                case BOTTOM:
-                    return bottomLength;
-                case UPPER:
-                    return length;
-                default:
-                    return 0;
-            }
+            return length;
         }
     }
 

@@ -34,7 +34,7 @@ public final class Constants {
 
     public static final boolean fieldOriented = true;
     public static final boolean tuningMode = true;
-    public static final boolean lightsExist = false;
+    public static final boolean lightsExist = true;
 
     public static class OperatorConstants {
         public static final int kDriverControllerPort = 0;

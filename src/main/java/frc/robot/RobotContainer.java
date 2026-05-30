@@ -164,7 +164,7 @@ public class RobotContainer {
 
         // driverController.x().onTrue(new LockWheels(swerve));
         operatorController.leftBumper().whileTrue(new SpinIntake(intake.getFunnel(), false));
-        operatorController.leftTrigger().whileTrue(new SpinIndexer(storage.getIndexer(), false));
+        // operatorController.leftTrigger().whileTrue(new SpinIndexer(storage.getIndexer(), false));
         // operatorController.rightBumper().whileTrue(new ManualKicker(shooter.getKicker()));
         operatorController.povUp().whileTrue(new SetHood(shooter.getHood(), false));
         operatorController.povDown().whileTrue(new SetHood(shooter.getHood(), true));
