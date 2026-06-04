@@ -12,6 +12,7 @@ import frc.robot.Constants;
 import frc.robot.Constants.DriveConstants;
 import frc.robot.Constants.OIConstants;
 import frc.robot.RobotContainer;
+import frc.robot.subsystems.Lights;
 import frc.robot.subsystems.Odometry;
 import frc.robot.subsystems.Swerve;
 import frc.robot.util.AllianceFlipUtil;
@@ -54,9 +55,11 @@ public class ManualTeleOp extends Command {
     @Override
     public void execute() {
         if (xButton.get()) {
+            Lights.getInstance().wheelsLocked = true;
             swerve.lockWheels();
             return;
         }
+        Lights.getInstance().wheelsLocked = false;
 
         double xSpeed = xSpdFunction.get();
         double ySpeed = ySpdFunction.get();

@@ -90,6 +90,7 @@ public class RobotContainer {
                 "PivotMiddle", new SetPivot(intake.getPivot(), IntakeConstants.kPivotMiddle));
         NamedCommands.registerCommand(
                 "PivotDown", new SetPivot(intake.getPivot(), IntakeConstants.kPivotUpper));
+        NamedCommands.registerCommand("Feed", new Feed(intake.getPivot()));
         NamedCommands.registerCommand(
                 "CalculatedShoot",
                 new CalculatedShoot(shooter.getFlywheel(), odometry, storage.getIndexer()));
@@ -164,7 +165,7 @@ public class RobotContainer {
 
         // driverController.x().onTrue(new LockWheels(swerve));
         operatorController.leftBumper().whileTrue(new SpinIntake(intake.getFunnel(), false));
-        // operatorController.leftTrigger().whileTrue(new SpinIndexer(storage.getIndexer(), false));
+        operatorController.leftTrigger().whileTrue(new SpinIndexer(storage.getIndexer(), false));
         // operatorController.rightBumper().whileTrue(new ManualKicker(shooter.getKicker()));
         operatorController.povUp().whileTrue(new SetHood(shooter.getHood(), false));
         operatorController.povDown().whileTrue(new SetHood(shooter.getHood(), true));
@@ -189,6 +190,7 @@ public class RobotContainer {
                 .a()
                 .whileTrue(new SetPivot(intake.getPivot(), IntakeConstants.kPivotUpper));
         operatorController.b().whileTrue(new SpinIntake(intake.getFunnel(), true));
+        operatorController.povLeft().whileTrue(new Feed(intake.getPivot()));
     }
 
     /**

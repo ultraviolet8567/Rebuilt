@@ -16,6 +16,7 @@ import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.CAN;
 import frc.robot.Constants.IntakeConstants;
+import frc.robot.subsystems.Lights;
 import org.littletonrobotics.junction.Logger;
 
 public class Pivot extends SubsystemBase {
@@ -128,6 +129,7 @@ public class Pivot extends SubsystemBase {
 
         setAngleRads(targetPosition);
         pivotDisplay.setBoolean(atPosition(IntakeConstants.kPivotLower));
+        Lights.getInstance().pivotDown = !atPosition(IntakeConstants.kPivotLower);
     }
 
     public double getAbsoluteRotationRads() {

@@ -23,7 +23,6 @@ public class CalculatedShoot extends Command {
         Logger.recordOutput("Shooter/Shooting", true);
         flywheel.start(flywheel.calculateTargetVelocity(odometry.distToHub()));
         indexer.setIndexerVoltage(StorageConstants.kIndexerVoltage);
-        System.out.println(flywheel.calculateTargetVelocity(odometry.distToHub()));
     }
 
     @Override

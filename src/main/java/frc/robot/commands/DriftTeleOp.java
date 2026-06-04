@@ -13,6 +13,7 @@ import frc.robot.Constants;
 import frc.robot.Constants.DriveConstants;
 import frc.robot.Constants.OIConstants;
 import frc.robot.RobotContainer;
+import frc.robot.subsystems.Lights;
 import frc.robot.subsystems.Odometry;
 import frc.robot.subsystems.Swerve;
 import frc.robot.util.AllianceFlipUtil;
@@ -63,15 +64,18 @@ public class DriftTeleOp extends Command {
     public void execute() {
         pidController.setP(DriveConstants.kSwerveP.get());
         pidController.setI(DriveConstants.kSwerveI.get());
+
         pidController.setD(DriveConstants.kSwerveD.get());
 
         Logger.recordOutput(
                 "SwerveTeleOp/CurrentAngle", odometry.getGyrometerHeading().getRadians());
 
         if (xButton.get()) {
+            Lights.getInstance().wheelsLocked = true;
             swerve.lockWheels();
             return;
         }
+        Lights.getInstance().wheelsLocked = false;
 
         double xSpeed = xSpdFunction.get();
         double ySpeed = ySpdFunction.get();
@@ -159,7 +163,6 @@ public class DriftTeleOp extends Command {
         }
 
         Logger.recordOutput("SwerveTeleOp/SwerveTeleOp/chassisSpeeds", chassisSpeeds);
-
         Logger.recordOutput("SwerveTeleOp/SwerveTeleOp/xSpeed", xSpeed);
         Logger.recordOutput("SwerveTeleOp/SwerveTeleOp/ySpeed", ySpeed);
         Logger.recordOutput("SwerveTeleOp/SwerveTeleOp/turningSpeed", turningSpeed);

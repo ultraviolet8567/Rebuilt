@@ -132,7 +132,13 @@ public class SwerveModule {
             // Logger.recordOutput("SwerveModule/" + turningMotor.getDeviceId() + "/State", state);
             driveMotor.set(
                     state.speedMetersPerSecond / DriveConstants.kPhysicalMaxSpeedMetersPerSecond);
+            turningMotor.set(
+                    turningPidController.calculate(getTurningPosition(), state.angle.getRadians()));
         }
+    }
+
+    public void setModuleRotation(SwerveModuleState state) {
+        driveMotor.set(0);
         turningMotor.set(
                 turningPidController.calculate(getTurningPosition(), state.angle.getRadians()));
     }

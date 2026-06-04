@@ -181,6 +181,13 @@ public class Swerve extends SubsystemBase {
         backRight.setDesiredState(desiredStates[3], throttle);
     }
 
+    public void setModuleRotations(SwerveModuleState[] desiredStates) {
+        frontLeft.setModuleRotation(desiredStates[0]);
+        frontRight.setModuleRotation(desiredStates[1]);
+        backLeft.setModuleRotation(desiredStates[2]);
+        backRight.setModuleRotation(desiredStates[3]);
+    }
+
     // Sets the wheels to 45 degree angles so it doesn't move
     public void lockWheels() {
         SwerveModuleState[] locked =
@@ -191,7 +198,7 @@ public class Swerve extends SubsystemBase {
                     new SwerveModuleState(0, Rotation2d.fromDegrees(45))
                 };
 
-        setModuleStates(locked);
+        setModuleRotations(locked);
     }
 
     public double[] getWheelRadiusCharacterizationPosition() {

@@ -11,12 +11,11 @@ import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.shuffleboard.BuiltInWidgets;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.util.Color;
-import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 import java.util.List;
 import org.littletonrobotics.junction.Logger;
 
-public class Lights extends SubsystemBase {
+public class Lights {
     private static Lights instance;
 
     public static Lights getInstance() {
@@ -28,7 +27,9 @@ public class Lights extends SubsystemBase {
     public int loopCycleCount = 0;
     public boolean lowBattery = false;
     public boolean autoFinished = false;
-    public boolean pivotMoving = false;
+    public boolean pivotDown = false;
+    public boolean isShooting = false;
+    public boolean wheelsLocked = false;
     public double autoFinishedTime = 0.0;
     public RobotState state = RobotState.DISABLED;
     public Alliance alliance = Alliance.Blue;
@@ -41,9 +42,9 @@ public class Lights extends SubsystemBase {
     private GenericEntry demoToggle;
 
     // Constants
-    private static final int length = 46;
+    private static final int length = 42;
     private static final int minLoopCycleCount = 10;
-    private static final double lowBatteryVoltage = 11.9;
+    private static final double lowBatteryVoltage = 10;
     private static final double shimmerExtremeness = 0.5;
     private static final double shimmerSpeed = 1;
     private static final double strobeTickSkip = 15;
@@ -65,7 +66,7 @@ public class Lights extends SubsystemBase {
     private static final double waveAllianceDuration = 2.0;
 
     private Lights() {
-        leds = new AddressableLED(9);
+        leds = new AddressableLED(7);
         buffer = new AddressableLEDBuffer(length);
 
         leds.setLength(length);
@@ -117,6 +118,7 @@ public class Lights extends SubsystemBase {
 
         if (Constants.lightsExist) {
             // Exit during initial cycles
+
             loopCycleCount++;
             if (loopCycleCount < minLoopCycleCount) {
                 return;
@@ -128,18 +130,19 @@ public class Lights extends SubsystemBase {
             // Disabled
             if (state == RobotState.DISABLED) {
                 // Orange
-                solid(Section.FULL, Color.kOrange);
+                shimmer(Section.FULL, Color.kOrange);
             }
 
             // Autonomous
             else if (state == RobotState.AUTO) {
                 // Rainbow
-                rainbow(Section.FULL);
+                breath(Section.FULL, Color.kRed, Color.kBlue, 4, 1);
             }
 
             // Teleop
             else {
                 // Alliance colors
+                Color primaryColor;
                 if (alliance == Alliance.Blue) {
                     wave(
                             Section.FULL,
@@ -147,6 +150,7 @@ public class Lights extends SubsystemBase {
                             Color.kDarkBlue,
                             waveSlowCycleLength,
                             waveSlowDuration);
+                    primaryColor = Color.kBlue;
                 } else {
                     wave(
                             Section.FULL,
@@ -154,20 +158,31 @@ public class Lights extends SubsystemBase {
                             Color.kRed,
                             waveSlowCycleLength,
                             waveSlowDuration);
+                    primaryColor = Color.kRed;
                 }
 
-                // Pickup indicator
+                if (pivotDown) {
+                    stripes(Section.FULL, List.of(primaryColor, Color.kPurple), 4, 1);
+                }
 
+                if (wheelsLocked) {
+                    stripes(Section.FULL, List.of(primaryColor, Color.kOrange), 4, 0.5);
+                }
+
+                if (isShooting) {
+                    strobe(Section.FULL, Color.kPurple);
+                }
+                // Pickup indicator
             }
 
             // Indicate low battery in every case
             lowBattery = (RobotController.getBatteryVoltage() < lowBatteryVoltage);
             if (lowBattery) {
-                strobe(Section.BOTTOM, Color.kGray);
+                strobe(Section.BOTTOM, Color.kMagenta);
             }
             // Demo mode is purple
             if (isDemo) {
-                solid(Section.FULL, Color.kPurple);
+                rainbow(Section.FULL);
             }
 
             // Update LEDs

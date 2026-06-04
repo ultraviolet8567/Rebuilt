@@ -237,7 +237,7 @@ public final class Constants {
         public static final double kPivotGearboxReduction = 45.0;
         public static final double kPivotChainReduction = 40.0 / 16.0;
         public static final double kPivotEncoderOffset =
-                -18.037796326794894 + 0.189 - 0.26 + 0.338 + 0.53 + 0.124 - 0.9161;
+                -18.037796326794894 + 0.189 - 0.26 + 0.338 + 0.53 + 0.124 - 0.9161 - 0.194;
         public static final double kPivotFeedforwardOffset =
                 2.36 - 4.505 - 1.604 - 1.535 - 1.143 - 2.012 + Math.PI;
         public static final double kPivotVoltage = 10;
