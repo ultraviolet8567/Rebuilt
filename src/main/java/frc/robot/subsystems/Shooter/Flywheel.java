@@ -10,6 +10,7 @@ import com.revrobotics.spark.config.SparkFlexConfig;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
+import edu.wpi.first.units.measure.Velocity;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.CAN;
 import frc.robot.Constants.ShooterConstants;
@@ -69,12 +70,10 @@ public class Flywheel extends SubsystemBase {
                         ShooterConstants.kFollowerV.get(),
                         ShooterConstants.kFollowerA.get());
 
-        if (!Lights.getInstance().isDemo) {
+        
             targetVelocity = ShooterConstants.kFlywheelMaxVelocity;
-        } else {
-            targetVelocity =
-                    ShooterConstants.kFlywheelMaxVelocity * ShooterConstants.shooterDemoScaleFactor;
-        }
+        
+    
         running = false;
     }
 
@@ -107,12 +106,12 @@ public class Flywheel extends SubsystemBase {
         Logger.recordOutput("Shooter/Flywheel/Ks", leadFeedforwardController.getKs());
         Logger.recordOutput("Shooter/Flywheel/Kv", leadFeedforwardController.getKv());
         Logger.recordOutput("Shooter/Flywheel/Ka", leadFeedforwardController.getKa());
-        Logger.recordOutput("Shooter/Flywheel/TargetVelocity", targetVelocity);
+        Logger.recordOutput("Shooter/Flywheel/TargetVelocity", getTargetVelocity());
 
-        Lights.getInstance().isShooting = atVelocity(targetVelocity);
+        Lights.getInstance().isShooting = atVelocity(getTargetVelocity());
 
         if (running) {
-            setFlywheelRadsPerSec(targetVelocity);
+            setFlywheelRadsPerSec(getTargetVelocity());
         } else {
             stop();
         }
@@ -121,6 +120,8 @@ public class Flywheel extends SubsystemBase {
     public double getVelocity(SparkFlex motor) {
         return motor.getEncoder().getVelocity();
     }
+
+   
 
     public void setFlywheelRadsPerSec(double targetVelocity) {
         double pidVoltage, ffVoltage;
@@ -134,7 +135,7 @@ public class Flywheel extends SubsystemBase {
         setMotorVoltage(leadMotor, pidVoltage + ffVoltage);
 
         pidVoltage = followerPIDController.calculate(-getVelocity(followerMotor), targetVelocity);
-        ffVoltage = followerFeedforwardController.calculate(targetVelocity);
+        ffVoltage = followerFeedforwardController.calculate(getTargetVelocity());
 
         Logger.recordOutput("Shooter/Flywheel/Follower/pidVoltage", pidVoltage);
         Logger.recordOutput("Shooter/Flywheel/Follower/ffVoltage", ffVoltage);
@@ -201,6 +202,13 @@ public class Flywheel extends SubsystemBase {
     }
 
     public double getTargetVelocity() {
+       if (Lights.getInstance().isDemo) {
+            targetVelocity = ShooterConstants.kFlywheelMaxVelocity * ShooterConstants.shooterDemoScaleFactor;
+        } 
+        else {
+            targetVelocity =
+                    ShooterConstants.kFlywheelMaxVelocity;
+        }
         return targetVelocity;
     }
 }

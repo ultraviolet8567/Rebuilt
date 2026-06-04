@@ -115,6 +115,8 @@ public class Swerve extends SubsystemBase {
                 "Swerve/FrontRight/DriveVoltage", Math.abs(frontRight.getDriveVoltage()));
         Logger.recordOutput("Swerve/BackLeft/DriveVoltage", Math.abs(backLeft.getDriveVoltage()));
         Logger.recordOutput("Swerve/BackRight/DriveVoltage", Math.abs(backRight.getDriveVoltage()));
+        Logger.recordOutput("SwerveMaxSpeed", getMaxSpeed());
+        
     }
 
     public double getDriveGearRatio() {
@@ -163,23 +165,34 @@ public class Swerve extends SubsystemBase {
         Logger.recordOutput("TargetState", moduleStates);
         setModuleStates(moduleStates);
     }
+    public double getMaxSpeed() {
+        if( Lights.getInstance().isDemo) {
+            return DriveConstants.kDemoTeleDriveMaxSpeedMetersPerSecond;
+        }
+        else {
+            return DriveConstants.kTeleDriveMaxSpeedMetersPerSecond;
+        }
+    }
 
     public void setModuleStates(SwerveModuleState[] desiredStates) {
         // double maxSpeed = Lights.getInstance().isDemo
         // ? DriveConstants.kDemoTeleDriveMaxSpeedMetersPerSecond
         // : DriveConstants.kTeleDriveMaxSpeedMetersPerSecond;
+        /* 
         double maxSpeed =
                 Lights.getInstance().isDemo
                         ? DriveConstants.kDemoTeleDriveMaxSpeedMetersPerSecond
                         : DriveConstants.kTeleDriveMaxSpeedMetersPerSecond;
         ;
+        */
 
-        SwerveDriveKinematics.desaturateWheelSpeeds(desiredStates, maxSpeed);
+        SwerveDriveKinematics.desaturateWheelSpeeds(desiredStates, getMaxSpeed());
         frontLeft.setDesiredState(desiredStates[0], throttle);
         frontRight.setDesiredState(desiredStates[1], throttle);
         backLeft.setDesiredState(desiredStates[2], throttle);
         backRight.setDesiredState(desiredStates[3], throttle);
     }
+
 
     public void setModuleRotations(SwerveModuleState[] desiredStates) {
         frontLeft.setModuleRotation(desiredStates[0]);
