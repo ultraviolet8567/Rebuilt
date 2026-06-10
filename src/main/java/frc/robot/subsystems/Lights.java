@@ -137,7 +137,10 @@ public class Lights {
             // Autonomous
             else if (state == RobotState.AUTO) {
                 // Rainbow
-                breath(Section.FULL, Color.kRed, Color.kBlue, 4, 1);
+                // Use the 4-arg overload so the animation runs off the live FPGA clock.
+                // The 5th argument of the other overload is a TIMESTAMP, not a speed --
+                // passing a constant froze the animation at one static color.
+                breath(Section.FULL, Color.kRed, Color.kBlue, 4);
             }
 
             // Teleop

@@ -10,7 +10,6 @@ import com.revrobotics.spark.config.SparkFlexConfig;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
-import edu.wpi.first.units.measure.Velocity;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.CAN;
 import frc.robot.Constants.ShooterConstants;
@@ -135,7 +134,7 @@ public class Flywheel extends SubsystemBase {
         setMotorVoltage(leadMotor, pidVoltage + ffVoltage);
 
         pidVoltage = followerPIDController.calculate(-getVelocity(followerMotor), targetVelocity);
-        ffVoltage = followerFeedforwardController.calculate(getTargetVelocity());
+        ffVoltage = followerFeedforwardController.calculate(targetVelocity);
 
         Logger.recordOutput("Shooter/Flywheel/Follower/pidVoltage", pidVoltage);
         Logger.recordOutput("Shooter/Flywheel/Follower/ffVoltage", ffVoltage);
@@ -212,12 +211,13 @@ public class Flywheel extends SubsystemBase {
     }
 
     public double getTargetVelocity() {
-       if (Lights.getInstance().isDemo) {
-            targetVelocity = ShooterConstants.kFlywheelMaxVelocity * ShooterConstants.shooterDemoScaleFactor;
-        } 
-        else {
-            targetVelocity =
-                    ShooterConstants.kFlywheelMaxVelocity;
+        // Scale for demo mode WITHOUT overwriting the field. The previous version
+        // assigned kFlywheelMaxVelocity to targetVelocity here, which clobbered
+        // every velocity commanded via start()/setTargetVelocity() -- both
+        // CalculatedShoot's distance-based velocity and Shuffle's tunable were
+        // replaced by the constant on the next periodic() call.
+        if (Lights.getInstance().isDemo) {
+            return targetVelocity * ShooterConstants.shooterDemoScaleFactor;
         }
         return targetVelocity;
     }
