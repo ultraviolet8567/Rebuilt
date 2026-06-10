@@ -261,7 +261,10 @@ public final class Constants {
 
         public static final double kFunnelReduction = 1 / 3.0;
         public static final double kFunnelVoltage = 12;
-        public static final boolean kFunnelInverted = true;
+        // Flipped to false alongside the Funnel.setFunnelVoltage ternary correction
+        // (was "inverted ? 1 : -1", i.e. true meant NO inversion). Net motor
+        // direction is unchanged from the field-tested behavior.
+        public static final boolean kFunnelInverted = false;
 
         public static final LoggedTunableNumber kPivotP = new LoggedTunableNumber("PivotPidP", 8);
         public static final LoggedTunableNumber kPivotI = new LoggedTunableNumber("PivotPidI", 0.0);
@@ -277,7 +280,10 @@ public final class Constants {
         // change later
         public static final double kIndexerVoltage = 8;
         public static final double kIndexerReduction = 1.0;
-        public static final boolean kIndexerInverted = true;
+        // Flipped to false alongside the Indexer.setIndexerVoltage ternary correction
+        // (was "inverted ? 1 : -1", i.e. true meant NO inversion). Net motor
+        // direction is unchanged from the field-tested behavior.
+        public static final boolean kIndexerInverted = false;
     }
 
     public static class AutoConstants {

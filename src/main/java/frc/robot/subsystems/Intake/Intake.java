@@ -13,11 +13,6 @@ public class Intake extends SubsystemBase {
         pivot = new Pivot();
     }
 
-    @Override
-    public void periodic() {
-        pivot.periodic();
-    }
-
     public Funnel getFunnel() {
         return funnel;
     }
