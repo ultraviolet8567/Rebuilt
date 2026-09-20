@@ -115,6 +115,10 @@ tasks.withType(JavaCompile) {
 }
 
 spotless {
+    // Force LF everywhere so the format check passes on Windows checkouts too
+    // (without this, Windows expects CRLF and `gradlew build` fails on build.gradle).
+    lineEndings 'UNIX'
+
     java {
         googleJavaFormat().aosp()
     }
