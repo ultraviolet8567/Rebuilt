@@ -196,7 +196,7 @@
 <tr><th>Platform</th><th><code>gradlew build</code> (incl. tests)</th><th><code>gradlew simulateJava</code></th></tr>
 <tr><td>macOS 26, Apple Silicon, Homebrew JDK 17</td><td>Pass</td><td>GUI opens, program runs</td></tr>
 <tr><td>Ubuntu 24.04 ARM64 (Parallels), apt JDK 17</td><td>Pass</td><td>GUI opens, program runs (screenshot in the simulator guide)</td></tr>
-<tr><td>Windows 11 ARM64 (Parallels), Temurin JDK 17 x64</td><td>Pass after the Spotless line-ending fix below</td><td>Program boots, Sim GUI extension loads (run from a service session, so the window itself was not visible to the check)</td></tr>
+<tr><td>Windows 11 ARM64 (Parallels), Temurin JDK 17 x64</td><td>Pass after the Spotless line-ending fix below</td><td>GUI opens, program runs (confirmed interactively in the VM)</td></tr>
 </table>
 <p><span class="tag fix">fix</span> <strong>Spotless line endings.</strong> On Windows the Groovy formatter expected CRLF and <code>spotlessGroovyGradleCheck</code> failed on <code>build.gradle</code>, which breaks <code>gradlew build</code> for every Windows teammate. <code>lineEndings 'UNIX'</code> is now pinned in the <code>spotless</code> block. Found only by running on Windows.</p>
 

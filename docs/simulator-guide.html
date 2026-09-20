@@ -470,7 +470,7 @@ git checkout sim/shooter-seperate-sim</code></pre>
 <tr><th style="width:24%">Platform</th><th>Build + 7 self-tests</th><th>Simulator window</th><th>Notes</th></tr>
 <tr><td>macOS 26 (Apple Silicon)</td><td>Pass</td><td>Opens and runs</td><td>Homebrew <code>openjdk@17</code> or the WPILib JDK. Primary development machine.</td></tr>
 <tr><td>Ubuntu 24.04 (ARM64, Parallels VM)</td><td>Pass</td><td>Opens and runs (screenshot below)</td><td><code>sudo apt install openjdk-17-jdk git</code>. 2 CPUs / 4 GB is enough. Runs under Wayland via XWayland; if the window is black on a virtual GPU, start it with <code>LIBGL_ALWAYS_SOFTWARE=1</code>.</td></tr>
-<tr><td>Windows 11 (ARM64, Parallels VM)</td><td>Pass</td><td>Program boots with the Sim GUI extension loaded</td><td>Use an <strong>x64</strong> Java 17 (the WPILib installer's, or Temurin x64); WPILib ships no ARM64 Windows natives, so the x64 JDK runs under emulation. Git is optional: the "Download ZIP" button on GitHub works. The <code>lineEndings 'UNIX'</code> Spotless setting on this branch is what makes <code>gradlew build</code> pass on Windows.</td></tr>
+<tr><td>Windows 11 (ARM64, Parallels VM)</td><td>Pass</td><td>Opens and runs</td><td>Use an <strong>x64</strong> Java 17 (the WPILib installer's, or Temurin x64); WPILib ships no ARM64 Windows natives, so the x64 JDK runs under emulation. Git is optional: the "Download ZIP" button on GitHub works. The <code>lineEndings 'UNIX'</code> Spotless setting on this branch is what makes <code>gradlew build</code> pass on Windows.</td></tr>
 </table>
 <figure>
 <img src="screenshots/ubuntu-24.04-arm64-simgui.png" alt="WPILib simulation window running on Ubuntu 24.04" style="width:100%;border:1px solid var(--line);border-radius:6px">
