@@ -51,6 +51,48 @@
 <strong>Terms with a <a class="t" href="#glossary" data-tip="Like this! Hover or tap a dotted word for a short explanation. The glossary at the bottom has all of them.">dotted underline</a></strong> have a tooltip; hover over them (or tap on a phone) for a plain-English explanation. Each section ends with a <em>Learn more</em> box linking to the official documentation.
 </div>
 
+
+<figure>
+<svg viewBox="0 0 900 330" width="100%" role="img" aria-label="How the simulator fits together">
+  <defs><marker id="bp" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#5c6470"/></marker></defs>
+  <!-- inputs -->
+  <rect x="20" y="60" width="150" height="70" rx="8" fill="#fff" stroke="#d9dee5"/>
+  <text x="95" y="88" text-anchor="middle" font-size="14" font-weight="600">Keyboard or</text>
+  <text x="95" y="108" text-anchor="middle" font-size="14" font-weight="600">Xbox controller</text>
+  <rect x="20" y="200" width="150" height="70" rx="8" fill="#fff" stroke="#d9dee5"/>
+  <text x="95" y="228" text-anchor="middle" font-size="14" font-weight="600">You</text>
+  <text x="95" y="248" text-anchor="middle" font-size="12" fill="#5c6470">enable / pick auto</text>
+  <!-- laptop -->
+  <rect x="230" y="20" width="420" height="290" rx="14" fill="#f4f6f8" stroke="#9aa4b1" stroke-width="2"/>
+  <text x="440" y="46" text-anchor="middle" font-size="15" font-weight="700" fill="#5c6470">YOUR LAPTOP</text>
+  <rect x="255" y="65" width="170" height="110" rx="8" fill="#e6ecff" stroke="#0b5fff" stroke-width="2"/>
+  <text x="340" y="92" text-anchor="middle" font-size="14" font-weight="700">Robot program</text>
+  <text x="340" y="112" text-anchor="middle" font-size="12" fill="#5c6470">the exact code that runs</text>
+  <text x="340" y="128" text-anchor="middle" font-size="12" fill="#5c6470">on the real robot</text>
+  <text x="340" y="158" text-anchor="middle" font-size="12" fill="#0b5fff">+ pretend motors, sensors, gyro</text>
+  <rect x="455" y="65" width="170" height="110" rx="8" fill="#fff4d6" stroke="#9a6700" stroke-width="2"/>
+  <text x="540" y="92" text-anchor="middle" font-size="14" font-weight="700">Simulation window</text>
+  <text x="540" y="112" text-anchor="middle" font-size="12" fill="#5c6470">enable / disable, joysticks,</text>
+  <text x="540" y="128" text-anchor="middle" font-size="12" fill="#5c6470">alliance, live numbers</text>
+  <text x="540" y="158" text-anchor="middle" font-size="12" fill="#9a6700">stands in for the Driver Station</text>
+  <rect x="255" y="200" width="370" height="90" rx="8" fill="#e3f1e6" stroke="#1a7f37" stroke-width="2"/>
+  <text x="440" y="228" text-anchor="middle" font-size="14" font-weight="700">AdvantageScope</text>
+  <text x="440" y="248" text-anchor="middle" font-size="12" fill="#5c6470">robot drawn on the field, wheel arrows, graphs,</text>
+  <text x="440" y="266" text-anchor="middle" font-size="12" fill="#5c6470">mechanism drawings, saved log files</text>
+  <!-- arrows -->
+  <line x1="170" y1="95" x2="255" y2="110" stroke="#5c6470" stroke-width="2" marker-end="url(#bp)"/>
+  <line x1="170" y1="235" x2="455" y2="120" stroke="#5c6470" stroke-width="2" stroke-dasharray="5 4" marker-end="url(#bp)"/>
+  <line x1="425" y1="120" x2="455" y2="120" stroke="#5c6470" stroke-width="2" marker-end="url(#bp)"/>
+  <line x1="340" y1="175" x2="340" y2="200" stroke="#1a7f37" stroke-width="2" marker-end="url(#bp)"/>
+  <text x="352" y="192" font-size="11" fill="#1a7f37">every number, 50&times; a second</text>
+  <!-- no robot -->
+  <rect x="690" y="90" width="190" height="150" rx="8" fill="#fff" stroke="#b42318" stroke-dasharray="6 4"/>
+  <text x="785" y="150" text-anchor="middle" font-size="15" font-weight="700" fill="#b42318">No robot needed</text>
+  <text x="785" y="172" text-anchor="middle" font-size="12" fill="#5c6470">no battery, no radio,</text>
+  <text x="785" y="188" text-anchor="middle" font-size="12" fill="#5c6470">nothing can break</text>
+</svg>
+<figcaption>Everything runs on one laptop. The robot program does not know it is being fooled.</figcaption>
+</figure>
 <ul class="toc">
   <li><a href="#need">1. What you need (one-time setup)</a></li>
   <li><a href="#get">2. Getting the code</a></li>
@@ -148,13 +190,142 @@ git checkout sim/shooter-seperate-sim</code></pre>
 <h2 id="drive">5. Driving the robot</h2>
 <div class="step"><div class="num">1</div><div><strong>Connect a controller.</strong> Best: plug in an Xbox controller and drag it from <em>System Joysticks</em> onto <strong>Joystick[0]</strong>. Otherwise drag <strong>Keyboard 0</strong> there.</div></div>
 <div class="step"><div class="num">2</div><div><strong>Set up keyboard steering (keyboard only).</strong> The robot turns with the controller's right stick, which is "axis 4". The keyboard preset does not map axis 4 by default. In the <em>System Joysticks</em> pane click the gear next to <em>Keyboard 0</em>, set <em>Axes</em> to at least 5, and for axis 4 assign two keys (for example <kbd>Q</kbd> and <kbd>E</kbd>). Forward/back and left/right already use <kbd>W</kbd> <kbd>S</kbd> <kbd>A</kbd> <kbd>D</kbd>. The settings are remembered in a file next to the code.</div></div>
+
+<figure>
+<svg viewBox="0 0 640 210" width="100%" style="max-width:640px" role="img" aria-label="Keyboard keys used to drive">
+  <defs>
+    <style>.k{fill:#fff;stroke:#b6bec8;stroke-width:1.5;} .kt{font-size:13px;font-weight:600;text-anchor:middle;}</style>
+  </defs>
+  <g id="row1">
+    <rect class="k" x="40" y="20" width="44" height="44" rx="6" fill="#fff4d6" stroke="#9a6700" stroke-width="2.5"/><text class="kt" x="62" y="47">Q</text>
+    <rect class="k" x="92" y="20" width="44" height="44" rx="6" fill="#e6ecff" stroke="#0b5fff" stroke-width="2.5"/><text class="kt" x="114" y="47">W</text>
+    <rect class="k" x="144" y="20" width="44" height="44" rx="6" fill="#fff4d6" stroke="#9a6700" stroke-width="2.5"/><text class="kt" x="166" y="47">E</text>
+    <rect class="k" x="196" y="20" width="44" height="44" rx="6"/><text class="kt" x="218" y="47">R</text>
+    <rect class="k" x="248" y="20" width="44" height="44" rx="6"/><text class="kt" x="270" y="47">T</text>
+    <rect class="k" x="300" y="20" width="44" height="44" rx="6"/><text class="kt" x="322" y="47">Y</text>
+  </g>
+  <g id="row2">
+    <rect class="k" x="62" y="72" width="44" height="44" rx="6" fill="#e6ecff" stroke="#0b5fff" stroke-width="2.5"/><text class="kt" x="84" y="99">A</text>
+    <rect class="k" x="114" y="72" width="44" height="44" rx="6" fill="#e6ecff" stroke="#0b5fff" stroke-width="2.5"/><text class="kt" x="136" y="99">S</text>
+    <rect class="k" x="166" y="72" width="44" height="44" rx="6" fill="#e6ecff" stroke="#0b5fff" stroke-width="2.5"/><text class="kt" x="188" y="99">D</text>
+    <rect class="k" x="218" y="72" width="44" height="44" rx="6"/><text class="kt" x="240" y="99">F</text>
+    <rect class="k" x="270" y="72" width="44" height="44" rx="6"/><text class="kt" x="292" y="99">G</text>
+  </g>
+  <g id="row3">
+    <rect class="k" x="84" y="124" width="44" height="44" rx="6"/><text class="kt" x="106" y="151">Z</text>
+    <rect class="k" x="136" y="124" width="44" height="44" rx="6"/><text class="kt" x="158" y="151">X</text>
+    <rect class="k" x="188" y="124" width="44" height="44" rx="6"/><text class="kt" x="210" y="151">C</text>
+    <rect class="k" x="240" y="124" width="44" height="44" rx="6"/><text class="kt" x="262" y="151">V</text>
+  </g>
+  <rect x="380" y="24" width="18" height="18" rx="4" fill="#e6ecff" stroke="#0b5fff" stroke-width="2"/>
+  <text x="406" y="38" font-size="14"><tspan font-weight="700">W S A D</tspan> = move (already set up)</text>
+  <text x="406" y="56" font-size="12" fill="#5c6470">W forward, S back, A left, D right</text>
+  <rect x="380" y="80" width="18" height="18" rx="4" fill="#fff4d6" stroke="#9a6700" stroke-width="2"/>
+  <text x="406" y="94" font-size="14"><tspan font-weight="700">Q E</tspan> = turn (you add this once)</text>
+  <text x="406" y="112" font-size="12" fill="#5c6470">gear icon &rarr; Axes = 5 &rarr; axis 4: Q / E</text>
+  <text x="380" y="160" font-size="12" fill="#5c6470">Click inside the simulation window first;</text>
+  <text x="380" y="178" font-size="12" fill="#5c6470">keys only count while it has focus.</text>
+</svg>
+<figcaption>Keyboard 0 layout after the one-time setup. A real controller needs no setup.</figcaption>
+</figure>
 <div class="step"><div class="num">3</div><div><strong>Enable.</strong> In <em>Robot State</em> click <strong>Teleoperated</strong>.</div></div>
 <div class="step"><div class="num">4</div><div><strong>Drive.</strong> Push the left stick (or <kbd>W</kbd>). The wheels turn to face the direction of travel, spin up, and the robot's position starts changing. Watch <code>Odometry/Pose</code> in NetworkTables, or better, use AdvantageScope (next section) to see it on the field.</div></div>
 <div class="callout warn"><strong>The robot is "field-oriented".</strong> Pushing the stick "up" always moves the robot <em>away from your alliance wall</em>, no matter which way the robot is facing, just like the real one. If it feels backwards, check the alliance colour in the DS pane: Red and Blue have opposite "forward".</div>
+
+<figure>
+<svg viewBox="0 0 900 400" width="100%" role="img" aria-label="Field-oriented driving: forward depends on your alliance">
+  <defs><marker id="fa" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#1b1f24"/></marker></defs>
+  <!-- field -->
+  <rect x="60" y="40" width="780" height="300" rx="6" fill="#e9ede6" stroke="#9aa4b1" stroke-width="2"/>
+  <rect x="60" y="40" width="14" height="300" fill="#2f6fed"/>
+  <rect x="826" y="40" width="14" height="300" fill="#d0342c"/>
+  <line x1="450" y1="40" x2="450" y2="340" stroke="#9aa4b1" stroke-dasharray="8 6"/>
+  <text x="67" y="30" text-anchor="middle" font-size="13" font-weight="700" fill="#2f6fed">BLUE WALL</text>
+  <text x="833" y="30" text-anchor="middle" font-size="13" font-weight="700" fill="#d0342c">RED WALL</text>
+  <text x="67" y="365" text-anchor="middle" font-size="12" fill="#5c6470">blue drivers</text>
+  <text x="67" y="381" text-anchor="middle" font-size="12" fill="#5c6470">stand here</text>
+  <text x="833" y="365" text-anchor="middle" font-size="12" fill="#5c6470">red drivers</text>
+  <text x="833" y="381" text-anchor="middle" font-size="12" fill="#5c6470">stand here</text>
+  <!-- hubs -->
+  <g transform="translate(300,190)"><polygon points="0,-34 30,-17 30,17 0,34 -30,17 -30,-17" fill="#fff" stroke="#2f6fed" stroke-width="3"/><text y="5" text-anchor="middle" font-size="12" font-weight="700" fill="#2f6fed">HUB</text></g>
+  <g transform="translate(600,190)"><polygon points="0,-34 30,-17 30,17 0,34 -30,17 -30,-17" fill="#fff" stroke="#d0342c" stroke-width="3"/><text y="5" text-anchor="middle" font-size="12" font-weight="700" fill="#d0342c">HUB</text></g>
+  <!-- blue robot, facing "up" on the page, stick forward pushes it away from the blue wall -->
+  <g transform="translate(180,110) rotate(-35)"><rect x="-24" y="-24" width="48" height="48" rx="4" fill="#cfe0ff" stroke="#2f6fed" stroke-width="2"/><polygon points="14,0 -4,-8 -4,8" fill="#2f6fed"/></g>
+  <line x1="215" y1="110" x2="330" y2="110" stroke="#1b1f24" stroke-width="3" marker-end="url(#fa)"/>
+  <text x="272" y="97" text-anchor="middle" font-size="13" font-weight="700">stick FORWARD</text>
+  <text x="272" y="135" text-anchor="middle" font-size="12" fill="#5c6470">away from the blue wall,</text>
+  <text x="272" y="150" text-anchor="middle" font-size="12" fill="#5c6470">whichever way the robot faces</text>
+  <!-- red robot -->
+  <g transform="translate(720,280) rotate(150)"><rect x="-24" y="-24" width="48" height="48" rx="4" fill="#ffd6d3" stroke="#d0342c" stroke-width="2"/><polygon points="14,0 -4,-8 -4,8" fill="#d0342c"/></g>
+  <line x1="685" y1="280" x2="570" y2="280" stroke="#1b1f24" stroke-width="3" marker-end="url(#fa)"/>
+  <text x="628" y="267" text-anchor="middle" font-size="13" font-weight="700">stick FORWARD</text>
+  <text x="628" y="305" text-anchor="middle" font-size="12" fill="#5c6470">away from the red wall</text>
+  <!-- legend -->
+  <text x="450" y="325" text-anchor="middle" font-size="12" fill="#5c6470">The little triangle is the robot's front. Notice it is not pointing the way the robot moves.</text>
+</svg>
+<figcaption>"Forward" on the stick means "away from my wall", not "the way the robot's nose points". Pressing <em>Back</em> on the driver controller re-teaches the robot which way its nose is.</figcaption>
+</figure>
 <div class="learn"><strong>Learn more:</strong> <a href="https://docs.wpilib.org/en/stable/docs/software/wpilib-tools/robot-simulation/simulation-gui.html#using-the-keyboard-as-a-joystick">Using the keyboard as a joystick</a> &middot; <a href="https://docs.wpilib.org/en/stable/docs/software/basic-programming/joystick.html">How joysticks map to axes and buttons</a></div>
 
 <h2 id="controls">6. Controller map</h2>
 <p>These are the real robot's bindings; the simulator uses the same code.</p>
+
+<figure>
+<svg viewBox="0 0 900 560" width="100%" role="img" aria-label="Xbox controller with numbered callouts">
+  <defs><style>.cn{font-size:12px;font-weight:700;fill:#fff;text-anchor:middle;} .lg{font-size:13.5px;}</style></defs>
+  <!-- triggers -->
+  <rect x="285" y="28" width="80" height="24" rx="8" fill="#cfd5dd" stroke="#9aa4b1"/><text x="325" y="45" text-anchor="middle" font-size="12">LT</text>
+  <rect x="535" y="28" width="80" height="24" rx="8" fill="#cfd5dd" stroke="#9aa4b1"/><text x="575" y="45" text-anchor="middle" font-size="12">RT</text>
+  <!-- bumpers -->
+  <rect x="265" y="58" width="120" height="20" rx="8" fill="#dfe4ea" stroke="#9aa4b1"/><text x="325" y="72" text-anchor="middle" font-size="12">LB</text>
+  <rect x="515" y="58" width="120" height="20" rx="8" fill="#dfe4ea" stroke="#9aa4b1"/><text x="575" y="72" text-anchor="middle" font-size="12">RB</text>
+  <!-- body -->
+  <path d="M300,80 H600 C660,80 690,120 700,180 L720,290 C725,330 700,350 675,335 L610,285 H290 L225,335 C200,350 175,330 180,290 L200,180 C210,120 240,80 300,80 Z" fill="#f4f6f8" stroke="#5c6470" stroke-width="2"/>
+  <!-- left stick -->
+  <circle cx="300" cy="160" r="34" fill="#e5e9ef" stroke="#5c6470" stroke-width="2"/><circle cx="300" cy="160" r="20" fill="#cfd5dd" stroke="#5c6470"/>
+  <!-- right stick -->
+  <circle cx="530" cy="245" r="34" fill="#e5e9ef" stroke="#5c6470" stroke-width="2"/><circle cx="530" cy="245" r="20" fill="#cfd5dd" stroke="#5c6470"/>
+  <!-- dpad -->
+  <g transform="translate(370,245)"><rect x="-12" y="-36" width="24" height="72" rx="4" fill="#cfd5dd" stroke="#5c6470"/><rect x="-36" y="-12" width="72" height="24" rx="4" fill="#cfd5dd" stroke="#5c6470"/></g>
+  <!-- back / start -->
+  <circle cx="410" cy="160" r="10" fill="#cfd5dd" stroke="#5c6470"/><text x="410" y="140" text-anchor="middle" font-size="11">Back</text>
+  <circle cx="490" cy="160" r="10" fill="#cfd5dd" stroke="#5c6470"/><text x="490" y="140" text-anchor="middle" font-size="11">Start</text>
+  <!-- ABXY -->
+  <circle cx="600" cy="125" r="15" fill="#f3d13a" stroke="#5c6470"/><text x="600" y="130" text-anchor="middle" font-size="13" font-weight="700">Y</text>
+  <circle cx="566" cy="160" r="15" fill="#5aa1e8" stroke="#5c6470"/><text x="566" y="165" text-anchor="middle" font-size="13" font-weight="700">X</text>
+  <circle cx="634" cy="160" r="15" fill="#e86b6b" stroke="#5c6470"/><text x="634" y="165" text-anchor="middle" font-size="13" font-weight="700">B</text>
+  <circle cx="600" cy="195" r="15" fill="#7bd17b" stroke="#5c6470"/><text x="600" y="200" text-anchor="middle" font-size="13" font-weight="700">A</text>
+  <!-- numbered callouts -->
+  <g>
+    <circle cx="260" cy="40" r="12" fill="#1b1f24"/><text class="cn" x="260" y="44">1</text>
+    <circle cx="245" cy="68" r="12" fill="#1b1f24"/><text class="cn" x="245" y="72">2</text>
+    <circle cx="252" cy="160" r="12" fill="#1b1f24"/><text class="cn" x="252" y="164">3</text>
+    <circle cx="370" cy="300" r="12" fill="#1b1f24"/><text class="cn" x="370" y="304">4</text>
+    <circle cx="410" cy="195" r="12" fill="#1b1f24"/><text class="cn" x="410" y="199">5</text>
+    <circle cx="650" cy="112" r="12" fill="#1b1f24"/><text class="cn" x="650" y="116">6</text>
+    <circle cx="655" cy="68" r="12" fill="#1b1f24"/><text class="cn" x="655" y="72">7</text>
+    <circle cx="640" cy="40" r="12" fill="#1b1f24"/><text class="cn" x="640" y="44">8</text>
+    <circle cx="580" cy="245" r="12" fill="#1b1f24"/><text class="cn" x="580" y="249">9</text>
+  </g>
+  <!-- legend -->
+  <rect x="40" y="365" width="820" height="180" rx="8" fill="#fff" stroke="#d9dee5"/>
+  <text x="60" y="390" font-size="14" font-weight="700" fill="#0b5fff">DRIVER (Joystick 0)</text>
+  <text x="470" y="390" font-size="14" font-weight="700" fill="#6b3fd6">OPERATOR (Joystick 1)</text>
+  <text class="lg" x="60" y="415"><tspan font-weight="700">3</tspan> Left stick: move (field-oriented)</text>
+  <text class="lg" x="60" y="437"><tspan font-weight="700">9</tspan> Right stick left/right: turn</text>
+  <text class="lg" x="60" y="459"><tspan font-weight="700">7</tspan> RB hold: slow mode (1/3 speed)</text>
+  <text class="lg" x="60" y="481"><tspan font-weight="700">8</tspan> RT hold: auto-aim at the hub</text>
+  <text class="lg" x="60" y="503"><tspan font-weight="700">6</tspan> X hold: lock wheels</text>
+  <text class="lg" x="60" y="525"><tspan font-weight="700">5</tspan> Back: reset "forward"</text>
+  <text class="lg" x="470" y="415"><tspan font-weight="700">6</tspan> Y / X / A: pivot up / middle / down &nbsp; B: intake reverse</text>
+  <text class="lg" x="470" y="437"><tspan font-weight="700">2</tspan> LB hold: intake rollers &nbsp;&nbsp; <tspan font-weight="700">1</tspan> LT hold: indexer</text>
+  <text class="lg" x="470" y="459"><tspan font-weight="700">8</tspan> RT hold: calculated shot (auto speed + indexer)</text>
+  <text class="lg" x="470" y="481"><tspan font-weight="700">7</tspan> RB hold: fixed shot (hood up + indexer)</text>
+  <text class="lg" x="470" y="503"><tspan font-weight="700">4</tspan> D-pad up/down: nudge hood &nbsp; left: "feed" wiggle</text>
+  <text class="lg" x="470" y="525" fill="#5c6470">Kicker fires by itself when the flywheel is at speed</text>
+</svg>
+<figcaption>Same physical controller, two jobs: whichever slot it is dragged into decides whether it drives (0) or operates (1).</figcaption>
+</figure>
 <h3>Driver (Joystick[0])</h3>
 <table>
 <tr><th style="width:30%">Control</th><th>What it does</th></tr>
@@ -193,6 +364,63 @@ git checkout sim/shooter-seperate-sim</code></pre>
 <tr><td><strong>Mechanism</strong></td><td><code>Mechanism2d/IntakePivot</code>, <code>Mechanism2d/Hood</code></td><td>Stick-figure drawings of the intake arm swinging down and the hood angle changing.</td></tr>
 <tr><td><strong>Line Graph</strong></td><td><code>Sim/BatteryVoltage</code>, <code>Sim/TotalCurrentAmps</code></td><td>The pretend battery sagging when everything runs at once.</td></tr>
 </table>
+
+<figure>
+<svg viewBox="0 0 900 470" width="100%" role="img" aria-label="What AdvantageScope looks like when connected to the simulator">
+  <rect x="10" y="10" width="880" height="450" rx="8" fill="#fff" stroke="#9aa4b1" stroke-width="2"/>
+  <rect x="10" y="10" width="880" height="26" rx="8" fill="#e5e9ef"/>
+  <text x="24" y="28" font-size="12" fill="#5c6470">AdvantageScope &mdash; File &rarr; Connect to Simulator &nbsp;&nbsp;&nbsp;&nbsp; &#9679; Connected: localhost</text>
+  <!-- sidebar -->
+  <rect x="10" y="36" width="230" height="424" fill="#f4f6f8"/>
+  <text x="24" y="60" font-size="12" font-weight="700" fill="#5c6470">FIELDS (drag these &rarr;)</text>
+  <text x="24" y="84" font-size="12">&#9660; RealOutputs</text>
+  <text x="40" y="106" font-size="12">&#9660; Odometry</text>
+  <rect x="52" y="114" width="150" height="18" rx="4" fill="#e6ecff"/><text x="58" y="127" font-size="12" font-weight="600">Pose</text>
+  <text x="58" y="148" font-size="12" fill="#5c6470">DistToHub</text>
+  <text x="40" y="170" font-size="12">&#9660; Swerve</text>
+  <rect x="52" y="178" width="150" height="18" rx="4" fill="#e3f1e6"/><text x="58" y="191" font-size="12" font-weight="600">SimTruePose</text>
+  <text x="58" y="212" font-size="12" fill="#5c6470">ModuleStates</text>
+  <text x="40" y="234" font-size="12">&#9660; Shooter / Flywheel</text>
+  <rect x="52" y="242" width="150" height="18" rx="4" fill="#fff4d6"/><text x="58" y="255" font-size="12" font-weight="600">Lead/Velocity</text>
+  <text x="58" y="276" font-size="12" fill="#5c6470">TargetVelocity</text>
+  <text x="40" y="298" font-size="12">&#9656; Mechanism2d</text>
+  <text x="40" y="320" font-size="12">&#9656; Sim</text>
+  <!-- tabs -->
+  <rect x="240" y="36" width="650" height="26" fill="#eef1f4"/>
+  <rect x="248" y="40" width="90" height="20" rx="4" fill="#fff" stroke="#9aa4b1"/><text x="293" y="54" text-anchor="middle" font-size="12" font-weight="600">Odometry</text>
+  <text x="385" y="54" text-anchor="middle" font-size="12" fill="#5c6470">Swerve</text>
+  <text x="470" y="54" text-anchor="middle" font-size="12" fill="#5c6470">Line Graph</text>
+  <text x="560" y="54" text-anchor="middle" font-size="12" fill="#5c6470">Mechanism</text>
+  <text x="620" y="54" text-anchor="middle" font-size="14" fill="#5c6470">+</text>
+  <!-- field view -->
+  <rect x="262" y="78" width="604" height="230" rx="4" fill="#e9ede6" stroke="#9aa4b1"/>
+  <rect x="262" y="78" width="10" height="230" fill="#2f6fed"/><rect x="856" y="78" width="10" height="230" fill="#d0342c"/>
+  <g transform="translate(450,193)"><polygon points="0,-22 19,-11 19,11 0,22 -19,11 -19,-11" fill="#fff" stroke="#2f6fed" stroke-width="2"/></g>
+  <g transform="translate(680,193)"><polygon points="0,-22 19,-11 19,11 0,22 -19,11 -19,-11" fill="#fff" stroke="#d0342c" stroke-width="2"/></g>
+  <!-- ghost (true) and solid (odometry) robots -->
+  <g transform="translate(372,236) rotate(-20)"><rect x="-20" y="-20" width="40" height="40" rx="3" fill="none" stroke="#1a7f37" stroke-width="2" stroke-dasharray="4 3"/><polygon points="12,0 -3,-6 -3,6" fill="#1a7f37"/></g>
+  <g transform="translate(360,244) rotate(-20)"><rect x="-20" y="-20" width="40" height="40" rx="3" fill="#cfe0ff" stroke="#0b5fff" stroke-width="2"/><polygon points="12,0 -3,-6 -3,6" fill="#0b5fff"/></g>
+  <line x1="395" y1="205" x2="470" y2="130" stroke="#1a7f37" stroke-width="1.5"/>
+  <text x="474" y="126" font-size="12" fill="#1a7f37">ghost = where it really is (SimTruePose)</text>
+  <line x1="345" y1="262" x2="420" y2="292" stroke="#0b5fff" stroke-width="1.5"/>
+  <text x="424" y="296" font-size="12" fill="#0b5fff">solid = where the code thinks it is (Odometry/Pose)</text>
+  <!-- bottom: drop zones + line graph -->
+  <rect x="262" y="318" width="290" height="130" rx="4" fill="#fff" stroke="#d9dee5"/>
+  <text x="274" y="338" font-size="12" font-weight="700" fill="#5c6470">Drop fields here</text>
+  <rect x="274" y="348" width="120" height="20" rx="4" fill="#e6ecff"/><text x="280" y="362" font-size="11">Robot: Odometry/Pose</text>
+  <rect x="274" y="374" width="150" height="20" rx="4" fill="#e3f1e6"/><text x="280" y="388" font-size="11">Ghost: Swerve/SimTruePose</text>
+  <text x="274" y="420" font-size="11" fill="#5c6470">Right-click a field to change</text>
+  <text x="274" y="436" font-size="11" fill="#5c6470">Robot / Ghost / Trajectory</text>
+  <rect x="566" y="318" width="300" height="130" rx="4" fill="#fff" stroke="#d9dee5"/>
+  <text x="578" y="338" font-size="12" font-weight="700" fill="#5c6470">Line Graph tab: flywheel spin-up</text>
+  <polyline points="580,430 620,430 630,395 645,372 665,362 700,358 760,358 800,358 840,358" fill="none" stroke="#9a6700" stroke-width="2"/>
+  <line x1="580" y1="356" x2="850" y2="356" stroke="#0b5fff" stroke-width="1.5" stroke-dasharray="5 4"/>
+  <text x="700" y="350" font-size="11" fill="#0b5fff">TargetVelocity</text>
+  <text x="780" y="376" font-size="11" fill="#9a6700">Lead/Velocity</text>
+  <text x="578" y="444" font-size="11" fill="#5c6470">trigger pressed &uarr;</text>
+</svg>
+<figcaption>A typical first layout. The gap between the ghost and the solid robot is odometry drift, the thing the camera corrects on the real robot.</figcaption>
+</figure>
 <p>Every run also saves a log file in the <code>logs/</code> folder inside the project. Open one later with <strong>File &rarr; Open Log</strong> and scrub through it with the timeline, exactly as the team does with logs from real matches.</p>
 <div class="learn"><strong>Learn more:</strong> <a href="https://docs.advantagescope.org/">AdvantageScope documentation</a> (start with "Getting Started" and the Odometry and Swerve tab pages) &middot; <a href="https://docs.advantagekit.org/">AdvantageKit</a>, the logging framework the code uses</div>
 
