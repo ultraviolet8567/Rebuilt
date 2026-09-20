@@ -3,6 +3,7 @@ package frc.robot.subsystems;
 import edu.wpi.first.math.geometry.*;
 import edu.wpi.first.math.kinematics.*;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Constants;
 import frc.robot.Constants.CAN;
 import frc.robot.Constants.DriveConstants;
 import frc.robot.Constants.ModuleConstants;
@@ -13,6 +14,10 @@ public class Swerve extends SubsystemBase {
     private final SwerveModule frontLeft, frontRight, backLeft, backRight;
     public final double driveGearRatio, driveRot2Meter, driveRPM2MeterPerSec;
     private double throttle;
+
+    // Desktop simulation only: the "true" robot pose, integrated from the simulated module
+    // states. Compare it to Odometry/Pose in AdvantageScope to see how much odometry drifts.
+    private Pose2d simTruePose = new Pose2d();
 
     public Swerve(int gearing) {
         System.out.println("[Init] Creating Swerve");
@@ -116,7 +121,41 @@ public class Swerve extends SubsystemBase {
         Logger.recordOutput("Swerve/BackLeft/DriveVoltage", Math.abs(backLeft.getDriveVoltage()));
         Logger.recordOutput("Swerve/BackRight/DriveVoltage", Math.abs(backRight.getDriveVoltage()));
         Logger.recordOutput("SwerveMaxSpeed", getMaxSpeed());
-        
+    }
+
+    // ------------------------------------------------------------------------------------
+    // Desktop simulation
+    // ------------------------------------------------------------------------------------
+
+    /** Called by the CommandScheduler each loop, only when running on a desktop. */
+    @Override
+    public void simulationPeriodic() {
+        frontLeft.simulationPeriodic();
+        frontRight.simulationPeriodic();
+        backLeft.simulationPeriodic();
+        backRight.simulationPeriodic();
+
+        // Dead-reckon the ground-truth pose from what the simulated wheels are doing.
+        ChassisSpeeds speeds = getRobotRelativeSpeeds();
+        double dt = Constants.kLoopPeriodSecs;
+        simTruePose =
+                simTruePose.exp(
+                        new Twist2d(
+                                speeds.vxMetersPerSecond * dt,
+                                speeds.vyMetersPerSecond * dt,
+                                speeds.omegaRadiansPerSecond * dt));
+
+        Logger.recordOutput("Swerve/SimTruePose", simTruePose);
+    }
+
+    /** Ground-truth pose in simulation. Meaningless on the real robot. */
+    public Pose2d getSimTruePose() {
+        return simTruePose;
+    }
+
+    /** Keep the simulated ground truth in step when odometry is reset (e.g. at auto start). */
+    public void resetSimTruePose(Pose2d pose) {
+        simTruePose = pose;
     }
 
     public double getDriveGearRatio() {
@@ -165,11 +204,11 @@ public class Swerve extends SubsystemBase {
         Logger.recordOutput("TargetState", moduleStates);
         setModuleStates(moduleStates);
     }
+
     public double getMaxSpeed() {
-        if( Lights.getInstance().isDemo) {
+        if (Lights.getInstance().isDemo) {
             return DriveConstants.kDemoTeleDriveMaxSpeedMetersPerSecond;
-        }
-        else {
+        } else {
             return DriveConstants.kTeleDriveMaxSpeedMetersPerSecond;
         }
     }
@@ -178,7 +217,7 @@ public class Swerve extends SubsystemBase {
         // double maxSpeed = Lights.getInstance().isDemo
         // ? DriveConstants.kDemoTeleDriveMaxSpeedMetersPerSecond
         // : DriveConstants.kTeleDriveMaxSpeedMetersPerSecond;
-        /* 
+        /*
         double maxSpeed =
                 Lights.getInstance().isDemo
                         ? DriveConstants.kDemoTeleDriveMaxSpeedMetersPerSecond
@@ -192,7 +231,6 @@ public class Swerve extends SubsystemBase {
         backLeft.setDesiredState(desiredStates[2], throttle);
         backRight.setDesiredState(desiredStates[3], throttle);
     }
-
 
     public void setModuleRotations(SwerveModuleState[] desiredStates) {
         frontLeft.setModuleRotation(desiredStates[0]);

@@ -10,6 +10,8 @@ import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc.robot.Constants.OdometryConstants;
 import frc.robot.subsystems.Lights;
 import frc.robot.subsystems.Lights.RobotState;
+import frc.robot.util.SimBattery;
+import java.io.File;
 import org.littletonrobotics.junction.LoggedRobot;
 import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.NT4Publisher;
@@ -30,20 +32,33 @@ public class Robot extends LoggedRobot {
      * initialization code.
      */
     public Robot() {
-        // Instantiate our RobotContainer. This will perform all our button bindings,
-        // and put our
-        // autonomous chooser on the dashboard.
-        Lights.getInstance();
-        m_robotContainer = new RobotContainer();
-    }
+        // AdvantageKit must be configured and started BEFORE any subsystem is created so that
+        // nothing is logged into the void. Where logs go depends on where we are running.
+        Logger.recordMetadata("ProjectName", "Rebuilt2026");
+        Logger.recordMetadata("RuntimeMode", Constants.currentMode.toString());
 
-    @Override
-    public void robotInit() {
-        // Logger.addDataReceiver(new WPILOGWriter("/U/logs/"));
-        Logger.addDataReceiver(new WPILOGWriter("/home/lvuser/logs/"));
-        Logger.addDataReceiver(new NT4Publisher());
+        switch (Constants.currentMode) {
+            case REAL:
+                // roboRIO internal flash. Small: clean out /home/lvuser/logs periodically.
+                Logger.addDataReceiver(new WPILOGWriter("/home/lvuser/logs/"));
+                Logger.addDataReceiver(new NT4Publisher());
+                break;
+            case SIM:
+                // Desktop simulation: logs land in <project>/logs (gitignored) and are also
+                // published over NetworkTables so AdvantageScope can connect live to
+                // localhost.
+                new File("logs").mkdirs();
+                Logger.addDataReceiver(new WPILOGWriter("logs/"));
+                Logger.addDataReceiver(new NT4Publisher());
+                break;
+        }
 
         Logger.start();
+
+        // Instantiate our RobotContainer. This will perform all our button bindings,
+        // and put our autonomous chooser on the dashboard.
+        Lights.getInstance();
+        m_robotContainer = new RobotContainer();
     }
 
     /**
@@ -56,12 +71,10 @@ public class Robot extends LoggedRobot {
     @Override
     public void robotPeriodic() {
         // Runs the Scheduler. This is responsible for polling buttons, adding
-        // newly-scheduled
-        // commands, running already-scheduled commands, removing finished or
-        // interrupted commands,
-        // and running subsystem periodic() methods. This must be called from the
-        // robot's periodic
-        // block in order for anything in the Command-based framework to work.
+        // newly-scheduled commands, running already-scheduled commands, removing finished or
+        // interrupted commands, and running subsystem periodic() methods. This must be called
+        // from the robot's periodic block in order for anything in the Command-based framework
+        // to work.
         CommandScheduler.getInstance().run();
         Lights.getInstance().run();
     }
@@ -145,17 +158,20 @@ public class Robot extends LoggedRobot {
     @Override
     public void testPeriodic() {}
 
-    /** This function is called once when the robot is first started up. */
+    /** This function is called once when the simulation is first started up. */
     @Override
     public void simulationInit() {
-        LimelightHelpers.setLEDMode_PipelineControl("limelight-" + OdometryConstants.kActiveCamera);
-        NetworkTableInstance.getDefault()
-                .getTable("limelight-" + OdometryConstants.kActiveCamera)
-                .getEntry("throttle_set")
-                .setNumber(0);
+        System.out.println("[Init] Running in DESKTOP SIMULATION. No hardware is being driven.");
     }
 
-    /** This function is called periodically whilst in simulation. */
+    /**
+     * This function is called periodically whilst in simulation, after robotPeriodic(). The
+     * individual subsystems update their own physics models in their simulationPeriodic() methods
+     * (called by the CommandScheduler); this just turns the currents they reported into a simulated
+     * battery voltage.
+     */
     @Override
-    public void simulationPeriodic() {}
+    public void simulationPeriodic() {
+        SimBattery.update();
+    }
 }

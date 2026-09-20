@@ -73,12 +73,6 @@
               {
                 "type": "named",
                 "data": {
-                  "name": "Index"
-                }
-              },
-              {
-                "type": "named",
-                "data": {
                   "name": "AutoAlign"
                 }
               },

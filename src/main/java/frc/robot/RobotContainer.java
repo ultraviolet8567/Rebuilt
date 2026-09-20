@@ -58,11 +58,20 @@ public class RobotContainer {
         shooter = new Shooter();
         intake = new Intake();
         storage = new Storage();
-        camera = CameraServer.startAutomaticCapture(0);
-
+        // The driver camera only exists on the real robot. In desktop simulation, asking
+        // CameraServer for USB camera 0 would grab the laptop webcam (or fail), so skip it.
         if (RobotBase.isReal()) {
+            camera = CameraServer.startAutomaticCapture(0);
             camera.setFPS(60);
             camera.setResolution(320, 240);
+
+            Shuffleboard.getTab("Main")
+                    .add("Camera", camera)
+                    .withWidget(BuiltInWidgets.kCameraStream)
+                    .withSize(4, 4)
+                    .withPosition(2, 0);
+        } else {
+            camera = null;
         }
 
         // Configure the PathPlanner auto-builder
@@ -117,12 +126,6 @@ public class RobotContainer {
         //        .withWidget(BuiltInWidgets.kCommand);
 
         autoChooser = new AutoChooser();
-
-        Shuffleboard.getTab("Main")
-                .add("Camera", camera)
-                .withWidget(BuiltInWidgets.kCameraStream)
-                .withSize(4, 4)
-                .withPosition(2, 0);
 
         swerve.setDefaultCommand(
                 new ManualTeleOp(
@@ -204,5 +207,26 @@ public class RobotContainer {
 
     public static XboxController getDriverJoystick() {
         return driverController.getHID();
+    }
+
+    // Accessors used by the simulation smoke test (src/test). Not needed by robot code.
+    public Swerve getSwerve() {
+        return swerve;
+    }
+
+    public Odometry getOdometry() {
+        return odometry;
+    }
+
+    public Shooter getShooter() {
+        return shooter;
+    }
+
+    public Intake getIntake() {
+        return intake;
+    }
+
+    public Storage getStorage() {
+        return storage;
     }
 }

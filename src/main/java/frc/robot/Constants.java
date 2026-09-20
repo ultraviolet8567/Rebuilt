@@ -10,7 +10,6 @@ import com.pathplanner.lib.config.RobotConfig;
 import com.pathplanner.lib.controllers.PPHolonomicDriveController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
@@ -20,6 +19,7 @@ import edu.wpi.first.math.system.plant.DCMotor;
 // import com.pathplanner.lib.util.PIDConstants;
 // import com.pathplanner.lib.util.ReplanningConfig;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj.RobotBase;
 import frc.robot.util.LoggedTunableNumber;
 
 /**
@@ -35,6 +35,17 @@ public final class Constants {
     public static final boolean fieldOriented = true;
     public static final boolean tuningMode = true;
     public static final boolean lightsExist = true;
+
+    /** Main robot loop period. Used by the simulation physics models. */
+    public static final double kLoopPeriodSecs = 0.02;
+
+    /** Where the code is running. REAL = roboRIO, SIM = desktop simulation. */
+    public static enum Mode {
+        REAL,
+        SIM
+    }
+
+    public static final Mode currentMode = RobotBase.isReal() ? Mode.REAL : Mode.SIM;
 
     public static class OperatorConstants {
         public static final int kDriverControllerPort = 0;
@@ -121,11 +132,15 @@ public final class Constants {
         public static final double kTeleDriveMaxSpeedMetersPerSecond = 5;
         public static final double kTeleDriveMaxAngularSpeedRadiansPerSecond = 3.5 * Math.PI;
 
-        public static final double swerveDemoScaleFactor = 0.25;
+        // Demo mode scales the normal teleop limits. The previous version derived the
+        // linear limit from the ANGULAR constant and vice versa (crossed units). 0.55
+        // keeps the demo max speed at ~2.75 m/s, the value the team has been running
+        // at demos, so on-robot behavior is unchanged.
+        public static final double swerveDemoScaleFactor = 0.55;
         public static final double kDemoTeleDriveMaxSpeedMetersPerSecond =
-                kTeleDriveMaxAngularSpeedRadiansPerSecond * swerveDemoScaleFactor;
+                kTeleDriveMaxSpeedMetersPerSecond * swerveDemoScaleFactor;
         public static final double kDemoTeleDriveMaxAngularSpeedRadiansPerSecond =
-                kPhysicalMaxSpeedMetersPerSecond * (swerveDemoScaleFactor * 2);
+                kTeleDriveMaxAngularSpeedRadiansPerSecond * swerveDemoScaleFactor;
 
         public static final double kTeleDriveMaxAccelerationUnitsPerSecond = 5;
         public static final double kTeleDriveMaxAngularAccelerationUnitsPerSecond = 3 * Math.PI;
@@ -228,7 +243,13 @@ public final class Constants {
 
         public static final Translation3d kTranslationOffset =
                 new Translation3d(-0.051, 0.27, 0.495);
-        public static final Rotation3d kRotationOffset = new Rotation3d(0, -30, 0);
+
+        // Camera mounting angles in DEGREES. LimelightHelpers.setCameraPose_RobotSpace()
+        // takes degrees. These used to be wrapped in a Rotation3d, whose constructor
+        // takes RADIANS, so the -30 was being sent to the Limelight as ~1.4 degrees.
+        public static final double kCameraRollDegrees = 0;
+        public static final double kCameraPitchDegrees = -30;
+        public static final double kCameraYawDegrees = 0;
     }
 
     public static final class FieldConstants {
@@ -297,6 +318,26 @@ public final class Constants {
         public static final PPHolonomicDriveController kHolonomicController =
                 new PPHolonomicDriveController(
                         new PIDConstants(1.5, 0, 0), new PIDConstants(1.5, 0, 0));
+    }
+
+    /**
+     * Physical parameters used ONLY by the desktop simulation models. None of these affect the real
+     * robot. Rough estimates are fine; they set how fast things spin up in the sim.
+     */
+    public static final class SimConstants {
+        // Moments of inertia in kg*m^2
+        public static final double kDriveWheelMOI = 0.03; // ~1/4 robot mass reflected to a wheel
+        public static final double kTurnMOI = 0.004;
+        public static final double kFlywheelMOI = 0.004; // per flywheel side
+        public static final double kHoodMOI = 0.002;
+        public static final double kKickerMOI = 0.001;
+        public static final double kIndexerMOI = 0.002;
+        public static final double kFunnelMOI = 0.002;
+
+        // Intake pivot modeled as a single-jointed arm
+        public static final double kPivotArmLengthMeters = 0.4;
+        public static final double kPivotArmMassKg = 4.0;
+        public static final double kPivotHardStopMarginRads = 0.05;
     }
 
     // CAN = computer area network

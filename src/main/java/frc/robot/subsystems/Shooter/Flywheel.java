@@ -3,6 +3,7 @@ package frc.robot.subsystems.Shooter;
 import com.revrobotics.PersistMode;
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.ResetMode;
+import com.revrobotics.sim.SparkFlexSim;
 import com.revrobotics.spark.SparkFlex;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
@@ -10,10 +11,18 @@ import com.revrobotics.spark.config.SparkFlexConfig;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
+import edu.wpi.first.math.system.plant.DCMotor;
+import edu.wpi.first.math.system.plant.LinearSystemId;
+import edu.wpi.first.wpilibj.RobotBase;
+import edu.wpi.first.wpilibj.simulation.FlywheelSim;
+import edu.wpi.first.wpilibj.simulation.RoboRioSim;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Constants;
 import frc.robot.Constants.CAN;
 import frc.robot.Constants.ShooterConstants;
+import frc.robot.Constants.SimConstants;
 import frc.robot.subsystems.Lights;
+import frc.robot.util.SimBattery;
 import org.littletonrobotics.junction.Logger;
 
 public class Flywheel extends SubsystemBase {
@@ -25,6 +34,11 @@ public class Flywheel extends SubsystemBase {
 
     private double targetVelocity;
     private boolean running;
+
+    // Desktop simulation only (null on the real robot). Each side of the shooter is its own
+    // motor + wheel, so each gets its own physics model.
+    private final FlywheelSim leadSim, followerSim;
+    private final SparkFlexSim leadSparkSim, followerSparkSim;
 
     public Flywheel() {
         System.out.println("[Init] Creating Flywheel");
@@ -69,11 +83,57 @@ public class Flywheel extends SubsystemBase {
                         ShooterConstants.kFollowerV.get(),
                         ShooterConstants.kFollowerA.get());
 
-        
-            targetVelocity = ShooterConstants.kFlywheelMaxVelocity;
-        
-    
+        targetVelocity = ShooterConstants.kFlywheelMaxVelocity;
+
         running = false;
+
+        if (RobotBase.isSimulation()) {
+            DCMotor gearbox = DCMotor.getNeoVortex(1);
+            leadSim =
+                    new FlywheelSim(
+                            LinearSystemId.createFlywheelSystem(
+                                    gearbox,
+                                    SimConstants.kFlywheelMOI,
+                                    ShooterConstants.kFlywheelReduction),
+                            gearbox);
+            followerSim =
+                    new FlywheelSim(
+                            LinearSystemId.createFlywheelSystem(
+                                    gearbox,
+                                    SimConstants.kFlywheelMOI,
+                                    ShooterConstants.kFlywheelReduction),
+                            gearbox);
+            leadSparkSim = new SparkFlexSim(leadMotor, gearbox);
+            followerSparkSim = new SparkFlexSim(followerMotor, gearbox);
+        } else {
+            leadSim = null;
+            followerSim = null;
+            leadSparkSim = null;
+            followerSparkSim = null;
+        }
+    }
+
+    // ------------------------------------------------------------------------------------
+    // Desktop simulation
+    // ------------------------------------------------------------------------------------
+
+    @Override
+    public void simulationPeriodic() {
+        double dt = Constants.kLoopPeriodSecs;
+        double vbus = RoboRioSim.getVInVoltage();
+
+        // The encoder velocity conversion factor is 1/kFlywheelReduction, so the value the
+        // robot code reads is wheel RPM. FlywheelSim.getAngularVelocityRPM() is also wheel RPM.
+        leadSim.setInputVoltage(leadSparkSim.getAppliedOutput() * vbus);
+        leadSim.update(dt);
+        leadSparkSim.iterate(leadSim.getAngularVelocityRPM(), vbus, dt);
+
+        followerSim.setInputVoltage(followerSparkSim.getAppliedOutput() * vbus);
+        followerSim.update(dt);
+        followerSparkSim.iterate(followerSim.getAngularVelocityRPM(), vbus, dt);
+
+        SimBattery.addCurrent(leadSim.getCurrentDrawAmps());
+        SimBattery.addCurrent(followerSim.getCurrentDrawAmps());
     }
 
     public void periodic() {
@@ -119,8 +179,6 @@ public class Flywheel extends SubsystemBase {
     public double getVelocity(SparkFlex motor) {
         return motor.getEncoder().getVelocity();
     }
-
-   
 
     public void setFlywheelRadsPerSec(double targetVelocity) {
         double pidVoltage, ffVoltage;

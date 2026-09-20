@@ -1,13 +1,16 @@
 package frc.robot.subsystems;
 
 import com.ctre.phoenix6.hardware.Pigeon2;
+import com.ctre.phoenix6.sim.Pigeon2SimState;
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
+import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Constants;
 import frc.robot.Constants.DriveConstants;
 import frc.robot.Constants.FieldConstants;
 import frc.robot.Constants.OdometryConstants;
@@ -21,6 +24,11 @@ public class Odometry extends SubsystemBase {
 
     private Pigeon2 gyro;
 
+    // Desktop simulation only: the Pigeon's simulated raw yaw, integrated from the chassis
+    // rotation rate. The Pigeon2's own setYaw()/reset() offsets still apply on top of this.
+    private Pigeon2SimState gyroSim;
+    private double simYawDegrees = 0.0;
+
     public Odometry(Swerve swerve) {
         System.out.println("[Init] Creating Odometry");
 
@@ -28,6 +36,10 @@ public class Odometry extends SubsystemBase {
 
         /* Gyro */
         gyro = new Pigeon2(30);
+        if (RobotBase.isSimulation()) {
+            gyroSim = gyro.getSimState();
+            gyroSim.setRawYaw(0.0);
+        }
         resetHeading();
 
         /* Odometry */
@@ -45,11 +57,14 @@ public class Odometry extends SubsystemBase {
                 OdometryConstants.kTranslationOffset.getX(),
                 OdometryConstants.kTranslationOffset.getY(),
                 OdometryConstants.kTranslationOffset.getZ(),
-                OdometryConstants.kRotationOffset.getX(),
-                OdometryConstants.kRotationOffset.getY(),
-                OdometryConstants.kRotationOffset.getZ());
+                OdometryConstants.kCameraRollDegrees,
+                OdometryConstants.kCameraPitchDegrees,
+                OdometryConstants.kCameraYawDegrees);
 
-        poseEstimator.setVisionMeasurementStdDevs(VecBuilder.fill(0.5, 0.5, 0.5));
+        // x/y from the Limelight are trusted moderately. Rotation is NOT: with MegaTag2 the
+        // vision rotation is derived from the gyro we already feed it, so fusing it tightly
+        // just lets vision fight the gyro. A huge stddev means "ignore vision rotation".
+        poseEstimator.setVisionMeasurementStdDevs(VecBuilder.fill(0.5, 0.5, 9999999));
     }
 
     /* Runs periodically (about once every 20 ms) */
@@ -130,6 +145,28 @@ public class Odometry extends SubsystemBase {
 
     public void resetPose(Pose2d pose) {
         poseEstimator.resetPosition(gyro.getRotation2d(), swerve.getModulePositions(), pose);
+        if (RobotBase.isSimulation()) {
+            swerve.resetSimTruePose(pose);
+        }
+    }
+
+    // ------------------------------------------------------------------------------------
+    // Desktop simulation
+    // ------------------------------------------------------------------------------------
+
+    /**
+     * Called by the CommandScheduler each loop, only on a desktop. Swerve.simulationPeriodic() has
+     * already advanced the wheels this loop (Swerve is registered first), so the chassis rotation
+     * rate we read here is current.
+     */
+    @Override
+    public void simulationPeriodic() {
+        double omegaRadPerSec = swerve.getRobotRelativeSpeeds().omegaRadiansPerSecond;
+        simYawDegrees += Math.toDegrees(omegaRadPerSec * Constants.kLoopPeriodSecs);
+        gyroSim.setRawYaw(simYawDegrees);
+        gyroSim.setAngularVelocityZ(Math.toDegrees(omegaRadPerSec));
+
+        Logger.recordOutput("Odometry/SimRawYawDegrees", simYawDegrees);
     }
 
     public void resetHeading() {

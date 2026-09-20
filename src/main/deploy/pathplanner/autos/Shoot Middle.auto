@@ -31,12 +31,6 @@
                 "data": {
                   "name": "CalculatedShoot"
                 }
-              },
-              {
-                "type": "named",
-                "data": {
-                  "name": "Index"
-                }
               }
             ]
           }
