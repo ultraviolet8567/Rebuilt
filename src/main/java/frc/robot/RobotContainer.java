@@ -4,67 +4,166 @@
 
 package frc.robot;
 
-import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
 import edu.wpi.first.cameraserver.CameraServer;
 import edu.wpi.first.cscore.UsbCamera;
-import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.DriverStation.Alliance;
+import edu.wpi.first.networktables.GenericEntry;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.shuffleboard.BuiltInWidgets;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
-import edu.wpi.first.wpilibj2.command.button.Trigger;
-import frc.robot.Constants.*;
-import frc.robot.commands.*;
-import frc.robot.subsystems.AutoChooser;
-import frc.robot.subsystems.Intake.Intake;
-import frc.robot.subsystems.Odometry;
-import frc.robot.subsystems.Shooter.Shooter;
-import frc.robot.subsystems.Storage.Storage;
-import frc.robot.subsystems.Swerve;
+import frc.robot.Constants.OIConstants;
+import frc.robot.commands.AutoSelector;
+import frc.robot.commands.DriveCommands;
+import frc.robot.subsystems.drive.Drive;
+import frc.robot.subsystems.drive.GyroIO;
+import frc.robot.subsystems.drive.GyroIOPigeon2;
+import frc.robot.subsystems.drive.GyroIOSim;
+import frc.robot.subsystems.drive.ModuleIO;
+import frc.robot.subsystems.drive.ModuleIOSim;
+import frc.robot.subsystems.drive.ModuleIOSpark;
+import frc.robot.subsystems.intake.Funnel;
+import frc.robot.subsystems.intake.FunnelIO;
+import frc.robot.subsystems.intake.FunnelIOSim;
+import frc.robot.subsystems.intake.FunnelIOTalonFX;
+import frc.robot.subsystems.intake.Intake;
+import frc.robot.subsystems.intake.IntakeConstants;
+import frc.robot.subsystems.intake.Pivot;
+import frc.robot.subsystems.intake.PivotIO;
+import frc.robot.subsystems.intake.PivotIOSim;
+import frc.robot.subsystems.intake.PivotIOSpark;
+import frc.robot.subsystems.leds.Leds;
+import frc.robot.subsystems.shooter.Flywheel;
+import frc.robot.subsystems.shooter.FlywheelIO;
+import frc.robot.subsystems.shooter.FlywheelIOSim;
+import frc.robot.subsystems.shooter.FlywheelIOSpark;
+import frc.robot.subsystems.shooter.Hood;
+import frc.robot.subsystems.shooter.HoodIO;
+import frc.robot.subsystems.shooter.HoodIOSim;
+import frc.robot.subsystems.shooter.HoodIOSpark;
+import frc.robot.subsystems.shooter.Kicker;
+import frc.robot.subsystems.shooter.KickerIO;
+import frc.robot.subsystems.shooter.KickerIOSim;
+import frc.robot.subsystems.shooter.KickerIOSpark;
+import frc.robot.subsystems.shooter.Shooter;
+import frc.robot.subsystems.storage.Indexer;
+import frc.robot.subsystems.storage.IndexerIO;
+import frc.robot.subsystems.storage.IndexerIOSim;
+import frc.robot.subsystems.storage.IndexerIOSpark;
+import frc.robot.subsystems.vision.Vision;
+import frc.robot.subsystems.vision.VisionConstants;
+import frc.robot.subsystems.vision.VisionIO;
+import frc.robot.subsystems.vision.VisionIOLimelight;
+import frc.robot.subsystems.vision.VisionIOSim;
 
 /**
- * This class is where the bulk of the robot should be declared. Since Command-based is a
- * "declarative" paradigm, very little robot logic should actually be handled in the {@link Robot}
- * periodic methods (other than the scheduler calls). Instead, the structure of the robot (including
- * subsystems, commands, and trigger mappings) should be declared here.
+ * Builds the robot: picks a hardware implementation for each subsystem based on where the code is
+ * running, wires the controllers, and hands the autonomous routine to {@link Robot}.
+ *
+ * <p>The mode switch in the constructor is the whole point of the IO layer. Nothing below this
+ * class knows or cares which branch was taken.
  */
 public class RobotContainer {
-    // The robot's subsystems and commands are defined here...
-    private final Swerve swerve;
-    private final Odometry odometry;
+    private final Drive drive;
+    private final Vision vision;
     private final Shooter shooter;
-    private final AutoChooser autoChooser;
     private final Intake intake;
-    private final Storage storage;
+    private final Indexer indexer;
+    private final Leds leds;
+    private final AutoSelector autoSelector;
     private final UsbCamera camera;
 
-    // Replace with CommandPS4Controller or CommandJoystick if needed
-    private static final CommandXboxController driverController =
-            new CommandXboxController(OperatorConstants.kDriverControllerPort);
-    private static final CommandXboxController operatorController =
-            new CommandXboxController(OperatorConstants.kOperatorControllerPort);
+    private static final CommandXboxController driver =
+            new CommandXboxController(OIConstants.kDriverControllerPort);
+    private static final CommandXboxController operator =
+            new CommandXboxController(OIConstants.kOperatorControllerPort);
 
-    /** The container for the robot. Contains subsystems, OI devices, and commands. */
+    private final GenericEntry demoToggle;
+
     public RobotContainer() {
-        // Configure the trigger bindings
+        Flywheel flywheel;
+        Hood hood;
+        Kicker kicker;
+        Pivot pivot;
+        Funnel funnel;
 
-        swerve = new Swerve(ModuleConstants.kDriveMotorGearing);
-        odometry = new Odometry(swerve);
-        shooter = new Shooter();
-        intake = new Intake();
-        storage = new Storage();
-        // The driver camera only exists on the real robot. In desktop simulation, asking
-        // CameraServer for USB camera 0 would grab the laptop webcam (or fail), so skip it.
+        switch (Constants.currentMode) {
+            case REAL -> {
+                drive =
+                        new Drive(
+                                new GyroIOPigeon2(),
+                                new ModuleIOSpark(0),
+                                new ModuleIOSpark(1),
+                                new ModuleIOSpark(2),
+                                new ModuleIOSpark(3));
+                vision = new Vision(drive, new VisionIOLimelight(VisionConstants.kCameraName));
+                flywheel = new Flywheel(new FlywheelIOSpark());
+                hood = new Hood(new HoodIOSpark());
+                kicker = new Kicker(new KickerIOSpark());
+                pivot = new Pivot(new PivotIOSpark());
+                funnel = new Funnel(new FunnelIOTalonFX());
+                indexer = new Indexer(new IndexerIOSpark());
+            }
+            case SIM -> {
+                // The gyro reads its rotation rate from the drivetrain, which does not exist yet.
+                // A holder breaks the cycle without giving the gyro a reference to the whole
+                // subsystem.
+                Drive[] self = new Drive[1];
+                drive =
+                        new Drive(
+                                new GyroIOSim(
+                                        () ->
+                                                self[0] == null
+                                                        ? 0.0
+                                                        : self[0].getChassisSpeeds()
+                                                                .omegaRadiansPerSecond),
+                                new ModuleIOSim(),
+                                new ModuleIOSim(),
+                                new ModuleIOSim(),
+                                new ModuleIOSim());
+                self[0] = drive;
+                vision = new Vision(drive, new VisionIOSim());
+                flywheel = new Flywheel(new FlywheelIOSim());
+                hood = new Hood(new HoodIOSim());
+                kicker = new Kicker(new KickerIOSim());
+                pivot = new Pivot(new PivotIOSim());
+                funnel = new Funnel(new FunnelIOSim());
+                indexer = new Indexer(new IndexerIOSim());
+            }
+            default -> {
+                // REPLAY: every IO is a do-nothing stub. AdvantageKit overwrites the inputs with
+                // the values recorded in the log, so the subsystems see exactly what they saw on
+                // the field while the control code above them is whatever is checked out now.
+                drive =
+                        new Drive(
+                                new GyroIO() {},
+                                new ModuleIO() {},
+                                new ModuleIO() {},
+                                new ModuleIO() {},
+                                new ModuleIO() {});
+                vision = new Vision(drive, new VisionIO() {});
+                flywheel = new Flywheel(new FlywheelIO() {});
+                hood = new Hood(new HoodIO() {});
+                kicker = new Kicker(new KickerIO() {});
+                pivot = new Pivot(new PivotIO() {});
+                funnel = new Funnel(new FunnelIO() {});
+                indexer = new Indexer(new IndexerIO() {});
+            }
+        }
+
+        shooter = new Shooter(flywheel, hood, kicker);
+        intake = new Intake(pivot, funnel);
+        leds = new Leds();
+
+        // The driver camera only exists on the real robot; in simulation CameraServer would open
+        // the laptop webcam.
         if (RobotBase.isReal()) {
             camera = CameraServer.startAutomaticCapture(0);
             camera.setFPS(60);
             camera.setResolution(320, 240);
-
             Shuffleboard.getTab("Main")
                     .add("Camera", camera)
                     .withWidget(BuiltInWidgets.kCameraStream)
@@ -74,148 +173,129 @@ public class RobotContainer {
             camera = null;
         }
 
-        // Configure the PathPlanner auto-builder
-        AutoBuilder.configure(
-                odometry::getPose,
-                odometry::resetPose,
-                swerve::getRobotRelativeSpeeds,
-                swerve::setModuleStates,
-                AutoConstants.kHolonomicController, // rotational PID
-                DriveConstants.kRobotConfig,
-                () -> {
-                    if (DriverStation.getAlliance().isPresent()) {
-                        return DriverStation.getAlliance().get() == Alliance.Red;
-                    }
-                    return false;
-                },
-                swerve);
+        demoToggle =
+                Shuffleboard.getTab("Main")
+                        .add("Demo Mode", false)
+                        .withWidget(BuiltInWidgets.kToggleSwitch)
+                        .withSize(1, 1)
+                        .withPosition(9, 0)
+                        .getEntry();
 
-        NamedCommands.registerCommand("Intake", new SpinIntake(intake.getFunnel(), false));
-        NamedCommands.registerCommand("Index", new SpinIndexer(storage.getIndexer(), false));
-        NamedCommands.registerCommand("ShootMiddle", new Shoot(shooter.getFlywheel(), 3000));
-        NamedCommands.registerCommand(
-                "PivotUp", new SetPivot(intake.getPivot(), IntakeConstants.kPivotLower));
-        NamedCommands.registerCommand(
-                "PivotMiddle", new SetPivot(intake.getPivot(), IntakeConstants.kPivotMiddle));
-        NamedCommands.registerCommand(
-                "PivotDown", new SetPivot(intake.getPivot(), IntakeConstants.kPivotUpper));
-        NamedCommands.registerCommand("Feed", new Feed(intake.getPivot()));
-        NamedCommands.registerCommand(
-                "CalculatedShoot",
-                new CalculatedShoot(shooter.getFlywheel(), odometry, storage.getIndexer()));
-        NamedCommands.registerCommand(
-                "Shoot",
-                new Shuffle(shooter.getFlywheel(), shooter.getHood(), storage.getIndexer()));
-        NamedCommands.registerCommand(
-                "AutoAlign",
-                new DriftTeleOp(
-                        swerve,
-                        odometry,
-                        () -> 0.0,
-                        () -> 0.0,
-                        () -> -odometry.angleToHub().getRadians(),
-                        () -> false,
-                        () -> false));
-        // NamedCommands.registerCommand(
-        //        "Kicker", new RunKicker(shooter.getFlywheel(), shooter.getKicker()));
+        registerNamedCommands();
 
-        // Shuffleboard.getTab("Main")
-        //        .add(
-        //                "Reset Pivot",
-        //                new InstantCommand(() -> intake.getPivot().resetRelativeEncoder()))
-        //        .withWidget(BuiltInWidgets.kCommand);
-
-        autoChooser = new AutoChooser();
-
-        swerve.setDefaultCommand(
-                new ManualTeleOp(
-                        swerve,
-                        odometry,
-                        () -> -driverController.getLeftY(),
-                        () -> -driverController.getLeftX(),
-                        () -> -driverController.getRightX(),
-                        () -> driverController.getHID().getRightBumperButton(),
-                        () -> driverController.getHID().getXButton()));
-
-        shooter.getKicker()
-                .setDefaultCommand(new RunKicker(shooter.getFlywheel(), shooter.getKicker()));
+        autoSelector = new AutoSelector();
+        autoSelector.addOption(
+                "Wheel Radius Characterization", DriveCommands.wheelRadiusCharacterization(drive));
 
         configureBindings();
     }
 
-    /**
-     * Use this method to define your trigger->command mappings. Triggers can be created via the
-     * {@link Trigger#Trigger(java.util.function.BooleanSupplier)} constructor with an arbitrary
-     * predicate, or via the named factories in {@link
-     * edu.wpi.first.wpilibj2.command.button.CommandGenericHID}'s subclasses for {@link
-     * CommandXboxController Xbox}/{@link edu.wpi.first.wpilibj2.command.button.CommandPS4Controller
-     * PS4} controllers or {@link edu.wpi.first.wpilibj2.command.button.CommandJoystick Flight
-     * joysticks}.
-     */
+    /** Commands PathPlanner autos can call by name. */
+    private void registerNamedCommands() {
+        NamedCommands.registerCommand("Intake", intake.getFunnel().run(false));
+        NamedCommands.registerCommand("Index", indexer.run(false));
+        NamedCommands.registerCommand(
+                "PivotUp", intake.getPivot().goToAndWait(IntakeConstants.kPivotStowedRad));
+        NamedCommands.registerCommand(
+                "PivotMiddle", intake.getPivot().goToAndWait(IntakeConstants.kPivotMiddleRad));
+        NamedCommands.registerCommand(
+                "PivotDown", intake.getPivot().goToAndWait(IntakeConstants.kPivotDeployedRad));
+        NamedCommands.registerCommand("Feed", intake.getPivot().shake());
+        NamedCommands.registerCommand(
+                "ShootMiddle",
+                Commands.parallel(shooter.getFlywheel().runAtRpm(3000), indexer.run(false)));
+        NamedCommands.registerCommand(
+                "CalculatedShoot",
+                Commands.parallel(shooter.rangedShot(drive::getDistanceToHub), indexer.run(false)));
+        NamedCommands.registerCommand(
+                "Shoot", Commands.parallel(shooter.shuffleShot(), indexer.run(false)));
+        NamedCommands.registerCommand(
+                "AutoAlign",
+                DriveCommands.joystickDriveAtAngle(
+                        drive,
+                        () -> 0.0,
+                        () -> 0.0,
+                        drive::getAngleToHub,
+                        () -> false,
+                        () -> false));
+    }
+
     private void configureBindings() {
-        driverController.back().onTrue(new InstantCommand(() -> odometry.resetHeading()));
-        driverController
-                .rightTrigger()
-                .whileTrue(
-                        new DriftTeleOp(
-                                swerve,
-                                odometry,
-                                () -> -driverController.getLeftY(),
-                                () -> -driverController.getLeftX(),
-                                () -> -odometry.angleToHub().getRadians(),
-                                () -> driverController.getHID().getRightBumperButton(),
-                                () -> driverController.getHID().getXButton()));
+        drive.setDefaultCommand(
+                DriveCommands.joystickDrive(
+                        drive,
+                        () -> -driver.getLeftY(),
+                        () -> -driver.getLeftX(),
+                        () -> -driver.getRightX(),
+                        driver.getHID()::getRightBumperButton,
+                        driver.getHID()::getXButton));
 
-        // driverController.x().onTrue(new LockWheels(swerve));
-        operatorController.leftBumper().whileTrue(new SpinIntake(intake.getFunnel(), false));
-        operatorController.leftTrigger().whileTrue(new SpinIndexer(storage.getIndexer(), false));
-        // operatorController.rightBumper().whileTrue(new ManualKicker(shooter.getKicker()));
-        operatorController.povUp().whileTrue(new SetHood(shooter.getHood(), false));
-        operatorController.povDown().whileTrue(new SetHood(shooter.getHood(), true));
-        // operatorController.povRight().whileTrue(new ManualKicker(shooter.getKicker()));
-        operatorController
-                .rightTrigger()
-                .whileTrue(
-                        new CalculatedShoot(shooter.getFlywheel(), odometry, storage.getIndexer()));
-        operatorController
-                .rightBumper()
-                .whileTrue(
-                        new Shuffle(
-                                shooter.getFlywheel(), shooter.getHood(), storage.getIndexer()));
+        // The kicker's default command is the flywheel interlock: it feeds when, and only when,
+        // both shooter wheels are at speed. Every shooting command therefore gets the interlock
+        // for free rather than having to remember it.
+        shooter.getKicker()
+                .setDefaultCommand(shooter.getKicker().feedWhen(shooter.getFlywheel()::atSpeed));
 
-        operatorController
-                .y()
-                .whileTrue(new SetPivot(intake.getPivot(), IntakeConstants.kPivotLower));
-        operatorController
-                .x()
-                .whileTrue(new SetPivot(intake.getPivot(), IntakeConstants.kPivotMiddle));
-        operatorController
-                .a()
-                .whileTrue(new SetPivot(intake.getPivot(), IntakeConstants.kPivotUpper));
-        operatorController.b().whileTrue(new SpinIntake(intake.getFunnel(), true));
-        operatorController.povLeft().whileTrue(new Feed(intake.getPivot()));
+        driver.back().onTrue(Commands.runOnce(drive::resetHeading).ignoringDisable(true));
+        driver.rightTrigger()
+                .whileTrue(
+                        DriveCommands.joystickDriveAtAngle(
+                                drive,
+                                () -> -driver.getLeftY(),
+                                () -> -driver.getLeftX(),
+                                drive::getAngleToHub,
+                                driver.getHID()::getRightBumperButton,
+                                driver.getHID()::getXButton));
+
+        // Slow mode buzzes the driver's controller so they can feel that it is engaged. This used
+        // to be done by poking setRumble() from inside the drive command's execute(); as a command
+        // with no requirements it composes with everything else instead of being duplicated in
+        // each drive mode.
+        driver.rightBumper()
+                .whileTrue(DriveCommands.rumble(driver.getHID()).withName("Slow mode rumble"));
+
+        operator.leftBumper().whileTrue(intake.getFunnel().run(false));
+        operator.b().whileTrue(intake.getFunnel().run(true));
+        operator.leftTrigger().whileTrue(indexer.run(false));
+
+        operator.povUp().whileTrue(shooter.getHood().trim(false));
+        operator.povDown().whileTrue(shooter.getHood().trim(true));
+
+        operator.rightTrigger()
+                .whileTrue(
+                        Commands.parallel(
+                                shooter.rangedShot(drive::getDistanceToHub), indexer.run(false)));
+        operator.rightBumper()
+                .whileTrue(Commands.parallel(shooter.shuffleShot(), indexer.run(false)));
+
+        operator.y().whileTrue(intake.getPivot().goTo(IntakeConstants.kPivotStowedRad));
+        operator.x().whileTrue(intake.getPivot().goTo(IntakeConstants.kPivotMiddleRad));
+        operator.a().whileTrue(intake.getPivot().goTo(IntakeConstants.kPivotDeployedRad));
+        operator.povLeft().whileTrue(intake.getPivot().shake());
     }
 
     /**
-     * Use this to pass the autonomous command to the main {@link Robot} class.
-     *
-     * @return the command to run in autonomous
+     * Called once per loop from {@link Robot}: read the dashboard toggles into {@link RobotState}.
      */
+    public void updateDashboardInputs() {
+        RobotState.getInstance().setDemoMode(demoToggle.getBoolean(false));
+    }
+
     public Command getAutonomousCommand() {
-        return autoChooser.getSelectedAuto();
+        return autoSelector.get();
+    }
+
+    public void setDisabledMode(boolean disabled) {
+        vision.setDisabledMode(disabled);
     }
 
     public static XboxController getDriverJoystick() {
-        return driverController.getHID();
+        return driver.getHID();
     }
 
-    // Accessors used by the simulation smoke test (src/test). Not needed by robot code.
-    public Swerve getSwerve() {
-        return swerve;
-    }
-
-    public Odometry getOdometry() {
-        return odometry;
+    // Accessors used by the simulation smoke test.
+    public Drive getDrive() {
+        return drive;
     }
 
     public Shooter getShooter() {
@@ -226,7 +306,7 @@ public class RobotContainer {
         return intake;
     }
 
-    public Storage getStorage() {
-        return storage;
+    public Indexer getIndexer() {
+        return indexer;
     }
 }

@@ -4,171 +4,175 @@
 
 package frc.robot;
 
-import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.wpilibj.Alert;
+import edu.wpi.first.wpilibj.Alert.AlertType;
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.RobotController;
+import edu.wpi.first.wpilibj.Threads;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
-import frc.robot.Constants.OdometryConstants;
-import frc.robot.subsystems.Lights;
-import frc.robot.subsystems.Lights.RobotState;
+import frc.robot.util.Alerts;
 import frc.robot.util.SimBattery;
 import java.io.File;
+import org.littletonrobotics.junction.LogFileUtil;
 import org.littletonrobotics.junction.LoggedRobot;
 import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.NT4Publisher;
+import org.littletonrobotics.junction.wpilog.WPILOGReader;
 import org.littletonrobotics.junction.wpilog.WPILOGWriter;
 
-/**
- * The methods in this class are called automatically corresponding to each mode, as described in
- * the TimedRobot documentation. If you change the name of this class or the package after creating
- * this project, you must also update the Main.java file in the project.
- */
+/** Mode transitions and the loop. Everything else lives in {@link RobotContainer}. */
 public class Robot extends LoggedRobot {
-    private Command m_autonomousCommand;
+    private Command autonomousCommand;
+    private final RobotContainer robotContainer;
 
-    private final RobotContainer m_robotContainer;
+    private final Alert brownout =
+            Alerts.create("Brownout: battery voltage collapsed", AlertType.kError);
+    private final Alert lowBattery =
+            Alerts.create("Battery below 11.5 V -- swap before the next match", AlertType.kWarning);
+    private final Alert canError = Alerts.create("CAN bus errors detected", AlertType.kWarning);
 
-    /**
-     * This function is run when the robot is first started up and should be used for any
-     * initialization code.
-     */
+    private static final double kCoastDelaySecs = 3.0;
+    private final Timer disabledTimer = new Timer();
+    private boolean brakeModeApplied = true;
+
     public Robot() {
-        // AdvantageKit must be configured and started BEFORE any subsystem is created so that
-        // nothing is logged into the void. Where logs go depends on where we are running.
+        // AdvantageKit must be configured and started BEFORE any subsystem is created, or the
+        // first loop of inputs is logged into the void.
         Logger.recordMetadata("ProjectName", "Rebuilt2026");
         Logger.recordMetadata("RuntimeMode", Constants.currentMode.toString());
+        Logger.recordMetadata("TuningMode", Boolean.toString(Constants.tuningMode));
 
         switch (Constants.currentMode) {
-            case REAL:
-                // roboRIO internal flash. Small: clean out /home/lvuser/logs periodically.
+            case REAL -> {
+                // roboRIO internal flash. Clean out /home/lvuser/logs periodically.
                 Logger.addDataReceiver(new WPILOGWriter("/home/lvuser/logs/"));
                 Logger.addDataReceiver(new NT4Publisher());
-                break;
-            case SIM:
-                // Desktop simulation: logs land in <project>/logs (gitignored) and are also
-                // published over NetworkTables so AdvantageScope can connect live to
-                // localhost.
+            }
+            case SIM -> {
                 new File("logs").mkdirs();
                 Logger.addDataReceiver(new WPILOGWriter("logs/"));
                 Logger.addDataReceiver(new NT4Publisher());
-                break;
+            }
+            case REPLAY -> {
+                // Feed a recorded log back through this code as fast as the CPU allows, writing
+                // the result out beside it for comparison. This is what the IO layer buys: a
+                // control-code change can be tested against a real match before the robot is
+                // powered on.
+                setUseTiming(false);
+                String logPath = LogFileUtil.findReplayLog();
+                Logger.setReplaySource(new WPILOGReader(logPath));
+                Logger.addDataReceiver(
+                        new WPILOGWriter(LogFileUtil.addPathSuffix(logPath, "_replay")));
+            }
         }
 
         Logger.start();
 
-        // Instantiate our RobotContainer. This will perform all our button bindings,
-        // and put our autonomous chooser on the dashboard.
-        Lights.getInstance();
-        m_robotContainer = new RobotContainer();
+        // Joystick ports 2-5 are unused; without this the driver station fills the log with
+        // warnings that hide the ones that matter.
+        DriverStation.silenceJoystickConnectionWarning(true);
+
+        robotContainer = new RobotContainer();
+
+        if (Constants.tuningMode) {
+            Alerts.create("Tuning mode is ON -- turn it off for competition", AlertType.kInfo)
+                    .set(true);
+        }
     }
 
-    /**
-     * This function is called every 20 ms, no matter the mode. Use this for items like diagnostics
-     * that you want ran during disabled, autonomous, teleoperated and test.
-     *
-     * <p>This runs after the mode specific periodic functions, but before LiveWindow and
-     * SmartDashboard integrated updating.
-     */
     @Override
     public void robotPeriodic() {
-        // Runs the Scheduler. This is responsible for polling buttons, adding
-        // newly-scheduled commands, running already-scheduled commands, removing finished or
-        // interrupted commands, and running subsystem periodic() methods. This must be called
-        // from the robot's periodic block in order for anything in the Command-based framework
-        // to work.
+        // Run the scheduler at real-time priority. Every other thread on the roboRIO -- the web
+        // server, the CAN receive threads, garbage collection -- can otherwise delay the control
+        // loop, and a control loop that runs late is a control loop with the wrong dt.
+        Threads.setCurrentThreadPriority(true, 99);
+
         CommandScheduler.getInstance().run();
-        Lights.getInstance().run();
+
+        robotContainer.updateDashboardInputs();
+        RobotState.getInstance().update();
+
+        double voltage = RobotController.getBatteryVoltage();
+        brownout.set(RobotController.isBrownedOut());
+        lowBattery.set(voltage < 11.5 && DriverStation.isDisabled());
+        canError.set(RobotController.getCANStatus().receiveErrorCount > 0);
+        Logger.recordOutput("Robot/BatteryVoltage", voltage);
+        Logger.recordOutput(
+                "Robot/CanUtilization", RobotController.getCANStatus().percentBusUtilization);
+        Alerts.log();
+
+        Threads.setCurrentThreadPriority(false, 10);
     }
 
-    /** This function is called once each time the robot enters Disabled mode. */
     @Override
     public void disabledInit() {
-        LimelightHelpers.setLEDMode_ForceOn("limelight-" + OdometryConstants.kActiveCamera);
-        NetworkTableInstance.getDefault()
-                .getTable("limelight-" + OdometryConstants.kActiveCamera)
-                .getEntry("throttle_set")
-                .setNumber(200);
-
-        Lights.getInstance().state = RobotState.DISABLED;
+        RobotState.getInstance().setMode(RobotState.Mode.DISABLED);
+        robotContainer.setDisabledMode(true);
+        disabledTimer.restart();
+        brakeModeApplied = true;
     }
-
-    @Override
-    public void disabledPeriodic() {}
 
     /**
-     * This autonomous runs the autonomous command selected by your {@link RobotContainer} class.
+     * Coast the drive motors a few seconds after the robot is disabled, so it can be pushed off the
+     * field -- but not immediately, because a robot disabled at speed would keep rolling into
+     * whatever is in front of it.
      */
     @Override
-    public void autonomousInit() {
-        m_autonomousCommand = m_robotContainer.getAutonomousCommand();
-
-        // schedule the autonomous command (example)
-        if (m_autonomousCommand != null) {
-            m_autonomousCommand.schedule();
+    public void disabledPeriodic() {
+        if (brakeModeApplied && disabledTimer.hasElapsed(kCoastDelaySecs)) {
+            robotContainer.getDrive().setBrakeMode(false);
+            brakeModeApplied = false;
         }
-
-        LimelightHelpers.setLEDMode_PipelineControl("limelight-" + OdometryConstants.kActiveCamera);
-        NetworkTableInstance.getDefault()
-                .getTable("limelight-" + OdometryConstants.kActiveCamera)
-                .getEntry("throttle_set")
-                .setNumber(0);
-
-        Lights.getInstance().state = RobotState.AUTO;
     }
 
-    /** This function is called periodically during autonomous. */
+    private void applyBrakeMode() {
+        if (!brakeModeApplied) {
+            robotContainer.getDrive().setBrakeMode(true);
+            brakeModeApplied = true;
+        }
+        disabledTimer.stop();
+    }
+
     @Override
-    public void autonomousPeriodic() {}
+    public void autonomousInit() {
+        RobotState.getInstance().setMode(RobotState.Mode.AUTO);
+        robotContainer.setDisabledMode(false);
+        applyBrakeMode();
+
+        autonomousCommand = robotContainer.getAutonomousCommand();
+        CommandScheduler.getInstance().schedule(autonomousCommand);
+    }
 
     @Override
     public void teleopInit() {
-        // This makes sure that the autonomous stops running when
-        // teleop starts running. If you want the autonomous to
-        // continue until interrupted by another command, remove
-        // this line or comment it out.
-        if (m_autonomousCommand != null) {
-            m_autonomousCommand.cancel();
+        RobotState.getInstance().setMode(RobotState.Mode.TELEOP);
+        robotContainer.setDisabledMode(false);
+        applyBrakeMode();
+
+        if (autonomousCommand != null) {
+            autonomousCommand.cancel();
         }
-
-        LimelightHelpers.setLEDMode_PipelineControl("limelight-" + OdometryConstants.kActiveCamera);
-        NetworkTableInstance.getDefault()
-                .getTable("limelight-" + OdometryConstants.kActiveCamera)
-                .getEntry("throttle_set")
-                .setNumber(0);
-
-        Lights.getInstance().state = RobotState.TELEOP;
     }
-
-    /** This function is called periodically during operator control. */
-    @Override
-    public void teleopPeriodic() {}
 
     @Override
     public void testInit() {
-        // Cancels all running commands at the start of test mode.
+        RobotState.getInstance().setMode(RobotState.Mode.TEST);
+        robotContainer.setDisabledMode(false);
+        applyBrakeMode();
         CommandScheduler.getInstance().cancelAll();
-
-        LimelightHelpers.setLEDMode_PipelineControl("limelight-" + OdometryConstants.kActiveCamera);
-        NetworkTableInstance.getDefault()
-                .getTable("limelight-" + OdometryConstants.kActiveCamera)
-                .getEntry("throttle_set")
-                .setNumber(0);
     }
 
-    /** This function is called periodically during test mode. */
-    @Override
-    public void testPeriodic() {}
-
-    /** This function is called once when the simulation is first started up. */
     @Override
     public void simulationInit() {
         System.out.println("[Init] Running in DESKTOP SIMULATION. No hardware is being driven.");
     }
 
     /**
-     * This function is called periodically whilst in simulation, after robotPeriodic(). The
-     * individual subsystems update their own physics models in their simulationPeriodic() methods
-     * (called by the CommandScheduler); this just turns the currents they reported into a simulated
-     * battery voltage.
+     * Turn the current every simulated mechanism reported this loop into a loaded battery voltage.
+     * Each {@code *IOSim} adds its draw during {@code updateInputs}, which the scheduler has
+     * already called by the time this runs.
      */
     @Override
     public void simulationPeriodic() {

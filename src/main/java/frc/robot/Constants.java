@@ -4,384 +4,55 @@
 
 package frc.robot;
 
-import com.pathplanner.lib.config.ModuleConfig;
-import com.pathplanner.lib.config.PIDConstants;
-import com.pathplanner.lib.config.RobotConfig;
-import com.pathplanner.lib.controllers.PPHolonomicDriveController;
-import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.math.geometry.Translation3d;
-import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
-import edu.wpi.first.math.kinematics.SwerveModuleState;
-import edu.wpi.first.math.system.plant.DCMotor;
-// import com.pathplanner.lib.util.HolonomicPathFollowerConfig;
-// import com.pathplanner.lib.util.PIDConstants;
-// import com.pathplanner.lib.util.ReplanningConfig;
-import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.RobotBase;
-import frc.robot.util.LoggedTunableNumber;
 
 /**
- * The Constants class provides a convenient place for teams to hold robot-wide numerical or boolean
- * constants. This class should not be used for any other purpose. All constants should be declared
- * globally (i.e. public static). Do not put anything functional in this class.
- *
- * <p>It is advised to statically import this class (or one of its inner classes) wherever the
- * constants are needed, to reduce verbosity.
+ * Global, robot-wide switches. Everything mechanism-specific now lives next to the mechanism, in a
+ * per-package constants class, so that a subsystem and its numbers can be read, moved or deleted as
+ * one unit -- the arrangement used by 41 of the 42 Java robots in the 2026 reference corpus, and by
+ * all of the ones that split hardware behind an IO layer.
  */
 public final class Constants {
-
-    public static final boolean fieldOriented = true;
-    public static final boolean tuningMode = true;
-    public static final boolean lightsExist = true;
-
-    /** Main robot loop period. Used by the simulation physics models. */
-    public static final double kLoopPeriodSecs = 0.02;
-
-    /** Where the code is running. REAL = roboRIO, SIM = desktop simulation. */
-    public static enum Mode {
-        REAL,
-        SIM
-    }
-
-    public static final Mode currentMode = RobotBase.isReal() ? Mode.REAL : Mode.SIM;
-
-    public static class OperatorConstants {
-        public static final int kDriverControllerPort = 0;
-        public static final int kOperatorControllerPort = 1;
-    }
-
-    public static class ModuleConstants {
-        public static final int kDriveMotorGearing = 2;
-
-        public static final double kWheelDiameterMeters =
-                Units.inchesToMeters(3.95) * 1.613 / 1.664;
-        public static final double kDriveMotorGearR1Ratio = 1 / 7.03;
-        public static final double kDriveMotorGearR2Ratio = 1 / 6.03;
-        public static final double kDriveMotorGearR3Ratio = 1 / 5.27;
-        public static final double kTurningMotorGearRatio = 1 / 26.0;
-
-        public static final double kDriveEncoderR1Rot2Meter =
-                kDriveMotorGearR1Ratio * Math.PI * kWheelDiameterMeters;
-        public static final double kDriveEncoderR2Rot2Meter =
-                kDriveMotorGearR2Ratio * Math.PI * kWheelDiameterMeters;
-        public static final double kDriveEncoderR3Rot2Meter =
-                kDriveMotorGearR3Ratio * Math.PI * kWheelDiameterMeters;
-
-        public static final double kDriveEncoderR1RPM2MeterPerSec = kDriveEncoderR1Rot2Meter / 60;
-        public static final double kDriveEncoderR2RPM2MeterPerSec = kDriveEncoderR2Rot2Meter / 60;
-        public static final double kDriveEncoderR3RPM2MeterPerSec = kDriveEncoderR3Rot2Meter / 60;
-
-        public static final double kTurningEncoderRot2Rad = kTurningMotorGearRatio * 2 * Math.PI;
-        public static final double kTurningEncoderRPM2RadPerSec = kTurningEncoderRot2Rad / 60;
-
-        public static final double kPTurning = 0.25;
-    }
-
-    // CHANGE LATER:
-    public static class DriveConstants {
-
-        public static final double kTrackWidth = Units.inchesToMeters(21.75);
-        // Distance between front and back wheels:
-        public static final double kWheelBase = Units.inchesToMeters(21.75);
-
-        public static final SwerveDriveKinematics kDriveKinematics =
-                new SwerveDriveKinematics(
-                        new Translation2d(kWheelBase / 2, kTrackWidth / 2), // Front left (+/+)
-                        new Translation2d(kWheelBase / 2, -kTrackWidth / 2), // Front right (+/-)
-                        new Translation2d(-kWheelBase / 2, kTrackWidth / 2), // Back left (-/+)
-                        new Translation2d(-kWheelBase / 2, -kTrackWidth / 2)); // Back right (-/-)
-
-        public static final boolean kFrontLeftDriveEncoderReversed = true;
-        public static final boolean kFrontLeftTurningEncoderReversed = false;
-        public static final boolean kFrontLeftDriveAbsoluteEncoderReversed = false;
-        public static final int kFrontLeftDriveAbsoluteEncoderPort = 0;
-
-        public static final boolean kFrontRightDriveEncoderReversed = true;
-        public static final boolean kFrontRightTurningEncoderReversed = false;
-        public static final boolean kFrontRightDriveAbsoluteEncoderReversed = false;
-        public static final int kFrontRightDriveAbsoluteEncoderPort = 1;
-
-        public static final boolean kBackLeftDriveEncoderReversed = true;
-        public static final boolean kBackLeftTurningEncoderReversed = false;
-        public static final boolean kBackLeftDriveAbsoluteEncoderReversed = false;
-        public static final int kBackLeftDriveAbsoluteEncoderPort = 2;
-
-        public static final boolean kBackRightDriveEncoderReversed = true;
-        public static final boolean kBackRightTurningEncoderReversed = false;
-        public static final boolean kBackRightDriveAbsoluteEncoderReversed = false;
-        public static final int kBackRightDriveAbsoluteEncoderPort = 3;
-
-        // TODO: Re-measure these offsets on the robot. The computed values don't match
-        // the comments, and several fall outside [-PI, PI] before wrapping.
-        // To recalibrate: point all wheels straight forward, read each absolute encoder's
-        // raw voltage, convert to radians (voltage/5V * 2*PI), and negate that value.
-        public static final double kFrontLeftDriveAbsoluteEncoderOffsetRad =
-                2.15 + 3.05 + 0.01; // adjusted at BattleCry
-        public static final double kFrontRightDriveAbsoluteEncoderOffsetRad =
-                -1.7 - 2.954; // computed: -4.654 rad, wraps to ~1.63 (comment said -1.497)
-        public static final double kBackLeftDriveAbsoluteEncoderOffsetRad =
-                2.06 + 2.99 + 0.109; // adjusted at BattleCry
-        public static final double kBackRightDriveAbsoluteEncoderOffsetRad =
-                1.43 + 1.99 - 1.793 - Math.PI; // computed: ~-1.51 (comment said -1.529 + PI)
-
-        public static final double kPhysicalMaxSpeedMetersPerSecond = 5;
-        public static final double kPhysicalMaxAngularSpeedRadiansPerSecond = 3 * Math.PI;
-
-        public static final double kTeleDriveMaxSpeedMetersPerSecond = 5;
-        public static final double kTeleDriveMaxAngularSpeedRadiansPerSecond = 3.5 * Math.PI;
-
-        // Demo mode scales the normal teleop limits. The previous version derived the
-        // linear limit from the ANGULAR constant and vice versa (crossed units). 0.55
-        // keeps the demo max speed at ~2.75 m/s, the value the team has been running
-        // at demos, so on-robot behavior is unchanged.
-        public static final double swerveDemoScaleFactor = 0.55;
-        public static final double kDemoTeleDriveMaxSpeedMetersPerSecond =
-                kTeleDriveMaxSpeedMetersPerSecond * swerveDemoScaleFactor;
-        public static final double kDemoTeleDriveMaxAngularSpeedRadiansPerSecond =
-                kTeleDriveMaxAngularSpeedRadiansPerSecond * swerveDemoScaleFactor;
-
-        public static final double kTeleDriveMaxAccelerationUnitsPerSecond = 5;
-        public static final double kTeleDriveMaxAngularAccelerationUnitsPerSecond = 3 * Math.PI;
-
-        public static final double kRobotMass = 50;
-        public static final double kRobotMOI = 7.0;
-
-        public static final SwerveModuleState[] kLockStates =
-                new SwerveModuleState[] {
-                    new SwerveModuleState(0, new Rotation2d(Math.PI / 4)),
-                    new SwerveModuleState(0, new Rotation2d(-Math.PI / 4)),
-                    new SwerveModuleState(0, new Rotation2d(Math.PI / 4)),
-                    new SwerveModuleState(0, new Rotation2d(-Math.PI / 4))
-                };
-
-        public static final ModuleConfig kRobotModuleConfig =
-                new ModuleConfig(
-                        ModuleConstants.kWheelDiameterMeters / 2,
-                        kPhysicalMaxSpeedMetersPerSecond,
-                        1, // friction coefficient between wheel and carpet, (unsure so 1.0)
-                        DCMotor.getNeoVortex(1),
-                        1 / ModuleConstants.kDriveMotorGearR2Ratio,
-                        80,
-                        1);
-        public static final RobotConfig kRobotConfig =
-                new RobotConfig(
-                        kRobotMass, // mass,
-                        kRobotMOI, // moment of inertia (why), kgm^2
-                        kRobotModuleConfig, // module config
-                        kDriveKinematics
-                                .getModules()); // locations of modules relative of robot center
-
-        public static final LoggedTunableNumber kSwerveP = new LoggedTunableNumber("SwerveP", 7);
-        public static final LoggedTunableNumber kSwerveI = new LoggedTunableNumber("SwerveI", 0);
-        public static final LoggedTunableNumber kSwerveD = new LoggedTunableNumber("SwerveD", 1);
-
-        public static final LoggedTunableNumber kTestAngle =
-                new LoggedTunableNumber("SwerveTestAngle", 0);
-    }
-
-    public static final class ShooterConstants {
-        public static final double kFlywheelVelocityTolerance = 100;
-        public static final double kFlywheelReduction = 1.0;
-        public static final double kFlywheelVoltage = 10;
-        public static final boolean kFlywheelInverted = true;
-        public static final double kFlywheelMaxVelocity = 2200;
-
-        public static final double kKickerReduction = 3.0;
-        public static final double kKickerVoltage = 12;
-        public static final boolean kKickerInverted = true;
-
-        public static final double kHoodLower = 0.01;
-        public static final double kHoodUpper = 0.3;
-
-        public static final double kHoodGearboxReduction = 25.0;
-        public static final double kHoodRackReduction = 168.0 / 10.0;
-        public static final double kHoodEncoderOffset = -0.0992 - 6.276 + 0.001 - 0.024 - 6.264;
-        public static final double kHoodVoltage = 10;
-        public static final boolean kHoodInverted = true;
-        public static final boolean kHoodAbsoluteEncoderInverted = false;
-        public static final boolean kHoodRelativeEncoderInverted = true;
-
-        public static final double kShooterAngle = 1.222;
-
-        public static final LoggedTunableNumber kHoodTestVoltage =
-                new LoggedTunableNumber("HoodTestVoltage", 0.1);
-
-        // PID values
-        public static final LoggedTunableNumber kFlywheelP =
-                new LoggedTunableNumber("FlywheelPidP", 1e-5);
-        public static final LoggedTunableNumber kFlywheelI =
-                new LoggedTunableNumber("FlywheelPidI", 0.0);
-        public static final LoggedTunableNumber kFlywheelD =
-                new LoggedTunableNumber("FlywheelPidD", 0.0);
-
-        public static final LoggedTunableNumber kLeadS = new LoggedTunableNumber("LeadFfS", 0.00);
-        public static final LoggedTunableNumber kLeadV =
-                new LoggedTunableNumber("LeadFfV", 0.00183);
-        public static final LoggedTunableNumber kLeadA = new LoggedTunableNumber("LeadFfA", 0.0);
-
-        public static final LoggedTunableNumber kFollowerS =
-                new LoggedTunableNumber("FollowerFfS", 0.00);
-        public static final LoggedTunableNumber kFollowerV =
-                new LoggedTunableNumber("FollowerFfV", 0.00185);
-        public static final LoggedTunableNumber kFollowerA =
-                new LoggedTunableNumber("FollowerFfA", 0.0);
-
-        public static final LoggedTunableNumber kFlywheelVelocity =
-                new LoggedTunableNumber("TargetVelocity", 5200);
-
-        public static final double shooterDemoScaleFactor = 0.25;
-
-        public static final LoggedTunableNumber kHoodP = new LoggedTunableNumber("HoodPidP", 40);
-        public static final LoggedTunableNumber kHoodI = new LoggedTunableNumber("HoodPidI", 0.0);
-        public static final LoggedTunableNumber kHoodD = new LoggedTunableNumber("HoodPidD", 0.0);
-    }
-
-    public static final class OdometryConstants {
-        public static final String kActiveCamera = "nip";
-
-        public static final Translation3d kTranslationOffset =
-                new Translation3d(-0.051, 0.27, 0.495);
-
-        // Camera mounting angles in DEGREES. LimelightHelpers.setCameraPose_RobotSpace()
-        // takes degrees. These used to be wrapped in a Rotation3d, whose constructor
-        // takes RADIANS, so the -30 was being sent to the Limelight as ~1.4 degrees.
-        public static final double kCameraRollDegrees = 0;
-        public static final double kCameraPitchDegrees = -30;
-        public static final double kCameraYawDegrees = 0;
-    }
-
-    public static final class FieldConstants {
-        public static final Pose2d kRedHub = new Pose2d(11.91, 4.041, new Rotation2d(0));
-        public static final Pose2d kBlueHub = new Pose2d(4.623, 4.041, new Rotation2d(0));
-        public static final double kG = 9.8;
-        public static final double kHubHeightDiff = 1.0885;
-    }
-
-    public static final class IntakeConstants {
-        public static final double kPivotGearboxReduction = 45.0;
-        public static final double kPivotChainReduction = 40.0 / 16.0;
-        public static final double kPivotEncoderOffset =
-                -18.037796326794894 + 0.189 - 0.26 + 0.338 + 0.53 + 0.124 - 0.9161 - 0.194;
-        public static final double kPivotFeedforwardOffset =
-                2.36 - 4.505 - 1.604 - 1.535 - 1.143 - 2.012 + Math.PI;
-        public static final double kPivotVoltage = 10;
-        public static final boolean kPivotInverted = false;
-        public static final boolean kPivotAbsoluteEncoderInverted = true;
-        public static final boolean kPivotRelativeEncoderInverted = false;
-        public static final double kPivotTolerance = 0.1;
-
-        public static final double kPivotLower = 0.1; // 0.2
-        public static final double kPivotMiddle = 0.9;
-        public static final double kPivotUpper = 2;
-
-        // Software limit
-        // public static final double kRaiseUpper = ;
-        // public static final double kRaiseLower = ;
-
-        public static final double kFunnelReduction = 1 / 3.0;
-        public static final double kFunnelVoltage = 12;
-        // Flipped to false alongside the Funnel.setFunnelVoltage ternary correction
-        // (was "inverted ? 1 : -1", i.e. true meant NO inversion). Net motor
-        // direction is unchanged from the field-tested behavior.
-        public static final boolean kFunnelInverted = false;
-
-        public static final LoggedTunableNumber kPivotP = new LoggedTunableNumber("PivotPidP", 8);
-        public static final LoggedTunableNumber kPivotI = new LoggedTunableNumber("PivotPidI", 0.0);
-        public static final LoggedTunableNumber kPivotD = new LoggedTunableNumber("PivotPidD", 0.1);
-
-        public static final LoggedTunableNumber kPivotS = new LoggedTunableNumber("PivotFfS", 3);
-        public static final LoggedTunableNumber kPivotG = new LoggedTunableNumber("PivotFfG", 0);
-        public static final LoggedTunableNumber kPivotV = new LoggedTunableNumber("PivotFfV", 0);
-        public static final LoggedTunableNumber kPivotA = new LoggedTunableNumber("PivotFfA", 0.0);
-    }
-
-    public static final class StorageConstants {
-        // change later
-        public static final double kIndexerVoltage = 8;
-        public static final double kIndexerReduction = 1.0;
-        // Flipped to false alongside the Indexer.setIndexerVoltage ternary correction
-        // (was "inverted ? 1 : -1", i.e. true meant NO inversion). Net motor
-        // direction is unchanged from the field-tested behavior.
-        public static final boolean kIndexerInverted = false;
-    }
-
-    public static class AutoConstants {
-        // Speeds from -1 to 1
-        public static final double kAutoXDriveSpeed = 0.0;
-        public static final double kAutoYDriveSpeed = 0.5;
-
-        public static final double kAutoTurningSpeed = 0.0;
-        public static final double kAutoAlignTolerance = 0.015;
-
-        public static final PPHolonomicDriveController kHolonomicController =
-                new PPHolonomicDriveController(
-                        new PIDConstants(1.5, 0, 0), new PIDConstants(1.5, 0, 0));
-    }
+    private Constants() {}
 
     /**
-     * Physical parameters used ONLY by the desktop simulation models. None of these affect the real
-     * robot. Rough estimates are fine; they set how fast things spin up in the sim.
+     * Where the code is running.
+     *
+     * <p>REPLAY re-runs a previously recorded WPILOG through the exact same subsystem code with the
+     * real hardware replaced by the log's recorded inputs. It is the reason the IO layer exists:
+     * every subsystem reads its sensors through an interface whose values are logged, so the log
+     * can be played back as if it were the robot. 19 of the 42 corpus robots carry this mode.
      */
-    public static final class SimConstants {
-        // Moments of inertia in kg*m^2
-        public static final double kDriveWheelMOI = 0.03; // ~1/4 robot mass reflected to a wheel
-        public static final double kTurnMOI = 0.004;
-        public static final double kFlywheelMOI = 0.004; // per flywheel side
-        public static final double kHoodMOI = 0.002;
-        public static final double kKickerMOI = 0.001;
-        public static final double kIndexerMOI = 0.002;
-        public static final double kFunnelMOI = 0.002;
-
-        // Intake pivot modeled as a single-jointed arm
-        public static final double kPivotArmLengthMeters = 0.4;
-        public static final double kPivotArmMassKg = 4.0;
-        public static final double kPivotHardStopMarginRads = 0.05;
+    public static enum Mode {
+        REAL,
+        SIM,
+        REPLAY
     }
 
-    // CAN = computer area network
-    public static class CAN {
-        public static final int kFrontLeftDriveMotorPort = 10;
-        public static final int kFrontLeftTurningMotorPort = 20;
+    /** Set to REPLAY by hand (and re-run in simulation) to replay a log. */
+    private static final Mode kSimMode = Mode.SIM;
 
-        public static final int kFrontRightDriveMotorPort = 11;
-        public static final int kFrontRightTurningMotorPort = 21;
+    public static final Mode currentMode = RobotBase.isReal() ? Mode.REAL : kSimMode;
 
-        public static final int kBackLeftDriveMotorPort = 12;
-        public static final int kBackLeftTurningMotorPort = 22;
+    /** Publishes tunable numbers to NetworkTables. Turn OFF for competition. */
+    public static final boolean tuningMode = true;
 
-        public static final int kBackRightDriveMotorPort = 13;
-        public static final int kBackRightTurningMotorPort = 23;
+    /** False when the LED strip is not plugged in, so the code does not drive a missing device. */
+    public static final boolean lightsExist = true;
 
-        public static final int kFlywheelLeadPort = 1;
-        public static final int kFlywheelFollowerPort = 2;
+    /** Main robot loop period, seconds. */
+    public static final double kLoopPeriodSecs = 0.02;
 
-        public static final int kKickerPort = 3;
-        public static final int kHoodPort = 4;
-        public static final int kHoodEncoderPort = 0;
-
-        public static final int kPivotPort = 5;
-        public static final int kPivotEncoderPort = 1;
-
-        public static final int kFunnelPort = 6;
-
-        public static final int kIndexerPort = 7;
-    }
-
-    public static class OIConstants {
-        public static final ControllerType controllerTypeDriver = ControllerType.XBOX;
-        public static final ControllerType controllerTypeOperator = ControllerType.XBOX;
+    public static final class OIConstants {
+        private OIConstants() {}
 
         public static final int kDriverControllerPort = 0;
         public static final int kOperatorControllerPort = 1;
 
+        /**
+         * Applied to the joystick VECTOR magnitude, not to each axis. See {@link
+         * frc.robot.commands.DriveCommands}.
+         */
         public static final double kDeadband = 0.11;
-    }
-
-    public static enum ControllerType {
-        XBOX,
-        LOGITECH,
-        JOYSTICK
     }
 }
