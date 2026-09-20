@@ -19,7 +19,8 @@ driven and watched in AdvantageScope on a laptop with no robot present.
 ## Access
 
 This repository is private. Team members need a GitHub account that has been
-invited to the `ultraviolet8567` organization; ask a programming mentor.
+invited to the `ultraviolet8567` organization; the student programming leads
+manage access, so ask one of them.
 
 ## Quick start
 
