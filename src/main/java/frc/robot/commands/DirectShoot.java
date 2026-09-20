@@ -11,7 +11,7 @@ public class DirectShoot extends Command {
     public DirectShoot(Flywheel flywheel) {
         this.flywheel = flywheel;
 
-        // addRequirements(shooter);
+        addRequirements(flywheel);
     }
 
     @Override

@@ -10,7 +10,6 @@ import com.revrobotics.spark.config.SparkFlexConfig;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
-import edu.wpi.first.units.measure.Velocity;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.CAN;
 import frc.robot.Constants.ShooterConstants;
@@ -189,6 +188,16 @@ public class Flywheel extends SubsystemBase {
                                 * (Math.tan(ShooterConstants.kShooterAngle) * dist
                                         - FieldConstants.kHubHeightDiff)));
         */
+        // TODO: This quadratic peaks at dist = 1270.33 / (2 * 128.09) ~= 4.96 m and then
+        // DECREASES with distance. From ~5 m and beyond, the formula commands a LOWER
+        // velocity than at 5 m -- shots from far range will undershoot the hub.
+        //   dist=2m -> 3338 rpm
+        //   dist=4m -> 4342 rpm
+        //   dist=5m -> 4460 rpm  (peak)
+        //   dist=7m -> 3926 rpm  (LESS than at 5 m)
+        //   dist=8m -> 3275 rpm  (way less)
+        // Either refit on points that cover the full shooting range, switch to the log
+        // alternative below (monotonic), or clamp dist to the peak before plugging in.
         return 1310.13 + 1270.33 * dist - 128.09 * dist * dist;
         // return 3429.57 * Math.log10(dist) + 2315.54;
     }
@@ -202,13 +211,14 @@ public class Flywheel extends SubsystemBase {
     }
 
     public double getTargetVelocity() {
-      /*  if (Lights.getInstance().isDemo) {
-            targetVelocity = targetVelocity * ShooterConstants.shooterDemoScaleFactor;
-        } 
-        else {
-            
+        // Scale for demo mode WITHOUT overwriting the field. The previous version
+        // assigned kFlywheelMaxVelocity to targetVelocity here, which clobbered
+        // every velocity commanded via start()/setTargetVelocity() -- both
+        // CalculatedShoot's distance-based velocity and Shuffle's tunable were
+        // replaced by the constant on the next periodic() call.
+        if (Lights.getInstance().isDemo) {
+            return targetVelocity * ShooterConstants.shooterDemoScaleFactor;
         }
-        */
-       return Lights.getInstance().isDemo ? targetVelocity * ShooterConstants.shooterDemoScaleFactor : targetVelocity;
+        return targetVelocity;
     }
 }

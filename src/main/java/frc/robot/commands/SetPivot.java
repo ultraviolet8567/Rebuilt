@@ -10,6 +10,8 @@ public class SetPivot extends Command {
     public SetPivot(Pivot pivot, double angle) {
         this.pivot = pivot;
         this.angle = angle;
+
+        addRequirements(pivot);
     }
 
     @Override

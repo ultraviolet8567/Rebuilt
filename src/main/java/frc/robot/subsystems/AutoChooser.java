@@ -76,11 +76,11 @@ public class AutoChooser extends VirtualSubsystem {
     }
 
     public Pose2d getAutoStartingPose() {
-        if (getAutoCommandName().equals("Do Nothing")) {
+        PathPlannerAuto auto = allAutos.get(getAutoCommandName());
+        if (auto == null) {
             return new Pose2d();
-        } else {
-            return allAutos.get(getAutoCommandName()).getStartingPose();
         }
+        return auto.getStartingPose();
     }
 
     public Rotation2d getInitialGyroYaw() {
@@ -88,13 +88,11 @@ public class AutoChooser extends VirtualSubsystem {
     }
 
     public PathPlannerAuto getSelectedAuto() {
-        String autoCommandName = getAutoCommandName();
-
-        if (autoCommandName.equals("Do Nothing")) {
+        PathPlannerAuto auto = allAutos.get(getAutoCommandName());
+        if (auto == null) {
             return null;
-        } else {
-            Logger.recordOutput("Autos/StartPos", allAutos.get(autoCommandName).getStartingPose());
-            return allAutos.get(autoCommandName);
         }
+        Logger.recordOutput("Autos/StartPos", auto.getStartingPose());
+        return auto;
     }
 }

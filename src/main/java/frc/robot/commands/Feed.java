@@ -10,6 +10,8 @@ public class Feed extends Command {
 
     public Feed(Pivot pivot) {
         this.pivot = pivot;
+
+        addRequirements(pivot);
     }
 
     @Override

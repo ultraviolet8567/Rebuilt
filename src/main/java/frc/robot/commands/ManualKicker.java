@@ -8,6 +8,8 @@ public class ManualKicker extends Command {
 
     public ManualKicker(Kicker kicker) {
         this.kicker = kicker;
+
+        addRequirements(kicker);
     }
 
     @Override

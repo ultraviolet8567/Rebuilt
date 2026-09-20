@@ -133,14 +133,19 @@ public class Odometry extends SubsystemBase {
     }
 
     public void resetHeading() {
-        // gyro.reset();
-        gyro.setYaw(((DriverStation.getAlliance().get() == Alliance.Blue) ? 0 : 180));
+        if (DriverStation.getAlliance().isPresent()) {
+            gyro.setYaw(((DriverStation.getAlliance().get() == Alliance.Blue) ? 0 : 180));
+        } else {
+            gyro.reset();
+        }
     }
 
     public Pose2d getHub() {
-        return (DriverStation.getAlliance().get() == Alliance.Blue
-                ? FieldConstants.kBlueHub
-                : FieldConstants.kRedHub);
+        if (DriverStation.getAlliance().isPresent()
+                && DriverStation.getAlliance().get() == Alliance.Red) {
+            return FieldConstants.kRedHub;
+        }
+        return FieldConstants.kBlueHub;
     }
 
     public double distToHub() {

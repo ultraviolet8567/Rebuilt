@@ -54,14 +54,13 @@ public class SwerveModule {
         driveConfig.smartCurrentLimit(40);
         driveConfig.inverted(driveMotorReversed);
         driveConfig.idleMode(IdleMode.kBrake);
+        driveConfig.encoder.positionConversionFactor(driveRot2Meter);
+        driveConfig.encoder.velocityConversionFactor(driveRPM2MeterPerSec);
 
         turningConfig.voltageCompensation(12.0);
         turningConfig.smartCurrentLimit(40);
         turningConfig.idleMode(IdleMode.kBrake);
         turningConfig.inverted(turningMotorReversed);
-
-        driveConfig.encoder.positionConversionFactor(driveRot2Meter);
-        driveConfig.encoder.velocityConversionFactor(driveRPM2MeterPerSec);
         turningConfig.encoder.positionConversionFactor(ModuleConstants.kTurningEncoderRot2Rad);
         turningConfig.encoder.velocityConversionFactor(
                 ModuleConstants.kTurningEncoderRPM2RadPerSec);

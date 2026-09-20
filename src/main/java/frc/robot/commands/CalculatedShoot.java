@@ -16,6 +16,8 @@ public class CalculatedShoot extends Command {
         this.flywheel = flywheel;
         this.odometry = odometry;
         this.indexer = indexer;
+
+        addRequirements(flywheel, indexer);
     }
 
     @Override
@@ -23,6 +25,11 @@ public class CalculatedShoot extends Command {
         Logger.recordOutput("Shooter/Shooting", true);
         flywheel.start(flywheel.calculateTargetVelocity(odometry.distToHub()));
         indexer.setIndexerVoltage(StorageConstants.kIndexerVoltage);
+    }
+
+    @Override
+    public void execute() {
+        flywheel.setTargetVelocity(flywheel.calculateTargetVelocity(odometry.distToHub()));
     }
 
     @Override

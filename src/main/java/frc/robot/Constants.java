@@ -102,13 +102,18 @@ public final class Constants {
         public static final boolean kBackRightDriveAbsoluteEncoderReversed = false;
         public static final int kBackRightDriveAbsoluteEncoderPort = 3;
 
+        // TODO: Re-measure these offsets on the robot. The computed values don't match
+        // the comments, and several fall outside [-PI, PI] before wrapping.
+        // To recalibrate: point all wheels straight forward, read each absolute encoder's
+        // raw voltage, convert to radians (voltage/5V * 2*PI), and negate that value.
         public static final double kFrontLeftDriveAbsoluteEncoderOffsetRad =
-                2.15 + 3.05 + 0.01; // -0.645 + PI
+                2.15 + 3.05 + 0.01; // adjusted at BattleCry
         public static final double kFrontRightDriveAbsoluteEncoderOffsetRad =
-                -1.7 - 2.954; // -1.497
-        public static final double kBackLeftDriveAbsoluteEncoderOffsetRad = 2.06 + 2.99 + 0.109; // 1.985
+                -1.7 - 2.954; // computed: -4.654 rad, wraps to ~1.63 (comment said -1.497)
+        public static final double kBackLeftDriveAbsoluteEncoderOffsetRad =
+                2.06 + 2.99 + 0.109; // adjusted at BattleCry
         public static final double kBackRightDriveAbsoluteEncoderOffsetRad =
-                1.43 + 1.99 - 1.793 - Math.PI; // -1.529 + PI
+                1.43 + 1.99 - 1.793 - Math.PI; // computed: ~-1.51 (comment said -1.529 + PI)
 
         public static final double kPhysicalMaxSpeedMetersPerSecond = 5;
         public static final double kPhysicalMaxAngularSpeedRadiansPerSecond = 3 * Math.PI;
@@ -256,7 +261,10 @@ public final class Constants {
 
         public static final double kFunnelReduction = 1 / 3.0;
         public static final double kFunnelVoltage = 12;
-        public static final boolean kFunnelInverted = true;
+        // Flipped to false alongside the Funnel.setFunnelVoltage ternary correction
+        // (was "inverted ? 1 : -1", i.e. true meant NO inversion). Net motor
+        // direction is unchanged from the field-tested behavior.
+        public static final boolean kFunnelInverted = false;
 
         public static final LoggedTunableNumber kPivotP = new LoggedTunableNumber("PivotPidP", 8);
         public static final LoggedTunableNumber kPivotI = new LoggedTunableNumber("PivotPidI", 0.0);
@@ -272,7 +280,10 @@ public final class Constants {
         // change later
         public static final double kIndexerVoltage = 8;
         public static final double kIndexerReduction = 1.0;
-        public static final boolean kIndexerInverted = true;
+        // Flipped to false alongside the Indexer.setIndexerVoltage ternary correction
+        // (was "inverted ? 1 : -1", i.e. true meant NO inversion). Net motor
+        // direction is unchanged from the field-tested behavior.
+        public static final boolean kIndexerInverted = false;
     }
 
     public static class AutoConstants {
