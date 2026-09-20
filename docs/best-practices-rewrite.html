@@ -1,0 +1,860 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Rebuilt 2026 &mdash; Best-Practices Rewrite</title>
+<style>
+  :root{
+    --ink:#161a1d; --ink2:#41484d; --ink3:#6b757c;
+    --rule:#dfe4e8; --bg:#fbfcfd; --panel:#ffffff;
+    --accent:#0b5cad; --accent-soft:#eaf2fb;
+    --bad:#a8202a; --bad-soft:#fdeeee;
+    --good:#1c6b4a; --good-soft:#e9f5ef;
+    --warn:#8a5a00; --warn-soft:#fdf3e0;
+    --mono:"SF Mono",ui-monospace,Menlo,Consolas,monospace;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0; background:var(--bg); color:var(--ink);
+    font:16px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:900px;margin:0 auto;padding:56px 28px 96px}
+  header.top{border-bottom:3px solid var(--ink);padding-bottom:22px;margin-bottom:38px}
+  header.top .kicker{font:600 12px/1 var(--mono);letter-spacing:.13em;text-transform:uppercase;color:var(--accent)}
+  h1{font-size:2.35rem;line-height:1.12;margin:.35em 0 .3em;letter-spacing:-.02em}
+  header.top .sub{color:var(--ink2);font-size:1.06rem;max-width:62ch;margin:0}
+  header.top .meta{margin-top:18px;font:12px/1.7 var(--mono);color:var(--ink3)}
+  h2{font-size:1.5rem;letter-spacing:-.01em;margin:3em 0 .2em;padding-top:.5em;border-top:1px solid var(--rule)}
+  h2:first-of-type{border-top:none}
+  h3{font-size:1.07rem;margin:2.1em 0 .4em;letter-spacing:-.005em}
+  h4{font-size:.95rem;margin:1.4em 0 .3em;color:var(--ink2)}
+  p{margin:.7em 0;max-width:72ch}
+  ul,ol{max-width:72ch;padding-left:1.25em}
+  li{margin:.35em 0}
+  code{font-family:var(--mono);font-size:.875em;background:#f1f4f6;padding:.12em .36em;border-radius:3px;color:#123}
+  pre{background:#161a1d;color:#e6edf3;padding:14px 16px;border-radius:7px;overflow-x:auto;font:12.5px/1.65 var(--mono)}
+  pre code{background:none;color:inherit;padding:0}
+  table{border-collapse:collapse;width:100%;margin:1.1em 0;font-size:.9rem}
+  th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--rule);vertical-align:top}
+  th{font:600 11px/1.4 var(--mono);letter-spacing:.07em;text-transform:uppercase;color:var(--ink3);border-bottom:2px solid var(--rule)}
+  td.num{font-family:var(--mono);white-space:nowrap;font-size:.92em}
+  tbody tr:hover{background:#f6f9fb}
+
+  .lead{font-size:1.09rem;color:var(--ink2)}
+  .panel{background:var(--panel);border:1px solid var(--rule);border-radius:9px;padding:18px 22px;margin:1.4em 0}
+  .panel > :first-child{margin-top:0}
+  .panel > :last-child{margin-bottom:0}
+
+  .change{border:1px solid var(--rule);border-left:4px solid var(--accent);border-radius:0 8px 8px 0;background:var(--panel);padding:16px 20px;margin:1.5em 0}
+  .change > h3{margin-top:0}
+  .change .src{font:12px/1.55 var(--mono);color:var(--accent);background:var(--accent-soft);border-radius:4px;padding:7px 10px;margin:.6em 0 .8em;display:block}
+  .change .src b{font-weight:700}
+
+  .ba{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:1em 0}
+  .ba > div{border-radius:7px;padding:12px 14px;font:12.5px/1.6 var(--mono);overflow-x:auto}
+  .ba .before{background:var(--bad-soft);border:1px solid #f2d0d2}
+  .ba .after{background:var(--good-soft);border:1px solid #cbe6d9}
+  .ba .lbl{display:block;font:700 10px/1 var(--mono);letter-spacing:.1em;text-transform:uppercase;margin-bottom:8px}
+  .ba .before .lbl{color:var(--bad)}
+  .ba .after .lbl{color:var(--good)}
+  @media (max-width:700px){.ba{grid-template-columns:1fr}}
+
+  .tag{display:inline-block;font:600 10.5px/1 var(--mono);letter-spacing:.06em;text-transform:uppercase;padding:4px 7px;border-radius:4px;vertical-align:middle}
+  .tag.perf{background:var(--good-soft);color:var(--good)}
+  .tag.safe{background:var(--warn-soft);color:var(--warn)}
+  .tag.arch{background:var(--accent-soft);color:var(--accent)}
+
+  figure{margin:1.8em 0}
+  figcaption{font-size:.83rem;color:var(--ink3);margin-top:.7em;max-width:72ch}
+  svg{display:block;max-width:100%;height:auto;background:var(--panel);border:1px solid var(--rule);border-radius:9px}
+
+  .bar{display:inline-block;height:9px;background:var(--accent);border-radius:2px;vertical-align:middle;margin-right:7px}
+  .bar.low{background:#b9c4cc}
+
+  .kv{font:12.5px/1.8 var(--mono);color:var(--ink2)}
+  footer{margin-top:4em;padding-top:20px;border-top:1px solid var(--rule);font-size:.83rem;color:var(--ink3)}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header class="top">
+  <div class="kicker">Wellesley FRC 8567 &middot; Rebuilt 2026</div>
+  <h1>Rewriting the simulation branch against what the top teams actually do</h1>
+  <p class="sub">What changed on <code>claude/sim-best-practices-rewrite</code>, which piece of evidence drove each change, and what it buys the robot.</p>
+  <div class="meta">
+    base: <b>sim/shooter-seperate-sim</b> @ 1135251 &nbsp;&middot;&nbsp;
+    87 files, +4913 / &minus;3864 &nbsp;&middot;&nbsp;
+    <code>./gradlew build</code> and <code>./gradlew test</code> pass (15/15)
+  </div>
+</header>
+
+<p class="lead">This branch is not a tidy-up. It is a reimplementation of the same robot behaviour on a
+different skeleton, driven by a survey of the robot code that 45 of the highest-performing 2026 FRC
+teams published. Along the way the survey exposed several defects in the old code that would have
+cost points on the field &mdash; the largest being a shooter that deliberately slowed down the
+further it stood from the hub.</p>
+
+
+<h2>1. Method: how the corpus was used</h2>
+
+<p>The <code>code-finder</code> tool in <code>~/Documents/home&nbsp;related/FRC/FRC2026/code-finder</code>
+ranks teams by Match13 xp, finds each one's 2026 robot repository through GitHub code search and Blue
+Alliance, verifies it by reading <code>wpilib_preferences.json</code>, scores the candidates and clones
+the winner. Its <code>repos/2026/</code> directory held 45 repositories; 42 of them are Java robot
+projects (the other three are a Python robot, a strategy tool, and an empty code bank).</p>
+
+<p>Rather than reading a handful of repositories and copying whichever one looked nicest, every
+candidate practice was counted across all 42. A practice that 34 teams use is a convention; one that
+6 teams use is a preference. The counts below are what decided each change, and each change in
+section 3 and 4 names the count that drove it.</p>
+
+<figure>
+<svg viewBox="0 0 760 470" role="img" aria-labelledby="prevTitle">
+  <title id="prevTitle">Prevalence of practices across the 42 Java robot repositories</title>
+  <text x="24" y="28" font-family="ui-monospace,Menlo,monospace" font-size="11" font-weight="700" fill="#6b757c" letter-spacing="1.2">ADOPTED IN THIS REWRITE</text>
+  <text x="24" y="330" font-family="ui-monospace,Menlo,monospace" font-size="11" font-weight="700" fill="#6b757c" letter-spacing="1.2">CONSIDERED, NOT ADOPTED (see &sect;6)</text>
+
+  <!-- gridlines -->
+  <g stroke="#eef1f4" stroke-width="1">
+    <line x1="310" y1="38" x2="310" y2="452"/><line x1="400" y1="38" x2="400" y2="452"/>
+    <line x1="490" y1="38" x2="490" y2="452"/><line x1="580" y1="38" x2="580" y2="452"/>
+    <line x1="670" y1="38" x2="670" y2="452"/><line x1="730" y1="38" x2="730" y2="452"/>
+  </g>
+  <g font-family="ui-monospace,Menlo,monospace" font-size="9" fill="#9aa4ab" text-anchor="middle">
+    <text x="310" y="462">0</text><text x="400" y="462">10</text><text x="490" y="462">20</text>
+    <text x="580" y="462">30</text><text x="670" y="462">40</text>
+  </g>
+
+  <g font-family="-apple-system,Segoe UI,Roboto,sans-serif" font-size="11.5" fill="#41484d">
+    <!-- adopted: label, y, count -->
+    <text x="300" y="52" text-anchor="end">inversion set in motor config</text>
+    <rect x="310" y="43" width="333" height="11" rx="2" fill="#0b5cad"/><text x="651" y="52" font-size="10.5" fill="#6b757c">37</text>
+
+    <text x="300" y="72" text-anchor="end">interpolating range table (shooter)</text>
+    <rect x="310" y="63" width="306" height="11" rx="2" fill="#0b5cad"/><text x="624" y="72" font-size="10.5" fill="#6b757c">34</text>
+
+    <text x="300" y="92" text-anchor="end">continuous wrap on heading controller</text>
+    <rect x="310" y="83" width="306" height="11" rx="2" fill="#0b5cad"/><text x="624" y="92" font-size="10.5" fill="#6b757c">34</text>
+
+    <text x="300" y="112" text-anchor="end">vision std-devs scaled by tags / distance</text>
+    <rect x="310" y="103" width="306" height="11" rx="2" fill="#0b5cad"/><text x="624" y="112" font-size="10.5" fill="#6b757c">34</text>
+
+    <text x="300" y="132" text-anchor="end">subsystem command factories</text>
+    <rect x="310" y="123" width="333" height="11" rx="2" fill="#0b5cad"/><text x="651" y="132" font-size="10.5" fill="#6b757c">37</text>
+
+    <text x="300" y="152" text-anchor="end">closed loop on velocity / position</text>
+    <rect x="310" y="143" width="324" height="11" rx="2" fill="#0b5cad"/><text x="642" y="152" font-size="10.5" fill="#6b757c">36</text>
+
+    <text x="300" y="172" text-anchor="end">cosine-scaled module setpoints</text>
+    <rect x="310" y="163" width="234" height="11" rx="2" fill="#0b5cad"/><text x="552" y="172" font-size="10.5" fill="#6b757c">26</text>
+
+    <text x="300" y="192" text-anchor="end">Spark connection debouncing</text>
+    <rect x="310" y="183" width="198" height="11" rx="2" fill="#0b5cad"/><text x="516" y="192" font-size="10.5" fill="#6b757c">22</text>
+
+    <text x="300" y="212" text-anchor="end">hardware IO-layer interfaces</text>
+    <rect x="310" y="203" width="198" height="11" rx="2" fill="#0b5cad"/><text x="516" y="212" font-size="10.5" fill="#6b757c">22</text>
+
+    <text x="300" y="232" text-anchor="end">WPILib Alert for faults</text>
+    <rect x="310" y="223" width="180" height="11" rx="2" fill="#0b5cad"/><text x="498" y="232" font-size="10.5" fill="#6b757c">20</text>
+
+    <text x="300" y="252" text-anchor="end">@AutoLog logged input structs</text>
+    <rect x="310" y="243" width="171" height="11" rx="2" fill="#0b5cad"/><text x="489" y="252" font-size="10.5" fill="#6b757c">19</text>
+
+    <text x="300" y="272" text-anchor="end">REAL / SIM / REPLAY mode switch</text>
+    <rect x="310" y="263" width="171" height="11" rx="2" fill="#0b5cad"/><text x="489" y="272" font-size="10.5" fill="#6b757c">19</text>
+
+    <text x="300" y="292" text-anchor="end">ChassisSpeeds.discretize</text>
+    <rect x="310" y="283" width="162" height="11" rx="2" fill="#0b5cad"/><text x="480" y="292" font-size="10.5" fill="#6b757c">18</text>
+
+    <text x="300" y="312" text-anchor="end">dedicated heading controller</text>
+    <rect x="310" y="303" width="144" height="11" rx="2" fill="#0b5cad"/><text x="462" y="312" font-size="10.5" fill="#6b757c">16</text>
+
+    <!-- not adopted -->
+    <text x="300" y="356" text-anchor="end" fill="#6b757c">WPILib Units library</text>
+    <rect x="310" y="347" width="351" height="11" rx="2" fill="#b9c4cc"/><text x="669" y="356" font-size="10.5" fill="#9aa4ab">39</text>
+
+    <text x="300" y="376" text-anchor="end" fill="#6b757c">motion profiling on every mechanism</text>
+    <rect x="310" y="367" width="351" height="11" rx="2" fill="#b9c4cc"/><text x="669" y="376" font-size="10.5" fill="#9aa4ab">39</text>
+
+    <text x="300" y="396" text-anchor="end" fill="#6b757c">SysId characterisation routines</text>
+    <rect x="310" y="387" width="279" height="11" rx="2" fill="#b9c4cc"/><text x="597" y="396" font-size="10.5" fill="#9aa4ab">31</text>
+
+    <text x="300" y="416" text-anchor="end" fill="#6b757c">superstructure state machine</text>
+    <rect x="310" y="407" width="270" height="11" rx="2" fill="#b9c4cc"/><text x="588" y="416" font-size="10.5" fill="#9aa4ab">30</text>
+
+    <text x="300" y="436" text-anchor="end" fill="#6b757c">high-frequency odometry thread</text>
+    <rect x="310" y="427" width="135" height="11" rx="2" fill="#b9c4cc"/><text x="453" y="436" font-size="10.5" fill="#9aa4ab">15</text>
+  </g>
+  <text x="380" y="18" font-family="-apple-system,Segoe UI,Roboto,sans-serif" font-size="11" fill="#9aa4ab" text-anchor="middle">repositories using the practice, out of 42</text>
+</svg>
+<figcaption>Counted by pattern-matching the source of every cloned repository. Approximate by
+construction &mdash; a team that spells a practice unusually will be missed &mdash; but the gaps are
+wide enough that the ranking is not in doubt. The single most decisive result is not on the chart:
+<b>zero</b> of the 42 negate a motor command at the call site, while 37 set inversion in the
+controller configuration.</figcaption>
+</figure>
+
+<p>Two repositories were read closely because they are the nearest architectural relatives of this
+robot: <b>FRC 6002 "TriShooter"</b> (REV Sparks, AdvantageKit IO layer, a hood/kicker/conveyor
+shooter for the same game) and <b>FRC 341</b> (the most complete IO-layer and vision-filtering
+implementation in the set). Where a specific file was used as a model, it is named.</p>
+
+
+<h2>2. The shape of the change</h2>
+
+<figure>
+<svg viewBox="0 0 800 340" role="img" aria-labelledby="archTitle">
+  <title id="archTitle">Before and after: where hardware and simulation code live</title>
+
+  <!-- BEFORE -->
+  <text x="30" y="26" font-family="ui-monospace,Menlo,monospace" font-size="11" font-weight="700" fill="#a8202a" letter-spacing="1.1">BEFORE</text>
+  <rect x="30" y="38" width="330" height="266" rx="8" fill="#fdeeee" stroke="#f2d0d2"/>
+
+  <rect x="52" y="56" width="286" height="30" rx="5" fill="#fff" stroke="#e4c3c5"/>
+  <text x="195" y="76" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="12" fill="#161a1d">RobotContainer</text>
+
+  <rect x="52" y="100" width="286" height="118" rx="5" fill="#fff" stroke="#e4c3c5"/>
+  <text x="195" y="120" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="12" font-weight="600" fill="#161a1d">Flywheel extends SubsystemBase</text>
+  <text x="68" y="142" font-family="ui-monospace,monospace" font-size="10.5" fill="#41484d">control law + PID + feedforward</text>
+  <text x="68" y="160" font-family="ui-monospace,monospace" font-size="10.5" fill="#41484d">SparkFlex leadMotor, followerMotor</text>
+  <text x="68" y="178" font-family="ui-monospace,monospace" font-size="10.5" fill="#a8202a">if (isSimulation()) { FlywheelSim ... }</text>
+  <text x="68" y="196" font-family="ui-monospace,monospace" font-size="10.5" fill="#a8202a">SparkFlexSim leadSparkSim, ... (null on robot)</text>
+  <text x="68" y="212" font-family="ui-monospace,monospace" font-size="10" fill="#8a5a00">Lights.getInstance().isShooting = ...</text>
+
+  <rect x="52" y="232" width="286" height="30" rx="5" fill="#fff" stroke="#e4c3c5"/>
+  <text x="195" y="252" text-anchor="middle" font-family="ui-monospace,monospace" font-size="11" fill="#a8202a">REV SparkSim shims (quirks leak upward)</text>
+
+  <rect x="52" y="272" width="286" height="22" rx="5" fill="#fff" stroke="#e4c3c5"/>
+  <text x="195" y="287" text-anchor="middle" font-family="ui-monospace,monospace" font-size="11" fill="#41484d">hardware</text>
+
+  <!-- arrow -->
+  <path d="M372 170 L422 170" stroke="#6b757c" stroke-width="2" fill="none"/>
+  <path d="M422 170 l-8 -5 v10 z" fill="#6b757c"/>
+
+  <!-- AFTER -->
+  <text x="440" y="26" font-family="ui-monospace,Menlo,monospace" font-size="11" font-weight="700" fill="#1c6b4a" letter-spacing="1.1">AFTER</text>
+  <rect x="440" y="38" width="330" height="266" rx="8" fill="#e9f5ef" stroke="#cbe6d9"/>
+
+  <rect x="462" y="56" width="286" height="30" rx="5" fill="#fff" stroke="#bcd9ca"/>
+  <text x="605" y="76" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="12" fill="#161a1d">RobotContainer &mdash; picks IO by Mode</text>
+
+  <rect x="462" y="100" width="286" height="62" rx="5" fill="#fff" stroke="#bcd9ca"/>
+  <text x="605" y="120" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="12" font-weight="600" fill="#161a1d">Flywheel extends SubsystemBase</text>
+  <text x="478" y="142" font-family="ui-monospace,monospace" font-size="10.5" fill="#41484d">control law + PID + feedforward only</text>
+  <text x="478" y="156" font-family="ui-monospace,monospace" font-size="10" fill="#1c6b4a">RobotState.setShooterAtSpeed(...)</text>
+
+  <rect x="462" y="176" width="286" height="28" rx="5" fill="#fff" stroke="#bcd9ca" stroke-dasharray="4 3"/>
+  <text x="605" y="194" text-anchor="middle" font-family="ui-monospace,monospace" font-size="11" fill="#0b5cad">interface FlywheelIO &nbsp;+&nbsp; @AutoLog inputs</text>
+
+  <g font-family="ui-monospace,monospace" font-size="10">
+    <rect x="462" y="218" width="88" height="44" rx="5" fill="#fff" stroke="#bcd9ca"/>
+    <text x="506" y="238" text-anchor="middle" fill="#161a1d">IOSpark</text>
+    <text x="506" y="252" text-anchor="middle" fill="#6b757c" font-size="9">real robot</text>
+
+    <rect x="561" y="218" width="88" height="44" rx="5" fill="#fff" stroke="#bcd9ca"/>
+    <text x="605" y="238" text-anchor="middle" fill="#161a1d">IOSim</text>
+    <text x="605" y="252" text-anchor="middle" fill="#6b757c" font-size="9">pure physics</text>
+
+    <rect x="660" y="218" width="88" height="44" rx="5" fill="#fff" stroke="#bcd9ca"/>
+    <text x="704" y="238" text-anchor="middle" fill="#161a1d">IO&#123;&#125; stub</text>
+    <text x="704" y="252" text-anchor="middle" fill="#6b757c" font-size="9">replay a log</text>
+  </g>
+
+  <rect x="462" y="272" width="286" height="22" rx="5" fill="#fff" stroke="#bcd9ca"/>
+  <text x="605" y="287" text-anchor="middle" font-family="ui-monospace,monospace" font-size="11" fill="#41484d">hardware &nbsp;&middot;&nbsp; physics &nbsp;&middot;&nbsp; recorded log</text>
+</svg>
+<figcaption>Every subsystem follows this shape. The control law moves nowhere; what moves is the
+hardware, out from underneath it and behind an interface whose values are recorded in the log.</figcaption>
+</figure>
+
+<p>The file layout follows from that. Mechanism constants moved next to their mechanism (41 of 42
+corpus robots organise this way), and the 15 single-purpose <code>Command</code> subclasses collapsed
+into factory methods on the subsystems that own the hardware.</p>
+
+<pre><code>src/main/java/frc/robot/
+  Robot.java  RobotContainer.java  Constants.java  RobotState.java
+  commands/     DriveCommands.java  AutoSelector.java
+  subsystems/
+    drive/      Drive  Module  ModuleIO{,Spark,Sim}  GyroIO{,Pigeon2,Sim}  DriveConstants
+    vision/     Vision  VisionIO{,Limelight,Sim}  VisionConstants
+    shooter/    Flywheel  Hood  Kicker  (+ IO trio each)  Shooter  ShooterConstants
+    intake/     Pivot  Funnel  (+ IO trio each)  Intake  IntakeConstants
+    storage/    Indexer  IndexerIO{,Spark,Sim}  StorageConstants
+    leds/       Leds
+  util/         Alerts  SparkUtil  LoggedTunableNumber  SimBattery  FieldConstants</code></pre>
+
+
+<h2>3. Changes that affect how the robot plays</h2>
+
+<div class="change">
+<h3>3.1 The shooter range curve <span class="tag perf">performance</span></h3>
+<span class="src"><b>Source:</b> 34 / 42 &mdash; interpolating lookup table for distance&rarr;velocity.
+Models: <code>341/subsystems/shooter/ShooterConstants.java</code>,
+<code>10021/subsystems/flywheel/FlywheelConstants.java</code>.</span>
+
+<p>The old code computed the flywheel setpoint from a fitted quadratic:</p>
+
+<div class="ba">
+<div class="before"><span class="lbl">before</span>return 1310.13 + 1270.33*dist<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- 128.09*dist*dist;</div>
+<div class="after"><span class="lbl">after</span>return ShooterConstants<br>&nbsp;&nbsp;.kDistanceToRpm.get(distanceMeters);</div>
+</div>
+
+<p>That parabola opens downwards. It peaks at <b>4.96&nbsp;m</b> and then falls away, so past five
+metres the further the robot stood from the hub, the <em>slower</em> it spun the wheel. At eight
+metres it commanded 3275&nbsp;RPM &mdash; less than it commanded at two metres. Every long shot
+undershot, and the undershoot grew with range.</p>
+
+<figure>
+<svg viewBox="0 0 740 400" role="img" aria-labelledby="shotTitle">
+  <title id="shotTitle">Commanded flywheel velocity against distance, old quadratic versus new table</title>
+  <rect x="70" y="40" width="620" height="290" fill="#fff"/>
+  <!-- grid -->
+  <g stroke="#eef1f4" stroke-width="1">
+    <line x1="70" y1="40" x2="690" y2="40"/><line x1="70" y1="88.3" x2="690" y2="88.3"/>
+    <line x1="70" y1="136.7" x2="690" y2="136.7"/><line x1="70" y1="185" x2="690" y2="185"/>
+    <line x1="70" y1="233.3" x2="690" y2="233.3"/><line x1="70" y1="281.7" x2="690" y2="281.7"/>
+    <line x1="225" y1="40" x2="225" y2="330"/><line x1="380" y1="40" x2="380" y2="330"/>
+    <line x1="535" y1="40" x2="535" y2="330"/>
+  </g>
+  <line x1="70" y1="330" x2="690" y2="330" stroke="#c6ced4" stroke-width="1.5"/>
+  <line x1="70" y1="40" x2="70" y2="330" stroke="#c6ced4" stroke-width="1.5"/>
+
+  <!-- axis labels -->
+  <g font-family="ui-monospace,Menlo,monospace" font-size="10" fill="#9aa4ab">
+    <text x="62" y="334" text-anchor="end">2500</text><text x="62" y="285.7" text-anchor="end">3000</text>
+    <text x="62" y="237.3" text-anchor="end">3500</text><text x="62" y="189" text-anchor="end">4000</text>
+    <text x="62" y="140.7" text-anchor="end">4500</text><text x="62" y="92.3" text-anchor="end">5000</text>
+    <text x="62" y="44" text-anchor="end">5500</text>
+    <text x="70" y="348" text-anchor="middle">1 m</text><text x="225" y="348" text-anchor="middle">3 m</text>
+    <text x="380" y="348" text-anchor="middle">5 m</text><text x="535" y="348" text-anchor="middle">7 m</text>
+    <text x="690" y="348" text-anchor="middle">9 m</text>
+  </g>
+  <text x="24" y="185" font-family="-apple-system,sans-serif" font-size="11" fill="#6b757c" transform="rotate(-90 24 185)" text-anchor="middle">commanded RPM</text>
+  <text x="380" y="372" font-family="-apple-system,sans-serif" font-size="11" fill="#6b757c" text-anchor="middle">distance to hub</text>
+
+  <!-- calibrated band shading -->
+  <rect x="147.5" y="40" width="185" height="290" fill="#0b5cad" opacity="0.045"/>
+  <text x="240" y="58" font-family="ui-monospace,monospace" font-size="9.5" fill="#0b5cad" text-anchor="middle" opacity="0.85">calibrated band (1.5&ndash;4.5 m)</text>
+
+  <!-- old quadratic -->
+  <polyline fill="none" stroke="#a8202a" stroke-width="2.4" stroke-dasharray="6 4"
+    points="70.0,334.6 89.4,310.9 108.8,288.7 128.1,268.0 147.5,249.0 166.9,231.4 186.2,215.4 205.6,201.0 225.0,188.1 244.4,176.7 263.8,166.9 283.1,158.6 302.5,151.9 321.9,146.8 341.2,143.2 360.6,141.1 380.0,140.6 399.4,141.6 418.8,144.2 438.1,148.3 457.5,154.0 476.9,161.2 496.2,170.0 515.6,180.3 535.0,192.2 554.4,205.6 573.8,220.5 593.1,237.0 612.5,255.1 631.9,274.7 651.2,295.8 670.6,318.5 690.0,339.7"/>
+  <!-- new table -->
+  <polyline fill="none" stroke="#1c6b4a" stroke-width="2.6"
+    points="70.0,288.7 89.4,288.7 108.8,288.7 128.1,268.9 147.5,249.0 166.9,232.2 186.2,215.4 205.6,201.8 225.0,188.1 244.4,177.5 263.8,166.9 283.1,159.4 302.5,151.9 321.9,147.5 341.2,143.1 360.6,135.6 380.0,128.0 399.4,121.1 418.8,114.2 438.1,108.0 457.5,101.8 476.9,96.2 496.2,90.7 515.6,85.1 535.0,79.5 554.4,74.7 573.8,69.9 593.1,65.1 612.5,60.3 631.9,60.3 651.2,60.3 670.6,60.3 690.0,60.3"/>
+
+  <!-- peak marker -->
+  <circle cx="376.8" cy="140.6" r="4" fill="#a8202a"/>
+  <line x1="376.8" y1="140.6" x2="376.8" y2="330" stroke="#a8202a" stroke-width="1" stroke-dasharray="2 3" opacity="0.5"/>
+  <text x="383" y="112" font-family="ui-monospace,monospace" font-size="10" fill="#a8202a">peak 4.96 m &mdash; falls after here</text>
+
+  <!-- gap annotation at 8 m -->
+  <line x1="651.2" y1="60.3" x2="651.2" y2="295.8" stroke="#8a5a00" stroke-width="1.5"/>
+  <line x1="646" y1="60.3" x2="656" y2="60.3" stroke="#8a5a00" stroke-width="1.5"/>
+  <line x1="646" y1="295.8" x2="656" y2="295.8" stroke="#8a5a00" stroke-width="1.5"/>
+  <text x="643" y="182" font-family="ui-monospace,monospace" font-size="10.5" font-weight="700" fill="#8a5a00" text-anchor="end">2015 RPM</text>
+  <text x="643" y="196" font-family="ui-monospace,monospace" font-size="9.5" fill="#8a5a00" text-anchor="end">short at 8 m</text>
+
+  <!-- legend -->
+  <g font-family="-apple-system,sans-serif" font-size="11">
+    <line x1="470" y1="310" x2="500" y2="310" stroke="#a8202a" stroke-width="2.4" stroke-dasharray="6 4"/>
+    <text x="507" y="314" fill="#41484d">old quadratic fit</text>
+    <line x1="470" y1="326" x2="500" y2="326" stroke="#1c6b4a" stroke-width="2.6"/>
+    <text x="507" y="330" fill="#41484d">new interpolating table</text>
+  </g>
+</svg>
+<figcaption>Inside the shaded band the two curves are the same by construction &mdash; the table's
+entries from 1.5&nbsp;m to 4.5&nbsp;m <em>are</em> the quadratic's own values, so nothing about a
+calibrated shot changes. Beyond it the table follows the logarithmic fit that was already sitting
+commented out one line below the quadratic in the old source. The two fits agree to within 1%
+everywhere inside the band, which is strong evidence they were fitted to the same range-test data
+and that the log form is the one that extrapolates sanely.</figcaption>
+</figure>
+
+<p><b>Why a table and not a better polynomial.</b> A table cannot turn over, it clamps rather than
+extrapolating when asked for a distance outside its range, and new range-test points can be pasted in
+without anyone refitting anything. That last property is why 34 of 42 teams use one: the table is
+edited by the students who ran the range test, in the units they measured.</p>
+
+<p>The regression is now a test, not a comment:</p>
+<pre><code>@Test void shooterRangeTableIsMonotonic() {
+    for (double d = 1.0; d &lt;= 9.0; d += 0.25)
+        assertTrue(Flywheel.rpmForDistance(d) &gt;= previous, ...);
+}</code></pre>
+</div>
+
+
+<div class="change">
+<h3>3.2 The flywheel had no feedback term <span class="tag perf">performance</span></h3>
+<span class="src"><b>Source:</b> found while porting; confirmed against the 36 / 42 that run a real
+closed loop on velocity. Measured in the new simulation.</span>
+
+<p><code>kFlywheelP</code> was <code>1e-5</code>. The PID takes RPM in and produces volts out, so a
+100&nbsp;RPM error produced a <b>one millivolt</b> correction. The loop was feedforward-only in
+everything but name: whatever offset <code>kV</code> left behind stayed there forever, and &mdash; the
+part that costs points &mdash; the wheel had no way to recover the speed it loses as a ball passes
+through it. The next ball left at whatever velocity the wheel happened to have drooped to.</p>
+
+<p>The new simulation makes this measurable. Commanded 3000&nbsp;RPM, the two wheels settled at
+3081 and 3115&nbsp;RPM &mdash; outside the 100&nbsp;RPM tolerance that gates the kicker, and never
+converging. Raising <code>kFlywheelP</code> to <b>0.002&nbsp;V/RPM</b> (0.2&nbsp;V at the ready
+tolerance, ~1&nbsp;V at 500&nbsp;RPM error, well inside the 10&nbsp;V clamp) brings both under
+55&nbsp;RPM.</p>
+</div>
+
+
+<div class="change">
+<h3>3.3 "At speed" was one-sided, and only watched one wheel <span class="tag perf">performance</span></h3>
+<span class="src"><b>Source:</b> the corpus convention is a symmetric tolerance on every driven wheel;
+FRC 341 gates its uptake on <code>TOLERANCE_RPM</code> either side.</span>
+
+<div class="ba">
+<div class="before"><span class="lbl">before</span>return Math.abs(getVelocity(leadMotor))<br>&nbsp;&nbsp;&gt; Math.abs(velocity) - tolerance;</div>
+<div class="after"><span class="lbl">after</span>return |lead &minus; setpoint| &lt; tol<br>&nbsp;&nbsp;&amp;&amp; |follower &minus; setpoint| &lt; tol;</div>
+</div>
+
+<p>Two consequences. An <em>over</em>-speeding wheel read as ready, so the kicker would feed while the
+shooter was still above its setpoint. And only the lead wheel was checked, so a follower that had not
+caught up &mdash; or that was fighting a jam &mdash; never blocked the shot. A ball fed into a shooter
+whose two sides are at different speeds leaves with side spin that no range table accounts for.</p>
+
+<p>Test <code>atSpeedRejectsOverspeed</code> now pins this: spin to 1000&nbsp;RPM, drop the setpoint to
+200, and assert that the shooter does <em>not</em> report ready while it coasts down through the
+target.</p>
+</div>
+
+
+<div class="change">
+<h3>3.4 Motor inversion moved into the controller configuration <span class="tag arch">architecture</span></h3>
+<span class="src"><b>Source:</b> 37 / 42 set inversion in the motor config. <b>0 / 42</b> negate at the
+call site &mdash; the clearest unanimous result in the whole survey.</span>
+
+<p>Five subsystems negated the voltage just before writing it:</p>
+
+<div class="ba">
+<div class="before"><span class="lbl">before &mdash; five places</span>voltage *= kFlywheelInverted ? -1 : 1;<br>motor.setVoltage(voltage);<br><br>// ...and so the measurement<br>// had to be negated too:<br>pid.calculate(<b>-</b>getVelocity(lead), target)</div>
+<div class="after"><span class="lbl">after</span>config.inverted(kFlywheelInverted);<br>motor.setVoltage(voltage);<br><br>// command and measurement now<br>// share a sign:<br>pid.calculate(inputs.leadVelocityRpm, target)</div>
+</div>
+
+<p>Negating at the call site flips the <em>command</em> but not the <em>encoder</em>, so the
+measurement and the setpoint end up in opposite sign conventions and the discrepancy has to be
+patched at the feedback input. That is exactly the <code>-getVelocity(leadMotor)</code> in the old
+flywheel loop. Setting <code>inverted</code> in the configuration flips both together and the minus
+sign disappears.</p>
+
+<p>The hood benefited twice over: it had <em>two</em> constants, <code>kHoodInverted</code> (negate the
+command) and <code>kHoodRelativeEncoderInverted</code> (negate the measurement), describing one
+physical fact &mdash; which way round the motor is bolted in. They had to be kept equal by hand, and
+setting one without the other turns the position loop into positive feedback that drives the hood
+into its hard stop. They are now one flag. The same pair on the pivot collapsed the same way.</p>
+
+<p>Net motor direction on the field is unchanged.</p>
+</div>
+
+
+<div class="change">
+<h3>3.5 Drive wheels are closed-loop, cosine-scaled, and discretised <span class="tag perf">performance</span></h3>
+<span class="src"><b>Sources:</b> closed loop 36 / 42; cosine scaling 26 / 42;
+<code>ChassisSpeeds.discretize</code> 18 / 42. Model: <code>6002/subsystems/drive/Module.java</code>
+and <code>io/ModuleIOSpark.java</code>.</span>
+
+<h4>Closed loop</h4>
+<p>Modules were driven open loop: <code>driveMotor.set(speed / kPhysicalMaxSpeed)</code>. That is a
+duty cycle, and it only produces the requested speed on a full battery with no load. Under a sagging
+battery, or while pushing another robot, the wheel turned slower than the kinematics assumed &mdash;
+so odometry over-counted distance and PathPlanner paths came up short exactly when the match was
+hardest. The Spark now runs a velocity loop with kS/kV feedforward.</p>
+
+<h4>Cosine scaling</h4>
+<p>While a module is still rotating toward its commanded angle, any speed it is given pushes the robot
+sideways. <code>state.cosineScale(currentAngle)</code> scales the commanded speed by the cosine of the
+remaining steering error, so the wheel waits until it is roughly pointed the right way before it
+pushes hard. Visible effect: the robot stops lurching off heading at the start of a hard direction
+change.</p>
+
+<h4>Discretisation</h4>
+<p>Swerve kinematics assume the robot travels in a straight line for the whole 20&nbsp;ms loop. When it
+is translating and rotating at once the real path is an arc, so the robot drifts perpendicular to its
+motion &mdash; and the odometry, using the same flawed assumption, does not notice. One call to
+<code>ChassisSpeeds.discretize</code> corrects it.</p>
+
+<h4>And the X-lock is now actually an X</h4>
+<div class="ba">
+<div class="before"><span class="lbl">before</span>45&deg;, 135&deg;, &minus;45&deg;, <b>45&deg;</b><br>&larr; back two wheels parallel</div>
+<div class="after"><span class="lbl">after</span>each wheel points along its own<br>chassis-corner vector &mdash; correct<br>by construction</div>
+</div>
+<p>The old angles left the two back wheels parallel, which is a parallelogram: the robot could still be
+shoved sideways while "locked". Test <code>xLockPointsWheelsAtTheChassisCorners</code> checks the
+geometry.</p>
+</div>
+
+
+<div class="change">
+<h3>3.6 Heading hold: a controller instead of four hand-written branches <span class="tag perf">performance</span></h3>
+<span class="src"><b>Source:</b> 34 / 42 enable continuous input on the heading controller;
+16 / 42 use a dedicated profiled heading controller. Model:
+<code>341/commands/DriveCommands.java :: joystickDriveAtAngle</code>.</span>
+
+<p><code>DriftTeleOp</code> worked out the shortest way round by hand:</p>
+<pre><code>if (target &lt; heading) {
+    if (heading - target &lt; Math.PI) turningSpeed = -pid.calculate(heading, target);
+    else                            turningSpeed = -pid.calculate(heading, target + 2*Math.PI);
+} else {
+    if (target - heading &lt; Math.PI) turningSpeed = -pid.calculate(heading, target);
+    else                            turningSpeed = -pid.calculate(heading, target - 2*Math.PI);
+}</code></pre>
+<p>Four branches, two sign conventions (<code>heading</code> came from
+<code>getHeading().unaryMinus()</code> while <code>target</code> did not), and a mapping into
+<code>[0, 2&pi;)</code> that has to agree with both. A <code>ProfiledPIDController</code> with
+<code>enableContinuousInput(-&pi;, &pi;)</code> does the same thing correctly by construction, and the
+trapezoid profile on top means the robot slews to a new heading at a bounded rate instead of jerking
+at whatever the proportional term produces.</p>
+</div>
+
+
+<div class="change">
+<h3>3.7 Vision is filtered and weighted <span class="tag perf">performance</span></h3>
+<span class="src"><b>Source:</b> 34 / 42 scale standard deviations by tag count and distance; 37 / 42
+tune them at all. Model: <code>341/subsystems/vision/Vision.java</code>.</span>
+
+<p>Every MegaTag2 result went straight into the pose estimator at a fixed
+<code>(0.5, 0.5, &infin;)</code>. A single tag glimpsed edge-on across the field moved the pose estimate
+exactly as hard as two tags two metres away. That is the mechanism behind "the robot teleports on the
+field display", and behind auto-aim snapping to a wrong heading.</p>
+
+<table>
+<thead><tr><th>Layer</th><th>Rule</th><th>Why</th></tr></thead>
+<tbody>
+<tr><td><b>Reject</b></td><td>no tags</td><td>nothing to believe</td></tr>
+<tr><td></td><td>one tag with ambiguity &gt; 0.3</td><td>the solver could not tell two poses apart</td></tr>
+<tr><td></td><td>average tag distance &gt; 6 m</td><td>noise grows faster than signal</td></tr>
+<tr><td></td><td>yaw rate &gt; 2&pi; rad/s</td><td>rolling shutter smears the tag, and MegaTag2's answer rests on a gyro angle that has already moved</td></tr>
+<tr><td></td><td>pose &gt; 0.5 m outside the field</td><td>physically impossible</td></tr>
+<tr><td><b>Weight</b></td><td><code>&sigma;<sub>xy</sub> = 0.05 &middot; d&sup2; / n&sup2;</code></td><td>doubling the range quadruples the uncertainty; a second tag quarters it</td></tr>
+<tr><td></td><td><code>&sigma;<sub>&theta;</sub> = &infin;</code></td><td>kept from the old code, and correct: with MegaTag2 the reported rotation is derived from the gyro yaw we sent the camera, so fusing it back lets vision argue with the gyro</td></tr>
+</tbody>
+</table>
+
+<p>Every rejection is logged with its reason at <code>Vision/RejectReason</code>, so a post-match
+review can tell "the camera saw nothing" from "we threw it all away".</p>
+
+<p>Two mounting-geometry bugs were also carried into the new <code>VisionConstants</code> with the
+reasoning attached: the camera pitch had at one point been wrapped in a <code>Rotation3d</code> (which
+takes radians) before being handed to a Limelight API that takes degrees, so a &minus;30&deg; mounting
+angle arrived as 1.4&deg; and every range the camera computed was wrong.</p>
+</div>
+
+
+<div class="change">
+<h3>3.8 Field-relative driving on the red alliance <span class="tag perf">performance</span></h3>
+<span class="src"><b>Source:</b> read while porting; the corpus convention is a 180&deg; heading
+rotation, e.g. <code>6002/commands/drive/DriveCommands.java</code>.</span>
+
+<div class="ba">
+<div class="before"><span class="lbl">before</span>AllianceFlipUtil.apply(heading)<br>// = new Rotation2d(-cos, sin)<br>// i.e. MIRRORED about X</div>
+<div class="after"><span class="lbl">after</span>heading.plus(Rotation2d.k180deg)<br>// i.e. ROTATED half a turn</div>
+</div>
+
+<p><code>AllianceFlipUtil.apply(Rotation2d)</code> mirrors a rotation. That is the right operation for
+flipping a field <em>position</em> to the other alliance's side, and the wrong one for converting a
+driver's "forward" into field coordinates: mirroring inverts the sense of one axis, so on red the
+robot's response to sideways stick was reversed relative to blue. A half-turn rotation is what
+"forward is away from your own wall" actually means.</p>
+</div>
+
+
+<div class="change">
+<h3>3.9 Joystick shaping <span class="tag perf">performance</span></h3>
+<span class="src"><b>Source:</b> 23 / 42 use <code>MathUtil.applyDeadband</code>; the nine that shape a
+drive stick all apply it to the vector magnitude, then square. Model:
+<code>341</code>, <code>1768</code>, <code>10021</code>, <code>6002</code> &mdash; identical code in
+all four.</span>
+
+<div class="ba">
+<div class="before"><span class="lbl">before</span>xSpeed *= (xSpeed &gt; 0) ? 1/0.8 : 1/0.9;<br>ySpeed *= 1/0.9;<br>if (|xSpeed| &lt; db) xSpeed = 0;<br>if (|ySpeed| &lt; db) ySpeed = 0;</div>
+<div class="after"><span class="lbl">after</span>double m = applyDeadband(hypot(x,y), db);<br>Rotation2d dir = new Rotation2d(atan2(y,x));<br>m = m * m;</div>
+</div>
+
+<p>Per-axis deadbands carve a <em>cross</em> out of the stick's travel: a diagonal push of 0.1 in each
+axis produces nothing at all, and a stick slightly off-centre on one axis distorts every diagonal.
+Deadbanding the magnitude carves a circle, which is the shape of the physical dead zone.</p>
+
+<p>The three scale factors are gone too. <code>1/0.8</code> forward against <code>1/0.9</code> backward
+made the robot 12% more sensitive pushing away from the driver than toward them, for no recorded
+reason. Squaring the magnitude gives fine control near centre and full speed at the rim, which is what
+those factors were probably reaching for.</p>
+</div>
+
+
+<div class="change">
+<h3>3.10 Autonomous selection cannot name a routine that does not exist <span class="tag safe">reliability</span></h3>
+<span class="src"><b>Source:</b> the corpus universally uses one chooser of real
+<code>Command</code> objects, most commonly <code>AutoBuilder.buildAutoChooser()</code>.</span>
+
+<p>The old chooser had two dropdowns and pasted their selections together into a string &mdash;
+"Shoot" plus "Left" made <code>"Shoot Left"</code> &mdash; then looked that string up in a map. Most of
+the nine combinations named nothing, and choosing one returned <code>null</code> from
+<code>getSelectedAuto()</code>, which <code>autonomousInit()</code> quietly skipped. The failure mode
+was a robot sitting still for fifteen seconds with nothing on the dashboard explaining why.</p>
+
+<p>One chooser built from the <code>.auto</code> files that are actually deployed cannot express an
+invalid selection. A renamed routine disappears from the dashboard instead of becoming a selection
+that fails at match start, the choice is recorded into the log, and an unselected chooser raises an
+<code>Alert</code> and returns a named do-nothing command rather than <code>null</code>.</p>
+</div>
+
+
+<h2>4. Changes that affect how the code is worked on</h2>
+
+<div class="change">
+<h3>4.1 The IO layer, and log replay <span class="tag arch">architecture</span></h3>
+<span class="src"><b>Source:</b> 22 / 42 IO interfaces, 19 / 42 <code>@AutoLog</code>, 19 / 42 a REPLAY
+mode. Model: <code>6002</code> (Spark-based, same shape of robot) and <code>341</code>.</span>
+
+<p>Each subsystem now reads its sensors through an interface whose fields are annotated
+<code>@AutoLog</code>. AdvantageKit generates a companion class that writes every field into the log
+each loop and, in REPLAY mode, reads them back out. Set <code>Constants.kSimMode = REPLAY</code>, point
+it at a match log, and the same subsystem code runs against exactly the inputs it saw on the field
+&mdash; with whatever control changes are checked out now. A shooter mis-fire from a match can be
+debugged, and the fix verified, without the robot being powered on.</p>
+
+<p>The simulation implementations are a second, independent win. They talk to no vendor code at all.
+The previous simulation drove REV's <code>SparkFlexSim</code>/<code>SparkMaxSim</code> shims, so every
+quirk of that library leaked into files that also run on the real robot:</p>
+<ul>
+<li><code>iterate()</code> ignores the configured inversion;</li>
+<li>it overwrites the encoder position with its own copy, so <code>resetEncoders()</code> had to poke
+the sim object as well &mdash; a line of simulation code sitting inside a real-robot method;</li>
+<li>it low-pass filters the velocity it hands back, so simulated control loops saw a different plant
+than real ones.</li>
+</ul>
+<p>Behind an interface, the simulation is an honest motor-and-gearbox model with its own controllers,
+and the real-robot classes keep no simulation code whatsoever. All three workarounds are gone.</p>
+</div>
+
+<div class="change">
+<h3>4.2 Faults are reported where someone will see them <span class="tag safe">reliability</span></h3>
+<span class="src"><b>Source:</b> 20 / 42 use WPILib <code>Alert</code>; 22 / 42 debounce device
+connection. Manager modelled on <code>6002/utils/AlertsManager.java</code>; Spark helpers on FRC
+6328's <code>SparkUtil</code>.</span>
+
+<p>The old code reported problems with <code>System.out.println</code> at construction time, which
+scrolls off the RioLog long before a match starts and never reaches the driver station. An
+<code>Alert</code> is a persistent named condition: it shows on the dashboard for as long as it holds
+and clears itself when it stops.</p>
+
+<p>Alerts now exist for every drive motor, steering motor, steering encoder, flywheel, hood, pivot,
+funnel, indexer and kicker disconnect; the gyro; the camera; brownout; low battery; CAN receive
+errors; an unselected auto; and tuning mode being left on. The LED strip flashes red whenever any
+error-level alert is active, so the fault is visible from across the pit.</p>
+
+<p>Underneath, Spark reads go through <code>SparkUtil.ifOk</code>. A failed CAN read does not throw
+&mdash; it returns a stale or zero value and sets an error code that nothing was checking. A steering
+encoder quietly returning 0.0 means the module confidently steers "straight ahead" and the robot
+drives into a wall. Now a failed read raises a sticky fault, a <code>Debouncer</code> turns a
+half-second of failures into a disconnect, and the driver sees it. Configuration is retried up to five
+times, because it routinely fails once at boot while the CAN bus is still enumerating.</p>
+</div>
+
+<div class="change">
+<h3>4.3 The LED strip is no longer a global variable <span class="tag arch">architecture</span></h3>
+<span class="src"><b>Source:</b> 11 / 42 keep an explicit <code>RobotState</code>
+(<code>341</code>, <code>6002</code>, <code>3467</code>).</span>
+
+<p><code>Lights</code> was a singleton with eleven public mutable fields that half the robot wrote into
+and the other half read back. <code>Swerve.getMaxSpeed()</code> asked the light strip whether demo
+mode was on; <code>Flywheel.getTargetVelocity()</code> did the same. The LED class sat on the
+dependency path of the drivetrain's top speed.</p>
+
+<p>Those facts now live in <code>RobotState</code>, named for what they are.
+<code>Leds</code> became an ordinary subsystem that only reads it &mdash; and being a subsystem, the
+scheduler runs it, so it is no longer called by hand from <code>robotPeriodic()</code>.</p>
+
+<p>One real bug fell out of the move. Demo scaling used to be applied by <em>assigning</em> the demo
+constant back into <code>targetVelocity</code> inside the getter, so the next loop found the
+distance-based velocity replaced by the constant &mdash; the robot kept shooting at demo speed for the
+rest of the match. Scaling on the way out preserves the commanded value; test
+<code>demoModeScalesButDoesNotClobber</code> holds it there.</p>
+</div>
+
+<div class="change">
+<h3>4.4 Commands are factories on the subsystem that owns the hardware <span class="tag arch">architecture</span></h3>
+<span class="src"><b>Source:</b> 37 / 42 use inline subsystem factories; 34 / 42 use
+<code>Commands.*</code>.</span>
+
+<p>Fifteen <code>Command</code> subclasses &mdash; <code>Shoot</code>, <code>DirectShoot</code>,
+<code>SpinIntake</code>, <code>SpinIndexer</code>, <code>SetPivot</code>, <code>SetHood</code>,
+<code>ManualKicker</code>, <code>RunKicker</code>, <code>Feed</code>, <code>Shuffle</code>,
+<code>CalculatedShoot</code>, <code>ResetPivot</code>, <code>CorrectAuto</code>, and the two teleop
+drive classes &mdash; each wrapped one or two lines of behaviour in forty of boilerplate. Two were
+entirely empty. They are now methods next to the hardware they command.</p>
+
+<p>Three behavioural fixes came with the collapse:</p>
+<ul>
+<li><b>Stale writes.</b> <code>SpinIntake</code> and <code>Shoot</code> wrote their output once, in
+<code>initialize()</code>. A Spark that has not heard from the roboRIO for 100&nbsp;ms cuts output on
+its own watchdog, so a long intake could stall silently until the button was released and pressed
+again. The factories use <code>runEnd</code>, which writes every loop.</li>
+<li><b>Ownership.</b> <code>SetPivot</code> set its target in <code>initialize()</code> and finished
+immediately, releasing the requirement while the arm was still moving; a second binding could take
+over mid-motion. <code>Pivot.goTo()</code> holds the requirement for as long as the button is held.</li>
+<li><b>Loop-counted timing.</b> <code>Feed</code> shook the intake using <code>count % 50 &gt; 25</code>,
+baking the loop period into the behaviour. <code>Pivot.shake()</code> uses the FPGA clock and a period
+in seconds.</li>
+</ul>
+
+<p>The kicker interlock also moved to where it cannot be forgotten: the kicker's <em>default command</em>
+feeds when and only when both flywheels are at speed, so every shooting command inherits it instead of
+having to remember it.</p>
+</div>
+
+<div class="change">
+<h3>4.5 Loop timing and disable behaviour <span class="tag safe">reliability</span></h3>
+<span class="src"><b>Source:</b> 12 / 42 raise thread priority around the scheduler.</span>
+<ul>
+<li>The scheduler runs at real-time priority 99 and drops back to 10 afterwards. Everything else on the
+roboRIO &mdash; the web server, CAN receive threads, garbage collection &mdash; can otherwise delay the
+control loop, and a control loop that runs late is one with the wrong <code>dt</code>.</li>
+<li>Tunable-number gains are only pushed into controllers when a value actually changes. The old
+flywheel and pivot wrote all seven gains into their controllers fifty times a second regardless.</li>
+<li>Drive motors coast three seconds after the robot is disabled, so it can be pushed off the field
+&mdash; but not instantly, because a robot disabled at speed would keep rolling.</li>
+<li><code>silenceJoystickConnectionWarning</code>, so warnings about unused joystick ports stop hiding
+the ones that matter.</li>
+</ul>
+</div>
+
+
+<h2>5. Verification</h2>
+
+<p>The smoke test grew from 7 cases to 15. It boots the whole robot in desktop simulation with no
+hardware and no Driver Station, then drives the simulated mechanisms.</p>
+
+<table>
+<thead><tr><th>Test</th><th>What it pins down</th></tr></thead>
+<tbody>
+<tr><td class="num">shooterRangeTableIsMonotonic</td><td>velocity never decreases with distance &mdash; &sect;3.1</td></tr>
+<tr><td class="num">shooterRangeTableMatchesCalibratedFit</td><td>inside 1.5&ndash;4.5 m the table equals the team's own fit</td></tr>
+<tr><td class="num">shooterRangeTableClampsOutsideItsRange</td><td>no extrapolation past the measured band</td></tr>
+<tr><td class="num">encodersAgreeAtBoot</td><td>hood and pivot boot at their stowed angles</td></tr>
+<tr><td class="num">allSimulatedDevicesReportConnected</td><td>the disconnect detection does not false-positive</td></tr>
+<tr><td class="num">drivingForwardMovesTheRobot</td><td>odometry tracks the simulated ground truth to 0.2 m over 2 s</td></tr>
+<tr><td class="num">modulesCanSteer</td><td>strafe left puts all four wheels at &plusmn;90&deg;</td></tr>
+<tr><td class="num">rotatingUpdatesTheSimulatedGyro</td><td>gyro integrates the commanded yaw rate</td></tr>
+<tr><td class="num">xLockPointsWheelsAtTheChassisCorners</td><td>the lock is a real X &mdash; &sect;3.5</td></tr>
+<tr><td class="num">flywheelSpinsUpAndReportsAtSpeed</td><td>both wheels reach setpoint and coast down &mdash; &sect;3.2</td></tr>
+<tr><td class="num">atSpeedRejectsOverspeed</td><td>over-speed is not "ready" &mdash; &sect;3.3</td></tr>
+<tr><td class="num">hoodMovesToTarget</td><td>position loop converges within 0.03 rad</td></tr>
+<tr><td class="num">hoodClampsOutOfRangeCommands</td><td>commands outside mechanical travel are refused</td></tr>
+<tr><td class="num">pivotDeploysAndStows</td><td>gravity-loaded arm reaches both ends</td></tr>
+<tr><td class="num">demoModeScalesButDoesNotClobber</td><td>commanded velocity survives demo mode &mdash; &sect;4.3</td></tr>
+</tbody>
+</table>
+
+<div class="panel">
+<p class="kv">
+$ ./gradlew build &nbsp;&rarr;&nbsp; <b>BUILD SUCCESSFUL</b><br>
+$ ./gradlew test &nbsp;&rarr;&nbsp; <b>15 tests, 15 passed</b><br>
+$ ./gradlew simulateJava &nbsp;&rarr;&nbsp; boots clean, AdvantageKit writing to <code>logs/</code>
+</p>
+<p style="margin-top:.8em">The suite also got faster and deterministic. It used to need
+<code>Timer.delay(0.002)</code> inside every loop iteration to give Phoenix's background thread time to
+publish the simulated gyro. With the gyro a plain integrator behind <code>GyroIO</code>, that race does
+not exist.</p>
+<p class="kv" style="margin-top:.6em">Build: <code>export JAVA_HOME=/opt/homebrew/opt/openjdk@17</code> first.</p>
+</div>
+
+
+<h2>6. What was deliberately left alone</h2>
+
+<p>Five widely-used practices were surveyed and not adopted. Each is a real improvement; each was
+judged to cost more than it returns right now, and all five are listed here so the decision is visible
+rather than silent.</p>
+
+<table>
+<thead><tr><th>Practice</th><th class="num">Corpus</th><th>Why not now</th></tr></thead>
+<tbody>
+<tr>
+  <td><b>WPILib Units library</b></td><td class="num">39 / 42</td>
+  <td>A large mechanical migration with no behavioural benefit, and every conversion touched is a
+  chance to introduce exactly the unit bug the library exists to prevent. Worth doing at the start of
+  an off-season, not on top of a rewrite this size.</td>
+</tr>
+<tr>
+  <td><b>Motion profiling on hood and pivot</b></td><td class="num">39 / 42</td>
+  <td>Both still run plain PID plus feedforward. Adding a trapezoid profile changes how they move and
+  therefore needs re-tuning on the real mechanism. The heading controller <em>is</em> profiled
+  (&sect;3.6) because it was being rewritten anyway.</td>
+</tr>
+<tr>
+  <td><b>SysId characterisation</b></td><td class="num">31 / 42</td>
+  <td>Needs hardware time to run. The one characterisation that can be run in a few seconds on a
+  patch of carpet &mdash; wheel radius &mdash; <em>was</em> added, and is on the auto chooser
+  (see below).</td>
+</tr>
+<tr>
+  <td><b>Superstructure state machine</b></td><td class="num">30 / 42</td>
+  <td>This robot has one shooter, one intake and one indexer with no conflicting geometry. A state
+  machine would add a layer without removing a problem.</td>
+</tr>
+<tr>
+  <td><b>High-frequency odometry thread</b></td><td class="num">15 / 42</td>
+  <td>Genuinely valuable, and the right next step. It needs careful threading work, and the steering
+  encoders here are analog inputs read by the roboRIO rather than CAN signals that can be queued, so
+  it is not a drop-in of the template version.</td>
+</tr>
+</tbody>
+</table>
+
+<h3>Two things left empty on purpose</h3>
+<p><b>The hood range table.</b> <code>ShooterConstants.kDistanceToHoodAngle</code> exists and is empty.
+The robot has never been range-tested for hood angle &mdash; the hood goes to a fixed position and the
+operator trims it &mdash; so there is no data to put in it, and inventing numbers would change how the
+robot shoots on the field on the strength of a guess. <code>Hood.angleForDistance()</code> falls back
+to today's fixed position while the table is empty; add measured pairs from a range session and the
+fallback stops being used, with no other code change.</p>
+
+<p><b>The wheel-diameter fudge factor.</b> <code>Units.inchesToMeters(3.95) * 1.613 / 1.664</code> was
+kept exactly as it was, because changing it would change every distance the robot believes it has
+travelled. What was added is the routine that produces that number:
+<code>DriveCommands.wheelRadiusCharacterization</code>, on the auto chooser. Spin in place for twelve
+seconds on clear carpet and it prints the measured radius. Re-run it whenever the tread is replaced,
+instead of guessing.</p>
+
+
+<h2>7. Two carried-forward notes for whoever works on this next</h2>
+
+<p>Two pieces of accumulated history were preserved verbatim rather than cleaned up, because their
+exact values matter and their provenance is the useful part:</p>
+
+<ul>
+<li><b>Encoder offsets.</b> <code>kAbsoluteEncoderOffsetsRad</code>,
+<code>kHoodEncoderOffsetRad</code> and <code>kPivotEncoderOffsetRad</code> are still written as the
+running sum of every field recalibration the team has done (<code>2.15 + 3.05 + 0.01</code>, and so
+on), because collapsing them to a single decimal would lose the trail and risk a rounding change in a
+value that is applied modulo 2&pi;. Each now carries a comment saying how to re-measure it, and the
+raw analog voltage is logged at <code>Drive/Module{n}/AbsoluteEncoderVolts</code> so it can be
+re-measured from a match log rather than from the pit.</li>
+<li><b>Absolute-encoder aliasing.</b> Both the hood and the pivot have their absolute encoder geared
+<em>before</em> the final reduction, so each only reads unambiguously over a window &mdash; about
+2&pi;/16.8 rad of hood travel, 2&pi;/2.5 rad of pivot travel &mdash; and aliases to a plausible but
+wrong value outside it. That is why both subsystems only re-seed the relative encoder when the two
+readings are close. The simulation reproduces the aliasing rather than hiding it, precisely so that
+this code path is exercised.</li>
+</ul>
+
+
+<footer>
+<p>Branch <code>claude/sim-best-practices-rewrite</code>, based on <code>sim/shooter-seperate-sim</code>
+@ 1135251. Corpus: 42 Java robot repositories in
+<code>FRC2026/code-finder/repos/2026/</code>, cloned by the code-finder tool from the 2026 season's
+highest-xp teams. Prevalence counts are source pattern-matches across those repositories and are
+approximate; the specific files named as models were read in full.</p>
+</footer>
+
+</div>
+</body>
+</html>
