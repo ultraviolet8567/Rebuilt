@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Branch sim/shooter-seperate-sim: what changed and why</title>
+<style>
+  :root { --ink:#1b1f24; --muted:#5c6470; --line:#d9dee5; --bg:#ffffff; --soft:#f4f6f8;
+          --red:#b42318; --amber:#9a6700; --green:#1a7f37; --blue:#0b5fff; --purple:#6b3fd6; }
+  * { box-sizing:border-box; }
+  body { margin:0; font:16px/1.55 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif; color:var(--ink); background:var(--bg); }
+  main { max-width:960px; margin:0 auto; padding:32px 20px 80px; }
+  h1 { font-size:30px; margin:0 0 6px; }
+  h2 { font-size:22px; margin:40px 0 12px; padding-bottom:6px; border-bottom:2px solid var(--line); }
+  h3 { font-size:17px; margin:26px 0 8px; }
+  p, li { max-width:78ch; }
+  .sub { color:var(--muted); margin:0 0 20px; }
+  code { font:13.5px/1.4 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; background:var(--soft); padding:1px 5px; border-radius:4px; }
+  pre { background:var(--soft); border:1px solid var(--line); border-radius:6px; padding:12px 14px; overflow:auto; font-size:13px; line-height:1.45; }
+  pre code { background:none; padding:0; }
+  table { border-collapse:collapse; width:100%; margin:12px 0 20px; font-size:14.5px; }
+  th, td { border:1px solid var(--line); padding:7px 10px; text-align:left; vertical-align:top; }
+  th { background:var(--soft); }
+  .tag { display:inline-block; font-size:12px; font-weight:600; padding:1px 8px; border-radius:999px; margin-right:6px; vertical-align:middle; }
+  .crit { background:#fde8e6; color:var(--red); } .fix { background:#fff4d6; color:var(--amber); }
+  .new { background:#e3f1e6; color:var(--green); } .sim { background:#e6ecff; color:var(--blue); } .doc { background:#efe8ff; color:var(--purple); }
+  .callout { border-left:4px solid var(--blue); background:#f2f6ff; padding:10px 14px; border-radius:0 6px 6px 0; margin:14px 0; }
+  .warn { border-left-color:var(--amber); background:#fff9e8; }
+  .box { border:1px solid var(--line); border-radius:8px; padding:14px 16px; margin:14px 0; }
+  figure { margin:18px 0; } figcaption { color:var(--muted); font-size:13.5px; margin-top:6px; }
+  svg text { font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif; }
+  .toc { columns:2; column-gap:30px; font-size:14.5px; } .toc li { margin:2px 0; }
+  a { color:var(--blue); }
+</style>
+</head>
+<body>
+<main>
+<h1>Branch <code>sim/shooter-seperate-sim</code></h1>
+<p class="sub">Team 8567 Rebuilt (2026) &middot; starts from <code>shooter-seperate</code> at <code>eb7a51d</code> &middot; folds in <code>bugfix/shooter-seperate-fixes</code> &middot; adds desktop simulation</p>
+
+<div class="callout">
+<strong>In one paragraph.</strong> This branch takes the most recent competition code (<code>shooter-seperate</code>), applies every fix from the existing review branch, fixes eight more problems found while reading the code, and adds a complete desktop simulation so the robot program can be run, driven, and watched in AdvantageScope on a laptop with no robot present. A JUnit test boots the whole robot in simulation and checks that the drivetrain, gyro, flywheel, hood and intake pivot all behave. <strong>Nothing that was tuned on the robot was re-tuned.</strong> Two fixes do change on-robot behavior and are flagged below for verification.
+</div>
+
+<ul class="toc">
+  <li><a href="#merged">1. Fixes merged from the review branch</a></li>
+  <li><a href="#new">2. New fixes found on this branch</a></li>
+  <li><a href="#sim">3. Simulation: how it is built</a></li>
+  <li><a href="#test">4. Automated verification</a></li>
+  <li><a href="#verify">5. Things to verify on the real robot</a></li>
+  <li><a href="#open">6. Open items deliberately not changed</a></li>
+  <li><a href="#files">7. File-by-file list</a></li>
+  <li><a href="#history">8. Commit history</a></li>
+</ul>
+
+<h2 id="merged">1. Fixes merged from <code>bugfix/shooter-seperate-fixes</code></h2>
+<p>That branch was written against an older commit of <code>shooter-seperate</code>. It merged with one conflict, in <code>Flywheel.java</code>, resolved as described in the last row. Full rationale for each item is in that branch's original README (git history, commit <code>d1e6eb9</code>).</p>
+<table>
+<tr><th style="width:38%">Fix</th><th>Where</th><th>Effect</th></tr>
+<tr><td><span class="tag crit">critical</span>Robot could crash at boot when no alliance was assigned (<code>Optional.get()</code> on an empty value)</td><td><code>Odometry</code></td><td>Boots cleanly in the pit and in simulation. The smoke test proves this: it constructs the robot with no alliance set.</td></tr>
+<tr><td><span class="tag crit">critical</span>Field-oriented drive was flipped twice, so it was never really flipped for Red</td><td><code>ManualTeleOp</code>, <code>DriftTeleOp</code></td><td>Single <code>AllianceFlipUtil.apply()</code>.</td></tr>
+<tr><td><span class="tag crit">critical</span>Demo-mode getter overwrote the flywheel target every loop</td><td><code>Flywheel</code></td><td>Already fixed upstream in <code>eb7a51d</code>; both branches agree.</td></tr>
+<tr><td><span class="tag fix">scheduler</span>Nine commands never declared subsystem requirements</td><td>most of <code>commands/</code></td><td>Conflicting commands now cancel each other instead of fighting over motors. <em>This exposed a latent auto-file bug, see 2.1.</em></td></tr>
+<tr><td><span class="tag fix">fix</span><code>CalculatedShoot</code> computed the shot speed only once</td><td><code>CalculatedShoot</code></td><td>Recomputed every loop from live distance.</td></tr>
+<tr><td><span class="tag fix">fix</span>Low-battery LED strobe lit the whole strip; auto LED animation was frozen</td><td><code>Lights</code></td><td>Sections restored; animation uses the live clock.</td></tr>
+<tr><td><span class="tag fix">fix</span>Selecting a non-existent auto crashed with a NullPointerException</td><td><code>AutoChooser</code></td><td>Null-checked.</td></tr>
+<tr><td><span class="tag fix">fix</span>Inversion ternaries were backwards for the funnel and indexer</td><td><code>Funnel</code>, <code>Indexer</code>, <code>Constants</code></td><td>Ternary and constant both flipped, so motor direction is unchanged.</td></tr>
+<tr><td><span class="tag fix">fix</span>Follower feedforward used a different velocity than the lead</td><td><code>Flywheel</code></td><td>Also already fixed upstream.</td></tr>
+<tr><td><span class="tag doc">docs</span>TODOs on the shooter lookup table (decreases past ~5 m) and encoder offset bookkeeping</td><td><code>Flywheel</code>, <code>Constants</code></td><td>Comments only.</td></tr>
+<tr><td><span class="tag fix">merge decision</span>The review branch also removed the minus sign on the <em>lead</em> flywheel's measured velocity</td><td><code>Flywheel</code></td><td><strong>Not taken.</strong> <code>kFlywheelInverted = true</code> negates the commanded voltage, so the lead encoder reads negative during a shot and the negation is correct. The field-tested upstream version is kept, consistent with the follower.</td></tr>
+</table>
+
+<h2 id="new">2. New fixes found on this branch</h2>
+
+<h3>2.1 <span class="tag crit">critical</span> Three autos would have crashed at boot once requirements were added</h3>
+<p><code>Shoot Left</code>, <code>Shoot Middle</code> and <code>Shoot Right</code> run <code>CalculatedShoot</code> and <code>Index</code> in the same parallel group. With the merged fix, both require the indexer, and WPILib throws <em>"Multiple commands in a parallel group cannot require the same subsystems"</em> while the autos are being built, which happens in the <code>RobotContainer</code> constructor. The robot program would not start. The smoke test caught this on its very first run.</p>
+<p><strong>Fix:</strong> <code>Index</code> was removed from those three groups. It was redundant: <code>CalculatedShoot</code> already runs the indexer at the same voltage for the same duration, so the auto does exactly what it did before.</p>
+
+<h3>2.2 <span class="tag crit">behavior change</span> Camera pitch was sent to the Limelight as ~1.4&deg; instead of &minus;30&deg;</h3>
+<p><code>OdometryConstants.kRotationOffset</code> was <code>new Rotation3d(0, -30, 0)</code>. <code>Rotation3d</code> takes <em>radians</em>, and <code>setCameraPose_RobotSpace()</code> takes <em>degrees</em>. &minus;30 rad wraps to about 1.4 rad, which came back out of the quaternion as 1.4 and was then interpreted as 1.4&deg;. The constant is now three plain-degree values (<code>kCameraRoll/Pitch/YawDegrees</code>) and &minus;30&deg; is what actually reaches the camera. See section 5.</p>
+
+<h3>2.3 <span class="tag fix">fix</span> Vision rotation was fused into the pose estimator</h3>
+<p>Standard deviation for vision rotation was 0.5. With MegaTag2 the vision rotation is derived from the gyro the code already feeds it, so fusing it lets vision fight the gyro. It is now 9 999 999 (ignored); x/y stay at 0.5. This was open item 4 in the review branch README.</p>
+
+<h3>2.4 <span class="tag fix">fix</span> Demo speed constants had crossed units</h3>
+<p>The linear limit was derived from the angular constant and vice versa. The derivation is corrected and <code>swerveDemoScaleFactor</code> set to 0.55 so the demo max speed stays at 2.75 m/s, the value that has been used at demos. No behavior change.</p>
+
+<h3>2.5 <span class="tag fix">fix</span> AdvantageKit was started after the subsystems were built</h3>
+<p><code>Logger.start()</code> lived in <code>robotInit()</code>, which runs after the <code>Robot</code> constructor has already created <code>RobotContainer</code>. Logger setup now happens first in the constructor, chooses outputs by run mode (roboRIO flash on the robot, a gitignored <code>logs/</code> folder on a laptop), and records metadata.</p>
+
+<h3>2.6 <span class="tag fix">fix</span> Kicker logged its applied output under the key <code>KickerRunning</code></h3>
+<p>It now logs the boolean, and its velocity.</p>
+
+<h3>2.7 <span class="tag fix">fix</span> <code>SwerveModule.getDriveVoltage()</code> returned bus voltage, not applied voltage</h3>
+<p>The <code>Swerve/&hellip;/DriveVoltage</code> log entries were always ~12 V. They now show what the motor is actually being given.</p>
+
+<h3>2.8 <span class="tag fix">fix</span> The driver camera was opened unconditionally</h3>
+<p>On a laptop this grabs the webcam (macOS prompts for permission) or fails. <code>CameraServer</code> is now only started on the real robot.</p>
+
+<h2 id="sim">3. Simulation: how it is built</h2>
+<p>The design goal was to leave the team's control code untouched and make the <em>hardware</em> lie convincingly. Every subsystem keeps its real motor controllers and sensors; when running on a desktop, each one also owns a small physics model and, once per loop, pushes the model's answer into the vendor's simulated device so the normal <code>getEncoder().getVelocity()</code>, <code>absoluteEncoder.get()</code> and <code>gyro.getRotation2d()</code> calls return believable numbers.</p>
+
+<figure>
+<svg viewBox="0 0 900 300" width="100%" role="img" aria-label="Simulation data flow">
+  <defs><marker id="a" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#5c6470"/></marker></defs>
+  <rect x="20" y="40" width="200" height="90" rx="8" fill="#f4f6f8" stroke="#d9dee5"/>
+  <text x="120" y="70" text-anchor="middle" font-size="14" font-weight="600">Team control code</text>
+  <text x="120" y="92" text-anchor="middle" font-size="12" fill="#5c6470">PID, feedforward, commands</text>
+  <text x="120" y="110" text-anchor="middle" font-size="12" fill="#5c6470">(unchanged)</text>
+  <rect x="350" y="40" width="200" height="90" rx="8" fill="#e6ecff" stroke="#0b5fff"/>
+  <text x="450" y="70" text-anchor="middle" font-size="14" font-weight="600">Vendor sim device</text>
+  <text x="450" y="92" text-anchor="middle" font-size="12" fill="#5c6470">SparkMaxSim / SparkFlexSim</text>
+  <text x="450" y="110" text-anchor="middle" font-size="12" fill="#5c6470">TalonFXSimState / Pigeon2SimState</text>
+  <rect x="680" y="40" width="200" height="90" rx="8" fill="#e3f1e6" stroke="#1a7f37"/>
+  <text x="780" y="70" text-anchor="middle" font-size="14" font-weight="600">WPILib physics model</text>
+  <text x="780" y="92" text-anchor="middle" font-size="12" fill="#5c6470">DCMotorSim, FlywheelSim,</text>
+  <text x="780" y="110" text-anchor="middle" font-size="12" fill="#5c6470">SingleJointedArmSim</text>
+  <line x1="220" y1="70" x2="350" y2="70" stroke="#5c6470" stroke-width="2" marker-end="url(#a)"/>
+  <text x="285" y="62" text-anchor="middle" font-size="12">setVoltage / set</text>
+  <line x1="550" y1="70" x2="680" y2="70" stroke="#5c6470" stroke-width="2" marker-end="url(#a)"/>
+  <text x="615" y="62" text-anchor="middle" font-size="12">applied output &times; Vbus</text>
+  <line x1="680" y1="105" x2="550" y2="105" stroke="#5c6470" stroke-width="2" marker-end="url(#a)"/>
+  <text x="615" y="122" text-anchor="middle" font-size="12">velocity &rarr; iterate()</text>
+  <line x1="350" y1="105" x2="220" y2="105" stroke="#5c6470" stroke-width="2" marker-end="url(#a)"/>
+  <text x="285" y="122" text-anchor="middle" font-size="12">encoder reads</text>
+  <rect x="350" y="190" width="200" height="70" rx="8" fill="#fff4d6" stroke="#9a6700"/>
+  <text x="450" y="218" text-anchor="middle" font-size="14" font-weight="600">Simulated sensors</text>
+  <text x="450" y="240" text-anchor="middle" font-size="12" fill="#5c6470">AnalogInputSim, DutyCycleEncoderSim</text>
+  <line x1="780" y1="130" x2="780" y2="225" stroke="#5c6470" stroke-width="2"/>
+  <line x1="780" y1="225" x2="550" y2="225" stroke="#5c6470" stroke-width="2" marker-end="url(#a)"/>
+  <text x="665" y="217" text-anchor="middle" font-size="12">angle &rarr; inverse of decode math</text>
+  <line x1="350" y1="225" x2="120" y2="225" stroke="#5c6470" stroke-width="2"/>
+  <line x1="120" y1="225" x2="120" y2="130" stroke="#5c6470" stroke-width="2" marker-end="url(#a)"/>
+  <text x="235" y="217" text-anchor="middle" font-size="12">absolute encoder reads</text>
+</svg>
+<figcaption>Per loop, each subsystem's <code>simulationPeriodic()</code> runs the loop on the right; the CommandScheduler calls it automatically, only on a desktop.</figcaption>
+</figure>
+
+<table>
+<tr><th style="width:18%">Mechanism</th><th>Physics model</th><th>What gets faked</th><th>Notes</th></tr>
+<tr><td>Swerve drive &times;4</td><td><code>DCMotorSim</code>, Vortex, 6.03:1, wheel MOI 0.03</td><td>Spark Flex encoder (m/s, m)</td><td>Open-loop duty cycle like the real code; free speed &asymp; 5.7 m/s.</td></tr>
+<tr><td>Swerve steer &times;4</td><td><code>DCMotorSim</code>, NEO, 26:1</td><td>Spark Max encoder and the <em>analog absolute encoder voltage</em></td><td>The sim writes the exact voltage that makes <code>getAbsoluteEncoderAngle()</code> decode to the model's angle, offsets included.</td></tr>
+<tr><td>Chassis</td><td>Kinematics integration of module states</td><td>Pigeon 2 raw yaw and yaw rate; <code>Swerve/SimTruePose</code></td><td>Odometry still runs its real estimator on the simulated encoders, so odometry drift is visible against the true pose.</td></tr>
+<tr><td>Flywheel &times;2</td><td><code>FlywheelSim</code>, Vortex, MOI 0.004 each</td><td>Spark Flex encoders (RPM)</td><td>Each side independent, as in the code.</td></tr>
+<tr><td>Hood</td><td><code>DCMotorSim</code>, NEO, 420:1</td><td>Spark Max encoder, duty-cycle absolute encoder</td><td>Reproduces the real encoder's 0.374 rad wrap window.</td></tr>
+<tr><td>Intake pivot</td><td><code>SingleJointedArmSim</code> with gravity, NEO, 112.5:1, 0.4 m / 4 kg, hard stops</td><td>Spark Max encoder, duty-cycle absolute encoder</td><td>Gravity frame = the angle the team's <code>ArmFeedforward</code> is fed. Reproduces the real 2.51 rad wrap window.</td></tr>
+<tr><td>Kicker, indexer</td><td><code>FlywheelSim</code></td><td>Spark encoders</td><td></td></tr>
+<tr><td>Funnel</td><td><code>DCMotorSim</code>, Kraken X60, 3:1</td><td>TalonFX rotor position / velocity</td><td>Orientation matched to the configured inversion.</td></tr>
+<tr><td>Battery</td><td><code>BatterySim</code> from summed currents</td><td>roboRIO input voltage</td><td><code>Sim/BatteryVoltage</code>; the Lights low-battery warning works in sim.</td></tr>
+<tr><td>Mechanism2d</td><td>&mdash;</td><td><code>Mechanism2d/Hood</code>, <code>Mechanism2d/IntakePivot</code></td><td>Logged on the real robot too, for AdvantageScope.</td></tr>
+</table>
+
+<div class="box">
+<strong>Two REV simulation quirks worth knowing.</strong>
+<ol>
+<li>REV's simulated Spark ignores the <code>inverted</code> config. That is harmless: the physics models treat "positive applied output" as "positive encoder count", which is what the real controller presents to the code.</li>
+<li>REV's simulated Spark keeps its own copy of the encoder position and overwrites the encoder with it every <code>iterate()</code>. So a plain <code>encoder.setPosition()</code> from robot code is lost in sim. Each <code>resetRelativeEncoder()</code> therefore also tells the sim object; on the real robot that extra line is skipped because the sim object is <code>null</code>. The velocity readback goes through REV's moving-average filter, like the real hardware, so it lags a few loops.</li>
+</ol>
+</div>
+
+<h3>Run modes and logging</h3>
+<p><code>Constants.currentMode</code> is <code>REAL</code> or <code>SIM</code> based on <code>RobotBase.isReal()</code>. In SIM, AdvantageKit writes <code>.wpilog</code> files to <code>&lt;project&gt;/logs/</code> (gitignored) and publishes over NetworkTables so AdvantageScope can connect to <code>localhost</code>. Log replay was <strong>not</strong> added: it needs the IO-layer architecture that this codebase does not use.</p>
+
+<h2 id="test">4. Automated verification</h2>
+<p><code>src/test/java/frc/robot/SimulationSmokeTest.java</code> runs with <code>./gradlew test</code> (also part of <code>./gradlew build</code>). It initializes the HAL in simulation, pretends a Driver Station is attached and enabled, builds the real <code>RobotContainer</code>, and then steps the CommandScheduler exactly the way the robot loop does.</p>
+<table>
+<tr><th>Test</th><th>What it proves</th></tr>
+<tr><td>boot</td><td>The robot constructs with <strong>no alliance</strong> assigned and all PathPlanner autos load (the crash in 2.1 fails here).</td></tr>
+<tr><td>encodersAgreeAtBoot</td><td>Hood and pivot relative encoders are seeded from the absolute encoders; the absolute-encoder inverse math round-trips.</td></tr>
+<tr><td>drivingForwardMovesTheRobot</td><td>Commanding 1 m/s forward for 2 s moves odometry 1&ndash;2.5 m along x, no y drift, wheels straight, and odometry agrees with the sim ground truth within 0.2 m.</td></tr>
+<tr><td>modulesCanSteer</td><td>Strafing steers all four modules to &plusmn;90&deg;: the analog absolute-encoder feedback loop works.</td></tr>
+<tr><td>rotatingUpdatesTheSimulatedGyro</td><td>1 rad/s for 2 s turns the Pigeon heading by more than 0.8 rad: Phoenix 6 sim state propagates to the signal.</td></tr>
+<tr><td>flywheelSpinsUpAndReportsAtVelocity</td><td>3000 RPM target reaches 3000 &plusmn; 400, <code>atVelocity()</code> is true, then it coasts down after <code>stop()</code>.</td></tr>
+<tr><td>hoodMovesToTarget</td><td>Hood reaches 0.25 rad within 0.03 on both encoders, then returns to the lower limit.</td></tr>
+<tr><td>pivotDeploysAndStows</td><td>Pivot deploys to 2.0 rad and stows to 0.1 rad within 0.15 rad against simulated gravity.</td></tr>
+</table>
+<p>Result at the time of writing: <strong>7 of 7 passing</strong>, full <code>./gradlew build</code> green, formatter (<code>spotlessApply</code>) applied, and <code>./gradlew simulateJava</code> launches the WPILib Sim GUI with the robot program running.</p>
+
+<h2 id="verify">5. Things to verify on the real robot</h2>
+<div class="callout warn">
+<ol>
+<li><strong>Camera pitch (2.2).</strong> The Limelight now receives pitch = &minus;30&deg;. Confirm the sign matches how the camera is physically mounted (Limelight convention: positive pitch = tilted up). If MegaTag2 poses jump when the robot is stationary, try +30. The old code was effectively sending ~0&deg;.</li>
+<li><strong>Vision rotation ignored (2.3).</strong> Heading now comes from the gyro alone. Expected to be an improvement; watch <code>Odometry/Pose</code> vs <code>Odometry/GyroHeading</code>.</li>
+<li><strong>Auto files (2.1).</strong> The three Shoot autos should behave identically. Run one in the pit to confirm the indexer still runs during the shot.</li>
+<li><strong>Requirements (section 1).</strong> Operator button combinations that used to overlap (e.g. Feed + SetPivot) now cancel each other. This is intended but it is a feel change for the operator.</li>
+</ol>
+</div>
+
+<h2 id="open">6. Open items deliberately not changed</h2>
+<ul>
+<li><strong>Pivot absolute encoder window.</strong> With the current offset the absolute encoder only decodes pivot angles in roughly (&minus;1.9, 0.62] rad. Stowed (0.1) is inside; deployed (2.0) aliases to about &minus;0.5. The code copes because it only re-syncs when the two encoders agree within 0.1 rad, <em>but if the robot is powered on with the intake deployed</em>, the relative encoder is seeded wrong and the pivot will drive to the wrong place. Same shape of issue for the hood above 0.278 rad. Fix needs the robot: re-measure offsets, or move the encoder to the output shaft.</li>
+<li><strong>Follower flywheel PID negation.</strong> Correct only if the follower encoder reads negative during a shot; check <code>Shooter/Flywheel/Follower/Velocity</code> in a log.</li>
+<li><strong>Shooter lookup table</strong> decreases beyond ~5 m (TODO in code).</li>
+<li><strong>Slew-rate limiters</strong> remain disabled in <code>ManualTeleOp</code>.</li>
+<li><strong>Log files on roboRIO flash</strong> (<code>/home/lvuser/logs</code>) still need periodic cleanup.</li>
+<li><strong>Log replay</strong> is not available (see section 3).</li>
+</ul>
+
+<h2 id="files">7. File-by-file list</h2>
+<table>
+<tr><th style="width:42%">File</th><th>Change</th></tr>
+<tr><td><code>build.gradle</code></td><td><span class="tag sim">sim</span><code>includeDesktopSupport = true</code>.</td></tr>
+<tr><td><code>Constants.java</code></td><td><span class="tag new">new</span><code>Mode</code>/<code>currentMode</code>, <code>kLoopPeriodSecs</code>, <code>SimConstants</code>; <span class="tag fix">fix</span>demo speed derivation, camera angles in degrees; plus merged TODO comments and inversion flags.</td></tr>
+<tr><td><code>Robot.java</code></td><td><span class="tag fix">fix</span>Logger configured first, by mode; <code>simulationPeriodic()</code> runs the battery model.</td></tr>
+<tr><td><code>RobotContainer.java</code></td><td><span class="tag fix">fix</span>Camera only on the real robot; accessors for the test.</td></tr>
+<tr><td><code>subsystems/SwerveModule.java</code></td><td><span class="tag sim">sim</span>Drive/steer physics, analog-encoder sim; <span class="tag fix">fix</span><code>getDriveVoltage()</code>.</td></tr>
+<tr><td><code>subsystems/Swerve.java</code></td><td><span class="tag sim">sim</span>Steps the modules, integrates ground-truth pose.</td></tr>
+<tr><td><code>subsystems/Odometry.java</code></td><td><span class="tag sim">sim</span>Pigeon 2 yaw; <span class="tag fix">fix</span>vision rotation stddev, camera angles, alliance guards (merged), sim pose reset.</td></tr>
+<tr><td><code>subsystems/Shooter/Flywheel.java</code></td><td><span class="tag sim">sim</span>Two flywheel models; merged demo-mode/feedforward fixes.</td></tr>
+<tr><td><code>subsystems/Shooter/Hood.java</code></td><td><span class="tag sim">sim</span>Physics, both encoders, Mechanism2d.</td></tr>
+<tr><td><code>subsystems/Shooter/Kicker.java</code></td><td><span class="tag sim">sim</span>Physics; <span class="tag fix">fix</span>log key.</td></tr>
+<tr><td><code>subsystems/Intake/Pivot.java</code></td><td><span class="tag sim">sim</span>Arm physics with gravity, both encoders, Mechanism2d.</td></tr>
+<tr><td><code>subsystems/Intake/Funnel.java</code></td><td><span class="tag sim">sim</span>TalonFX sim; logging; merged inversion fix.</td></tr>
+<tr><td><code>subsystems/Storage/Indexer.java</code></td><td><span class="tag sim">sim</span>Physics; logging; merged inversion fix.</td></tr>
+<tr><td><code>util/SimBattery.java</code></td><td><span class="tag new">new</span>Battery model helper.</td></tr>
+<tr><td><code>deploy/pathplanner/autos/Shoot {Left,Middle,Right}.auto</code></td><td><span class="tag crit">fix</span>Redundant <code>Index</code> removed from the shooting parallel group.</td></tr>
+<tr><td><code>src/test/java/frc/robot/SimulationSmokeTest.java</code></td><td><span class="tag new">new</span>Simulation smoke test.</td></tr>
+<tr><td><code>commands/*</code>, <code>AutoChooser.java</code>, <code>Lights.java</code></td><td>Merged from the review branch unchanged.</td></tr>
+<tr><td><code>README.md</code>, <code>docs/</code></td><td><span class="tag doc">docs</span>This document and the simulator guide.</td></tr>
+</table>
+
+<h2 id="history">8. Commit history</h2>
+<pre><code>shooter-seperate (eb7a51d)  "FIxed Shooting Issue from previous commit"
+   |
+   +-- merge bugfix/shooter-seperate-fixes (Flywheel conflict resolved, lead negation kept)
+   |
+   +-- sim + new fixes + test + docs   (this branch: sim/shooter-seperate-sim)</code></pre>
+<p>To build and test on any machine with JDK 17: <code>./gradlew build</code>. To run the simulator: <code>./gradlew simulateJava</code>. See <a href="simulator-guide.html">the simulator guide</a> for a walkthrough that does not assume programming experience.</p>
+</main>
+</body>
+</html>

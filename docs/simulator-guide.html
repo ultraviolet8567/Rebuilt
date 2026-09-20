@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Running the robot simulator: a guide for everyone</title>
+<style>
+  :root { --ink:#1b1f24; --muted:#5c6470; --line:#d9dee5; --bg:#fff; --soft:#f4f6f8; --blue:#0b5fff; --green:#1a7f37; --amber:#9a6700; --red:#b42318; --purple:#6b3fd6; }
+  * { box-sizing:border-box; }
+  body { margin:0; font:17px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif; color:var(--ink); background:var(--bg); }
+  main { max-width:900px; margin:0 auto; padding:32px 20px 90px; }
+  h1 { font-size:32px; margin:0 0 6px; }
+  h2 { font-size:24px; margin:44px 0 12px; padding-bottom:6px; border-bottom:2px solid var(--line); }
+  h3 { font-size:18px; margin:26px 0 8px; }
+  p, li { max-width:75ch; }
+  .sub { color:var(--muted); margin:0 0 18px; }
+  code { font:14px ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; background:var(--soft); padding:1px 5px; border-radius:4px; }
+  pre { background:#0f172a; color:#e2e8f0; border-radius:8px; padding:12px 16px; overflow:auto; font-size:14px; line-height:1.5; }
+  pre code { background:none; color:inherit; padding:0; }
+  kbd { font:13px ui-monospace,Menlo,monospace; background:#fff; border:1px solid #b6bec8; border-bottom-width:2px; border-radius:5px; padding:1px 6px; }
+  table { border-collapse:collapse; width:100%; margin:12px 0 22px; font-size:15px; }
+  th, td { border:1px solid var(--line); padding:8px 10px; text-align:left; vertical-align:top; }
+  th { background:var(--soft); }
+  .step { display:flex; gap:14px; margin:14px 0; }
+  .num { flex:0 0 34px; height:34px; border-radius:50%; background:var(--blue); color:#fff; font-weight:700; display:flex; align-items:center; justify-content:center; }
+  .callout { border-left:4px solid var(--blue); background:#f2f6ff; padding:10px 14px; border-radius:0 6px 6px 0; margin:14px 0; }
+  .ok { border-left-color:var(--green); background:#eef8f0; }
+  .warn { border-left-color:var(--amber); background:#fff9e8; }
+  .stop { border-left-color:var(--red); background:#fdeeed; }
+  a { color:var(--blue); }
+  /* Tooltips: hover or focus a dotted term to see a plain-English explanation. */
+  .t { position:relative; border-bottom:1.5px dotted var(--purple); color:inherit; cursor:help; text-decoration:none; }
+  .t::after { content:attr(data-tip); position:absolute; left:0; bottom:calc(100% + 8px); width:min(340px, 80vw); background:#1b1f24; color:#fff; font-size:13.5px; line-height:1.45; padding:9px 11px; border-radius:7px; box-shadow:0 6px 20px rgba(0,0,0,.25); opacity:0; pointer-events:none; transform:translateY(4px); transition:.12s; z-index:10; white-space:normal; }
+  .t:hover::after, .t:focus::after { opacity:1; transform:translateY(0); }
+  .glossary dt { font-weight:700; margin-top:12px; } .glossary dd { margin:2px 0 0 0; color:#2b3138; }
+  .learn { background:var(--soft); border:1px solid var(--line); border-radius:8px; padding:12px 16px; margin:14px 0; font-size:15px; }
+  .learn strong { color:var(--purple); }
+  figure { margin:20px 0; } figcaption { color:var(--muted); font-size:14px; margin-top:6px; }
+  svg text { font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif; }
+  .toc { columns:2; column-gap:30px; font-size:15px; } .toc li { margin:2px 0; }
+</style>
+</head>
+<body>
+<main>
+<h1>Running the robot simulator</h1>
+<p class="sub">Team 8567 &middot; 2026 "Rebuilt" robot &middot; branch <code>sim/shooter-seperate-sim</code> &middot; written for mentors, parents, drivers and new members, not just programmers</p>
+
+<div class="callout">
+<strong>What this is.</strong> The robot's real program can run on an ordinary laptop, pretending the motors, sensors and gyro are there. You drive a virtual robot with the keyboard or an Xbox controller and watch it move on a picture of the field. Nothing you do here can damage anything, and you do not need the robot, a battery, or the driver station laptop.
+<br><br>
+<strong>Terms with a <a class="t" href="#glossary" data-tip="Like this! Hover or tap a dotted word for a short explanation. The glossary at the bottom has all of them.">dotted underline</a></strong> have a tooltip; hover over them (or tap on a phone) for a plain-English explanation. Each section ends with a <em>Learn more</em> box linking to the official documentation.
+</div>
+
+<ul class="toc">
+  <li><a href="#need">1. What you need (one-time setup)</a></li>
+  <li><a href="#get">2. Getting the code</a></li>
+  <li><a href="#run">3. Starting the simulator</a></li>
+  <li><a href="#window">4. The simulator window, explained</a></li>
+  <li><a href="#drive">5. Driving the robot</a></li>
+  <li><a href="#controls">6. Controller map</a></li>
+  <li><a href="#scope">7. Watching it in AdvantageScope</a></li>
+  <li><a href="#auto">8. Running an autonomous routine</a></li>
+  <li><a href="#test">9. The automatic self-test</a></li>
+  <li><a href="#trouble">10. When something goes wrong</a></li>
+  <li><a href="#limits">11. What the simulator does not do</a></li>
+  <li><a href="#glossary">Glossary</a></li>
+</ul>
+
+<h2 id="need">1. What you need (one-time setup)</h2>
+<p>Everything below is free. Allow about 30 minutes and a good internet connection the first time.</p>
+<table>
+<tr><th style="width:26%">Install</th><th>Why</th><th>Where</th></tr>
+<tr><td><strong>WPILib 2026</strong> (includes VS Code, Java, AdvantageScope)</td><td>The <a class="t" data-tip="WPILib is the standard software library and toolset every FRC team uses to program their robot. Its installer also brings a ready-made copy of VS Code and the right version of Java.">FRC software suite</a>. This is the only thing that matters; it bundles the editor, the correct Java, and the viewing tools.</td><td><a href="https://docs.wpilib.org/en/stable/docs/zero-to-robot/step-2/wpilib-setup.html">WPILib installation guide</a></td></tr>
+<tr><td><strong>Git</strong></td><td>To download the team's code and switch to this branch.</td><td><a href="https://git-scm.com/downloads">git-scm.com</a> (on a Mac, installing Xcode command-line tools also works)</td></tr>
+<tr><td>Xbox-style controller (optional)</td><td>Much nicer than the keyboard. Any USB or Bluetooth Xbox controller works.</td><td>&mdash;</td></tr>
+</table>
+<div class="callout ok"><strong>Mac users:</strong> this branch was built and tested on macOS with Java 17. The WPILib installer's own Java is the easiest path; Homebrew's <code>openjdk@17</code> also works if you set <code>JAVA_HOME</code>.</div>
+<div class="learn"><strong>Learn more:</strong> <a href="https://docs.wpilib.org/en/stable/docs/zero-to-robot/introduction.html">Zero to Robot</a> (WPILib's start-from-nothing walkthrough) &middot; <a href="https://docs.wpilib.org/en/stable/docs/software/vscode-overview/index.html">Using VS Code with WPILib</a></div>
+
+<h2 id="get">2. Getting the code</h2>
+<p>The team's code lives on <a class="t" data-tip="GitHub is a website that stores code and its full history. A repository ('repo') is one project; a branch is a named version of that project that can be worked on separately.">GitHub</a> at <a href="https://github.com/ultraviolet8567/Rebuilt">github.com/ultraviolet8567/Rebuilt</a>. Open a terminal (Mac: <em>Terminal</em> app; Windows: <em>Git Bash</em>, which comes with Git) and run these three lines, one at a time:</p>
+<pre><code>git clone https://github.com/ultraviolet8567/Rebuilt.git
+cd Rebuilt
+git checkout sim/shooter-seperate-sim</code></pre>
+<p>The last line switches to the <a class="t" data-tip="A branch is a separate line of work. The team's competition code is on 'shooter-seperate'; this branch adds the simulator on top of it without changing the original.">branch</a> that contains the simulator. If you already have the code, just run the last line inside the folder, then <code>git pull</code>.</p>
+<div class="learn"><strong>Learn more:</strong> <a href="https://docs.github.com/en/get-started/start-your-journey/hello-world">GitHub Hello World</a> (branches in 10 minutes) &middot; <a href="https://git-scm.com/book/en/v2/Getting-Started-What-is-Git%3F">What is Git?</a></div>
+
+<h2 id="run">3. Starting the simulator</h2>
+<h3>Option A: from VS Code (recommended)</h3>
+<div class="step"><div class="num">1</div><div>Open <strong>2026 WPILib VS Code</strong> (the WPILib installer put it on your desktop or in Applications). Use <em>File &rarr; Open Folder</em> and pick the <code>Rebuilt</code> folder.</div></div>
+<div class="step"><div class="num">2</div><div>Press <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>P</kbd> (Mac: <kbd>&#8984;</kbd>+<kbd>Shift</kbd>+<kbd>P</kbd>) to open the command palette, type <strong>Simulate Robot Code</strong>, and press Enter. The first run downloads libraries and can take a few minutes.</div></div>
+<div class="step"><div class="num">3</div><div>If a small box asks which extensions to enable, keep <strong>Sim GUI</strong> ticked (and <strong>DriverStation</strong> if it is offered) and click OK.</div></div>
+<h3>Option B: from a terminal</h3>
+<pre><code>./gradlew simulateJava</code></pre>
+<p>(Windows: <code>gradlew simulateJava</code>). This is exactly what VS Code runs behind the scenes.</p>
+<div class="callout ok">A window titled <strong>Robot Simulation</strong> appears and the terminal prints <code>[Init] Running in DESKTOP SIMULATION</code>. You are running the robot program.</div>
+<div class="learn"><strong>Learn more:</strong> <a href="https://docs.wpilib.org/en/stable/docs/software/wpilib-tools/robot-simulation/introduction.html">Introduction to robot simulation</a></div>
+
+<h2 id="window">4. The simulator window, explained</h2>
+<figure>
+<svg viewBox="0 0 900 420" width="100%" role="img" aria-label="Layout of the WPILib simulation window">
+  <rect x="10" y="10" width="880" height="400" rx="8" fill="#f4f6f8" stroke="#d9dee5"/>
+  <rect x="10" y="10" width="880" height="28" rx="8" fill="#e5e9ef"/>
+  <text x="24" y="29" font-size="13" fill="#5c6470">Robot Simulation &nbsp;&nbsp;&nbsp; Hardware &nbsp; NetworkTables &nbsp; DS &nbsp; Plots &nbsp; Window</text>
+  <rect x="24" y="52" width="230" height="150" rx="6" fill="#fff" stroke="#9a6700" stroke-width="2"/>
+  <text x="36" y="74" font-size="14" font-weight="700">Robot State</text>
+  <text x="36" y="98" font-size="13">&#9675; Disabled</text>
+  <text x="36" y="118" font-size="13">&#9675; Autonomous</text>
+  <text x="36" y="138" font-size="13">&#9679; Teleoperated</text>
+  <text x="36" y="158" font-size="13">&#9675; Test</text>
+  <text x="36" y="188" font-size="12" fill="#9a6700">Pick Teleoperated to "enable" the robot</text>
+  <rect x="270" y="52" width="290" height="150" rx="6" fill="#fff" stroke="#0b5fff" stroke-width="2"/>
+  <text x="282" y="74" font-size="14" font-weight="700">System Joysticks</text>
+  <text x="282" y="98" font-size="13">Keyboard 0</text>
+  <text x="282" y="118" font-size="13">Keyboard 1</text>
+  <text x="282" y="138" font-size="13">Xbox Wireless Controller</text>
+  <text x="282" y="188" font-size="12" fill="#0b5fff">Drag one of these to Joystick[0] &rarr;</text>
+  <rect x="580" y="52" width="290" height="150" rx="6" fill="#fff" stroke="#0b5fff" stroke-width="2"/>
+  <text x="592" y="74" font-size="14" font-weight="700">Joysticks</text>
+  <text x="592" y="98" font-size="13">Joystick[0]  &larr; driver</text>
+  <text x="592" y="118" font-size="13">Joystick[1]  &larr; operator</text>
+  <text x="592" y="138" font-size="13">Joystick[2]</text>
+  <text x="592" y="188" font-size="12" fill="#0b5fff">Slot 0 drives, slot 1 shoots/intakes</text>
+  <rect x="24" y="222" width="400" height="170" rx="6" fill="#fff" stroke="#d9dee5"/>
+  <text x="36" y="244" font-size="14" font-weight="700">Other Devices / NetworkTables</text>
+  <text x="36" y="268" font-size="13">Shuffleboard &rarr; Main &rarr; Side, Drive Out (auto pickers)</text>
+  <text x="36" y="288" font-size="13">Shuffleboard &rarr; Main &rarr; Demo Mode</text>
+  <text x="36" y="308" font-size="13">TunableNumbers &rarr; PID gains</text>
+  <text x="36" y="340" font-size="12" fill="#5c6470">Everything the robot publishes shows up here.</text>
+  <rect x="444" y="222" width="426" height="170" rx="6" fill="#fff" stroke="#d9dee5"/>
+  <text x="456" y="244" font-size="14" font-weight="700">FMS / DS</text>
+  <text x="456" y="268" font-size="13">Alliance station: Blue 1 / Red 1 ...</text>
+  <text x="456" y="288" font-size="13">Match time, game data</text>
+  <text x="456" y="320" font-size="12" fill="#5c6470">Set Red vs Blue here; the code flips</text>
+  <text x="456" y="338" font-size="12" fill="#5c6470">field-oriented driving to match.</text>
+</svg>
+<figcaption>The panes float and can be rearranged; use the <em>Window</em> menu to bring one back if you close it. Yours may not look exactly like this.</figcaption>
+</figure>
+<ul>
+<li><strong>Robot State</strong> is the on/off switch. The robot program is always running, but motors only respond when it is <em>enabled</em>: choose <strong>Teleoperated</strong> for driving, <strong>Autonomous</strong> to run a pre-planned routine, <strong>Disabled</strong> to stop everything.</li>
+<li><strong>System Joysticks</strong> lists input devices your laptop can see. The keyboard always appears as "Keyboard 0". A real controller appears by name once plugged in.</li>
+<li><strong>Joysticks</strong> is the robot's view: slot 0 is the <em>driver</em> controller, slot 1 the <em>operator</em>. Drag from the left pane into a slot to connect it.</li>
+<li><strong>NetworkTables</strong> is a live list of every number the robot publishes, and of dashboard controls like the auto picker.</li>
+<li><strong>DS / FMS</strong> lets you pretend to be Red or Blue alliance.</li>
+</ul>
+<div class="learn"><strong>Learn more:</strong> <a href="https://docs.wpilib.org/en/stable/docs/software/wpilib-tools/robot-simulation/simulation-gui.html">Simulation GUI reference</a></div>
+
+<h2 id="drive">5. Driving the robot</h2>
+<div class="step"><div class="num">1</div><div><strong>Connect a controller.</strong> Best: plug in an Xbox controller and drag it from <em>System Joysticks</em> onto <strong>Joystick[0]</strong>. Otherwise drag <strong>Keyboard 0</strong> there.</div></div>
+<div class="step"><div class="num">2</div><div><strong>Set up keyboard steering (keyboard only).</strong> The robot turns with the controller's right stick, which is "axis 4". The keyboard preset does not map axis 4 by default. In the <em>System Joysticks</em> pane click the gear next to <em>Keyboard 0</em>, set <em>Axes</em> to at least 5, and for axis 4 assign two keys (for example <kbd>Q</kbd> and <kbd>E</kbd>). Forward/back and left/right already use <kbd>W</kbd> <kbd>S</kbd> <kbd>A</kbd> <kbd>D</kbd>. The settings are remembered in a file next to the code.</div></div>
+<div class="step"><div class="num">3</div><div><strong>Enable.</strong> In <em>Robot State</em> click <strong>Teleoperated</strong>.</div></div>
+<div class="step"><div class="num">4</div><div><strong>Drive.</strong> Push the left stick (or <kbd>W</kbd>). The wheels turn to face the direction of travel, spin up, and the robot's position starts changing. Watch <code>Odometry/Pose</code> in NetworkTables, or better, use AdvantageScope (next section) to see it on the field.</div></div>
+<div class="callout warn"><strong>The robot is "field-oriented".</strong> Pushing the stick "up" always moves the robot <em>away from your alliance wall</em>, no matter which way the robot is facing, just like the real one. If it feels backwards, check the alliance colour in the DS pane: Red and Blue have opposite "forward".</div>
+<div class="learn"><strong>Learn more:</strong> <a href="https://docs.wpilib.org/en/stable/docs/software/wpilib-tools/robot-simulation/simulation-gui.html#using-the-keyboard-as-a-joystick">Using the keyboard as a joystick</a> &middot; <a href="https://docs.wpilib.org/en/stable/docs/software/basic-programming/joystick.html">How joysticks map to axes and buttons</a></div>
+
+<h2 id="controls">6. Controller map</h2>
+<p>These are the real robot's bindings; the simulator uses the same code.</p>
+<h3>Driver (Joystick[0])</h3>
+<table>
+<tr><th style="width:30%">Control</th><th>What it does</th></tr>
+<tr><td>Left stick</td><td>Move (field-oriented)</td></tr>
+<tr><td>Right stick, left/right</td><td>Turn</td></tr>
+<tr><td>Right bumper (hold)</td><td>Slow mode: one-third speed, with a light rumble</td></tr>
+<tr><td>Right trigger (hold)</td><td>Auto-aim: keeps the robot pointed at the <a class="t" data-tip="The hub is the 2026 game's central scoring target. The code knows where each alliance's hub is on the field and can turn to face it and compute a shot for the distance.">hub</a> while you drive</td></tr>
+<tr><td>X (hold)</td><td>Lock wheels in an X so the robot cannot be pushed</td></tr>
+<tr><td>Back</td><td>Reset which way is "forward" (gyro zero)</td></tr>
+</table>
+<h3>Operator (Joystick[1])</h3>
+<table>
+<tr><th style="width:30%">Control</th><th>What it does</th></tr>
+<tr><td>A / X / Y</td><td>Intake pivot down (deployed) / middle / up (stowed)</td></tr>
+<tr><td>Left bumper (hold)</td><td>Run the intake rollers (funnel)</td></tr>
+<tr><td>B (hold)</td><td>Intake rollers in reverse</td></tr>
+<tr><td>Left trigger (hold)</td><td>Run the indexer (moves game pieces toward the shooter)</td></tr>
+<tr><td>Right trigger (hold)</td><td><strong>Calculated shot:</strong> spins the flywheel to a speed computed from the distance to the hub and runs the indexer</td></tr>
+<tr><td>Right bumper (hold)</td><td><strong>Fixed shot:</strong> flywheel to the dashboard "TargetVelocity" value, hood up, indexer on</td></tr>
+<tr><td>D-pad up / down (hold)</td><td>Nudge the hood angle</td></tr>
+<tr><td>D-pad left (hold)</td><td>"Feed": wiggles the intake pivot to unjam pieces</td></tr>
+<tr><td><em>(automatic)</em></td><td>The kicker wheel runs by itself once the flywheel is at speed</td></tr>
+</table>
+<p>To use a second controller in the simulator, drag another device onto <strong>Joystick[1]</strong>. With one Xbox controller you can put it in slot 0 to drive, then move it to slot 1 to try the shooter.</p>
+
+<h2 id="scope">7. Watching it in AdvantageScope</h2>
+<p><a class="t" data-tip="AdvantageScope is a free viewer, installed with WPILib, that shows robot data as graphs, a top-down field with the robot on it, and 3D views. It can connect live or open saved log files.">AdvantageScope</a> is where the simulator becomes useful. It draws the robot on the field and graphs every number the code logs.</p>
+<div class="step"><div class="num">1</div><div>With the simulator running, open <strong>AdvantageScope</strong> (it is in the WPILib tools folder, or in VS Code: command palette &rarr; <em>Start Tool</em> &rarr; AdvantageScope).</div></div>
+<div class="step"><div class="num">2</div><div>Menu <strong>File &rarr; Connect to Simulator</strong>. The sidebar fills with data under <em>RealOutputs</em>.</div></div>
+<div class="step"><div class="num">3</div><div>Add tabs with the <strong>+</strong> button and drag fields from the sidebar into them:</div></div>
+<table>
+<tr><th style="width:26%">Tab</th><th>Drag in</th><th>You will see</th></tr>
+<tr><td><strong>Odometry</strong> (2D field)</td><td><code>Odometry/Pose</code> (as Robot) and <code>Swerve/SimTruePose</code> (as Ghost)</td><td>The robot on the 2026 field. The ghost is where the simulator says it <em>really</em> is; the solid one is where the robot <em>thinks</em> it is. Drive around and watch them drift apart: that gap is what the camera fixes on the real robot.</td></tr>
+<tr><td><strong>Swerve</strong></td><td><code>Swerve/ModuleStates</code> and <code>TargetState</code></td><td>Four arrows showing where each wheel points and how fast it spins, commanded vs actual.</td></tr>
+<tr><td><strong>Line Graph</strong></td><td><code>Shooter/Flywheel/Lead/Velocity</code>, <code>Shooter/Flywheel/TargetVelocity</code></td><td>Flywheel spin-up when you hold the right trigger. Add <code>Shooter/Kicker/KickerRunning</code> to see the kicker fire once the wheel is at speed.</td></tr>
+<tr><td><strong>Mechanism</strong></td><td><code>Mechanism2d/IntakePivot</code>, <code>Mechanism2d/Hood</code></td><td>Stick-figure drawings of the intake arm swinging down and the hood angle changing.</td></tr>
+<tr><td><strong>Line Graph</strong></td><td><code>Sim/BatteryVoltage</code>, <code>Sim/TotalCurrentAmps</code></td><td>The pretend battery sagging when everything runs at once.</td></tr>
+</table>
+<p>Every run also saves a log file in the <code>logs/</code> folder inside the project. Open one later with <strong>File &rarr; Open Log</strong> and scrub through it with the timeline, exactly as the team does with logs from real matches.</p>
+<div class="learn"><strong>Learn more:</strong> <a href="https://docs.advantagescope.org/">AdvantageScope documentation</a> (start with "Getting Started" and the Odometry and Swerve tab pages) &middot; <a href="https://docs.advantagekit.org/">AdvantageKit</a>, the logging framework the code uses</div>
+
+<h2 id="auto">8. Running an autonomous routine</h2>
+<p>The <a class="t" data-tip="The first 15 seconds of a match, when the robot drives itself from a pre-planned script. The team designs these paths in a tool called PathPlanner.">autonomous</a> routines are chosen with two drop-downs the robot publishes to the dashboard. In the simulator you set them through the <em>NetworkTables</em> pane (or open Shuffleboard from the WPILib tools):</p>
+<div class="step"><div class="num">1</div><div>In <em>NetworkTables</em> expand <code>Shuffleboard &rarr; Main &rarr; Side</code> and set <code>selected</code> to <strong>Middle</strong>, <strong>Left</strong> or <strong>Right</strong>.</div></div>
+<div class="step"><div class="num">2</div><div>Expand <code>Drive Out</code> and set <code>selected</code> to <strong>Drive Out</strong> or <strong>Shoot</strong>. The <code>Auto Name</code> field shows the resulting routine, e.g. <em>Shoot Middle</em>, or says it does not exist if the combination is not a real routine.</div></div>
+<div class="step"><div class="num">3</div><div>Optionally pick an alliance in the DS pane, then in <em>Robot State</em> click <strong>Autonomous</strong>. In AdvantageScope the robot follows its path; <code>Auto/Routine</code> shows the name.</div></div>
+<div class="learn"><strong>Learn more:</strong> <a href="https://pathplanner.dev/home.html">PathPlanner</a> (the tool the paths are drawn in) &middot; <a href="https://docs.wpilib.org/en/stable/docs/software/dashboards/shuffleboard/index.html">Shuffleboard</a></div>
+
+<h2 id="test">9. The automatic self-test</h2>
+<p>The branch includes a test that boots the simulated robot with no window at all and checks that driving, steering, the gyro, the flywheel, the hood and the intake pivot all do what they should. Run it whenever the code changes:</p>
+<pre><code>./gradlew test</code></pre>
+<p>A green <code>BUILD SUCCESSFUL</code> with <em>7 tests completed</em> means the simulation and the control code still agree. A failure prints which mechanism misbehaved and by how much. It takes about 10 seconds.</p>
+
+<h2 id="trouble">10. When something goes wrong</h2>
+<table>
+<tr><th style="width:34%">Symptom</th><th>Likely cause and fix</th></tr>
+<tr><td>"Unsupported class file major version" or "invalid source release: 17"</td><td>The wrong Java is being used. Run from WPILib VS Code, or set <code>JAVA_HOME</code> to a Java 17 (Mac Homebrew: <code>export JAVA_HOME=/opt/homebrew/opt/openjdk@17</code>).</td></tr>
+<tr><td>First run sits at "Downloading" for a long time</td><td>Normal; it fetches about 1 GB of libraries once. Needs internet.</td></tr>
+<tr><td>Robot does not move when I push the stick</td><td>Check, in order: Robot State is <em>Teleoperated</em>; a device is in <strong>Joystick[0]</strong>; for keyboard, the pane has focus (click it) and axis 4 is mapped if you want to turn.</td></tr>
+<tr><td>Lots of "Joystick Button 7 on port 0 not available" warnings</td><td>Harmless. It means no controller is in slot 0 yet.</td></tr>
+<tr><td>"Address already in use" or AdvantageScope will not connect</td><td>An older simulator is still running. Quit any other Robot Simulation windows, or restart the computer.</td></tr>
+<tr><td>Everything is tiny / the window is blank on macOS</td><td>Resize the window once; the panes redraw. The <em>Window</em> menu restores closed panes.</td></tr>
+<tr><td>The robot drives the wrong way</td><td>Alliance colour in the DS pane. Press <em>Back</em> on the driver controller to re-zero the heading.</td></tr>
+<tr><td>Vision / Limelight values are all zero</td><td>Expected. There is no camera in the simulator; the robot navigates by wheel odometry alone.</td></tr>
+</table>
+<div class="callout stop"><strong>Simulator files not to commit.</strong> Running the simulator creates <code>simgui.json</code>, <code>networktables.json</code>, <code>logs/</code> and <code>ctre_sim/</code> in the project folder. They are already ignored by Git, so they will not show up in your changes.</div>
+
+<h2 id="limits">11. What the simulator does not do</h2>
+<ul>
+<li>No <strong>vision</strong>. The Limelight camera is not modelled, so there is no vision correction to odometry. That is deliberate: it lets you see how much odometry drifts on its own.</li>
+<li>No <strong>game pieces</strong>. The intake, indexer and shooter spin, but nothing is "in" them. Whether a shot would score is not computed.</li>
+<li>No <strong>collisions</strong>. The robot can drive through field walls.</li>
+<li>Physics numbers (masses, inertias) are reasonable guesses, kept together in <code>Constants.SimConstants</code>. The sim feels roughly right; it is not a substitute for tuning on the real robot.</li>
+<li>Battery voltage is estimated, current limits are not enforced, and motors do not overheat.</li>
+</ul>
+
+<h2 id="glossary">Glossary</h2>
+<dl class="glossary">
+<dt>FRC</dt><dd>FIRST Robotics Competition: the high-school robotics program this robot competes in. <a href="https://www.firstinspires.org/robotics/frc">firstinspires.org</a></dd>
+<dt>WPILib</dt><dd>The standard software library and tools for FRC robots. Installs VS Code, Java, the simulator and AdvantageScope. <a href="https://docs.wpilib.org/">docs.wpilib.org</a></dd>
+<dt>roboRIO</dt><dd>The small computer on the robot that runs this program. The simulator stands in for it on your laptop.</dd>
+<dt>Driver Station (DS)</dt><dd>The laptop software that enables/disables the robot and carries joystick input. The simulator has a built-in stand-in (the Robot State and DS panes).</dd>
+<dt>Swerve drive</dt><dd>A drivetrain where each of the four wheels can both spin and steer independently, letting the robot move in any direction while turning. <a href="https://docs.wpilib.org/en/stable/docs/software/kinematics-and-odometry/swerve-drive-kinematics.html">WPILib swerve docs</a></dd>
+<dt>Odometry</dt><dd>Estimating where the robot is by adding up how far each wheel has turned and which way the gyro says the robot faces. Drifts over time; the camera corrects it on the real robot.</dd>
+<dt>Gyro (Pigeon 2)</dt><dd>A sensor that measures which way the robot is facing. In the simulator it is fed the rotation computed from the wheels.</dd>
+<dt>Encoder</dt><dd>A sensor that measures how far a motor or mechanism has turned. "Absolute" encoders remember their position through a power cycle; "relative" ones start at zero.</dd>
+<dt>PID / feedforward</dt><dd>The math that decides how hard to push a motor to reach a target speed or angle. The simulator runs the team's real PID code against the fake motors. <a href="https://docs.wpilib.org/en/stable/docs/software/advanced-controls/introduction/index.html">WPILib controls intro</a></dd>
+<dt>NetworkTables</dt><dd>The live data feed between the robot and any laptop tool. Everything in the NetworkTables pane and everything AdvantageScope shows travels this way.</dd>
+<dt>AdvantageKit / AdvantageScope</dt><dd>AdvantageKit is the logging framework inside the robot code (it records every value every 20 ms). AdvantageScope is the viewer for those logs, live or from files. <a href="https://docs.advantagekit.org/">advantagekit</a> &middot; <a href="https://docs.advantagescope.org/">advantagescope</a></dd>
+<dt>PathPlanner</dt><dd>The tool the team uses to draw autonomous paths; the robot follows them with its own code. <a href="https://pathplanner.dev/">pathplanner.dev</a></dd>
+<dt>Limelight / MegaTag2</dt><dd>The robot's camera and its way of finding the robot's position from field markers (AprilTags). Not simulated.</dd>
+<dt>Gradle</dt><dd>The build tool. <code>./gradlew &lt;task&gt;</code> compiles the code, runs tests, starts the simulator, or deploys to the robot.</dd>
+<dt>CAN</dt><dd>The wiring network the motor controllers on the robot talk over. In the simulator each device still has its CAN number, which is why two of the same device cannot be created at once.</dd>
+<dt>Hub</dt><dd>The 2026 game's central scoring target. The code knows each alliance's hub position and can aim at it and compute the shot speed for the distance.</dd>
+</dl>
+
+<p style="margin-top:40px;color:var(--muted);font-size:14px">Companion document: <a href="sim-branch-changes.html">what changed on this branch and why</a> (for programmers and mentors reviewing the code).</p>
+</main>
+</body>
+</html>
