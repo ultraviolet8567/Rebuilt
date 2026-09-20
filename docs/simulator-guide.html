@@ -105,6 +105,7 @@
   <li><a href="#test">9. The automatic self-test</a></li>
   <li><a href="#trouble">10. When something goes wrong</a></li>
   <li><a href="#limits">11. What the simulator does not do</a></li>
+  <li><a href="#platforms">12. Verified platforms</a></li>
   <li><a href="#glossary">Glossary</a></li>
 </ul>
 
@@ -459,6 +460,19 @@ git checkout sim/shooter-seperate-sim</code></pre>
 <li>Battery voltage is estimated, current limits are not enforced, and motors do not overheat.</li>
 </ul>
 
+
+<h2 id="platforms">12. Verified platforms</h2>
+<p>The branch was built, its self-test run, and the simulator launched on all three operating systems the team uses. Same code, same commands.</p>
+<table>
+<tr><th style="width:24%">Platform</th><th>Build + 7 self-tests</th><th>Simulator window</th><th>Notes</th></tr>
+<tr><td>macOS 26 (Apple Silicon)</td><td>Pass</td><td>Opens and runs</td><td>Homebrew <code>openjdk@17</code> or the WPILib JDK. Primary development machine.</td></tr>
+<tr><td>Ubuntu 24.04 (ARM64, Parallels VM)</td><td>Pass</td><td>Opens and runs (screenshot below)</td><td><code>sudo apt install openjdk-17-jdk git</code>. 2 CPUs / 4 GB is enough. Runs under Wayland via XWayland; if the window is black on a virtual GPU, start it with <code>LIBGL_ALWAYS_SOFTWARE=1</code>.</td></tr>
+<tr><td>Windows 11 (ARM64, Parallels VM)</td><td>Pass</td><td>Program boots with the Sim GUI extension loaded</td><td>Use an <strong>x64</strong> Java 17 (the WPILib installer's, or Temurin x64); WPILib ships no ARM64 Windows natives, so the x64 JDK runs under emulation. Git is optional: the "Download ZIP" button on GitHub works. The <code>lineEndings 'UNIX'</code> Spotless setting on this branch is what makes <code>gradlew build</code> pass on Windows.</td></tr>
+</table>
+<figure>
+<img src="screenshots/ubuntu-24.04-arm64-simgui.png" alt="WPILib simulation window running on Ubuntu 24.04" style="width:100%;border:1px solid var(--line);border-radius:6px">
+<figcaption>The simulation window on Ubuntu 24.04 with this branch: Robot State, joysticks, NetworkTables, DS panel and, on the right, every simulated motor controller, encoder, gyro and Talon listed under <em>Other Devices</em>.</figcaption>
+</figure>
 <h2 id="glossary">Glossary</h2>
 <dl class="glossary">
 <dt>FRC</dt><dd>FIRST Robotics Competition: the high-school robotics program this robot competes in. <a href="https://www.firstinspires.org/robotics/frc">firstinspires.org</a></dd>
