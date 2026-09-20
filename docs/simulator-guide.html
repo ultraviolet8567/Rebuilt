@@ -435,7 +435,7 @@ git checkout sim/shooter-seperate-sim</code></pre>
 <h2 id="test">9. The automatic self-test</h2>
 <p>The branch includes a test that boots the simulated robot with no window at all and checks that driving, steering, the gyro, the flywheel, the hood and the intake pivot all do what they should. Run it whenever the code changes:</p>
 <pre><code>./gradlew test</code></pre>
-<p>A green <code>BUILD SUCCESSFUL</code> with <em>7 tests completed</em> means the simulation and the control code still agree. A failure prints which mechanism misbehaved and by how much. It takes about 10 seconds.</p>
+<p>A green <code>BUILD SUCCESSFUL</code> means the simulation and the control code still agree. There are 35 checks in 9 groups: the simulation smoke test (driving, steering, gyro, flywheel, hood, pivot), a boot as the Red alliance, command wiring and behavior, the auto chooser, the shooter lookup table, hub geometry, LEDs, and the alliance-flip and tunable-number helpers. A failure prints which check failed and by how much. The whole run takes under a minute.</p>
 
 <h2 id="trouble">10. When something goes wrong</h2>
 <table>
@@ -447,6 +447,9 @@ git checkout sim/shooter-seperate-sim</code></pre>
 <tr><td>"Address already in use" or AdvantageScope will not connect</td><td>An older simulator is still running. Quit any other Robot Simulation windows, or restart the computer.</td></tr>
 <tr><td>Everything is tiny / the window is blank on macOS</td><td>Resize the window once; the panes redraw. The <em>Window</em> menu restores closed panes.</td></tr>
 <tr><td>The robot drives the wrong way</td><td>Alliance colour in the DS pane. Press <em>Back</em> on the driver controller to re-zero the heading.</td></tr>
+<tr><td><strong>Windows:</strong> "Could not load library" / "UnsatisfiedLinkError" on an ARM laptop (Surface, Snapdragon)</td><td>You are running an ARM64 Java. Install an <strong>x64</strong> Java 17 (the WPILib installer's JDK is fine); it runs under Windows' built-in emulation and WPILib's x64 native libraries load normally.</td></tr>
+<tr><td><strong>Ubuntu:</strong> the Robot Simulation window is black, or "GLX" errors in the terminal</td><td>Usually a virtual machine or a driver without a working OpenGL 3 context. Run <code>LIBGL_ALWAYS_SOFTWARE=1 ./gradlew simulateJava</code> to use Mesa's software renderer; it is plenty fast for the sim GUI.</td></tr>
+<tr><td><strong>Ubuntu:</strong> "java: command not found"</td><td><code>sudo apt install openjdk-17-jdk git</code>, or use the WPILib installer's Linux build which brings its own JDK.</td></tr>
 <tr><td>Vision / Limelight values are all zero</td><td>Expected. There is no camera in the simulator; the robot navigates by wheel odometry alone.</td></tr>
 </table>
 <div class="callout stop"><strong>Simulator files not to commit.</strong> Running the simulator creates <code>simgui.json</code>, <code>networktables.json</code>, <code>logs/</code> and <code>ctre_sim/</code> in the project folder. They are already ignored by Git, so they will not show up in your changes.</div>

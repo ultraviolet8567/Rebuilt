@@ -88,6 +88,11 @@ public class Kicker extends SubsystemBase {
         setKickerVoltage(0);
     }
 
+    /** True while the kicker has been told to run (used by RunKicker and the tests). */
+    public boolean isRunning() {
+        return kickerRunning;
+    }
+
     // ------------------------------------------------------------------------------------
     // Desktop simulation
     // ------------------------------------------------------------------------------------

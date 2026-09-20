@@ -97,6 +97,10 @@
 <h3>2.8 <span class="tag fix">fix</span> The driver camera was opened unconditionally</h3>
 <p>On a laptop this grabs the webcam (macOS prompts for permission) or fails. <code>CameraServer</code> is now only started on the real robot.</p>
 
+<h3>2.9 <span class="tag crit">critical</span> Pose estimator seeded with the wrong heading for Red</h3>
+<p><code>Odometry</code> calls <code>resetHeading()</code> (gyro to 0 for Blue, 180 for Red) and then builds the <code>SwerveDrivePoseEstimator</code> with an initial pose of <code>new Pose2d()</code>, heading 0. The estimator stores <em>initial heading minus gyro heading</em> as a permanent offset. If the gyro already reports 180 at that instant, the offset is &minus;180&deg; and the estimator integrates wheel motion in the wrong direction for the rest of the session. An auto's <code>resetPose()</code> at match start hides it; a Red practice session in teleop does not. It is timing-dependent on the real robot (Phoenix status signals refresh asynchronously) and deterministic in the simulator, where the new <code>RedAllianceBootTest</code> caught it: stick-forward moved the estimated pose +7.6 m instead of &minus;7.6 m.</p>
+<p><strong>Fix:</strong> the estimator is seeded with the gyro's own reading (<code>new Pose2d(0, 0, gyro.getRotation2d())</code>), so the offset is zero whether or not the reading is fresh.</p>
+
 <h2 id="sim">3. Simulation: how it is built</h2>
 <p>The design goal was to leave the team's control code untouched and make the <em>hardware</em> lie convincingly. Every subsystem keeps its real motor controllers and sensors; when running on a desktop, each one also owns a small physics model and, once per loop, pushes the model's answer into the vendor's simulated device so the normal <code>getEncoder().getVelocity()</code>, <code>absoluteEncoder.get()</code> and <code>gyro.getRotation2d()</code> calls return believable numbers.</p>
 
@@ -162,7 +166,19 @@
 <p><code>Constants.currentMode</code> is <code>REAL</code> or <code>SIM</code> based on <code>RobotBase.isReal()</code>. In SIM, AdvantageKit writes <code>.wpilog</code> files to <code>&lt;project&gt;/logs/</code> (gitignored) and publishes over NetworkTables so AdvantageScope can connect to <code>localhost</code>. Log replay was <strong>not</strong> added: it needs the IO-layer architecture that this codebase does not use.</p>
 
 <h2 id="test">4. Automated verification</h2>
-<p><code>src/test/java/frc/robot/SimulationSmokeTest.java</code> runs with <code>./gradlew test</code> (also part of <code>./gradlew build</code>). It initializes the HAL in simulation, pretends a Driver Station is attached and enabled, builds the real <code>RobotContainer</code>, and then steps the CommandScheduler exactly the way the robot loop does.</p>
+<p>Nine test classes, 35 tests, run with <code>./gradlew test</code> (also part of <code>./gradlew build</code>). Every class that touches hardware runs in its own JVM (<code>forkEvery = 1</code>) because CAN IDs can be allocated once per process. <code>TestRobot</code> holds the shared boot helpers. The simulation smoke test initializes the HAL, pretends a Driver Station is attached and enabled, builds the real <code>RobotContainer</code>, and steps the CommandScheduler exactly the way the robot loop does.</p>
+<table>
+<tr><th>Class</th><th>Covers</th></tr>
+<tr><td><code>SimulationSmokeTest</code> (7)</td><td>Boot with no alliance, encoder seeding, drive, steer, gyro, flywheel, hood, pivot (table below).</td></tr>
+<tr><td><code>RedAllianceBootTest</code> (3)</td><td>Boots as Red: gyro at 180, red hub selected, stick-forward moves toward &minus;x. Found fix 2.9.</td></tr>
+<tr><td><code>CommandBehaviorTest</code> (7)</td><td>Every command declares its subsystems; Feed and SetPivot interrupt each other; Feed oscillation timing; CalculatedShoot recomputes from live distance; Shuffle raises then lowers the hood; SetHood nudges and clamps; kicker runs only once the flywheel is at speed.</td></tr>
+<tr><td><code>AutoChooserTest</code> (3)</td><td>Default and nonexistent selections return null safely (the old NPE); a real selection resolves to a PathPlanner auto with a starting pose. Drives the Shuffleboard choosers through NetworkTables.</td></tr>
+<tr><td><code>ShooterMathTest</code> (3)</td><td>Lookup table values, its known decrease past 5 m (documented, not hidden), demo scaling without clobbering the target.</td></tr>
+<tr><td><code>DrivetrainMathTest</code> (3)</td><td>Hub by alliance (Blue default), distance and angle to hub from the pose, demo speed limit.</td></tr>
+<tr><td><code>LightsTest</code> (2)</td><td>Every robot state renders and lights the strip; low-battery flag below 10 V.</td></tr>
+<tr><td><code>AllianceFlipUtilTest</code> (3)</td><td>No alliance and Blue do not flip; Red mirrors x and headings.</td></tr>
+<tr><td><code>LoggedTunableNumberTest</code> (4)</td><td>Defaults, no-default zero, hasChanged per caller, ifChanged.</td></tr>
+</table>
 <table>
 <tr><th>Test</th><th>What it proves</th></tr>
 <tr><td>boot</td><td>The robot constructs with <strong>no alliance</strong> assigned and all PathPlanner autos load (the crash in 2.1 fails here).</td></tr>
@@ -174,13 +190,13 @@
 <tr><td>hoodMovesToTarget</td><td>Hood reaches 0.25 rad within 0.03 on both encoders, then returns to the lower limit.</td></tr>
 <tr><td>pivotDeploysAndStows</td><td>Pivot deploys to 2.0 rad and stows to 0.1 rad within 0.15 rad against simulated gravity.</td></tr>
 </table>
-<p>Result at the time of writing: <strong>7 of 7 passing</strong>, full <code>./gradlew build</code> green, formatter (<code>spotlessApply</code>) applied, and <code>./gradlew simulateJava</code> launches the WPILib Sim GUI with the robot program running.</p>
+<p>Result at the time of writing: <strong>35 of 35 passing</strong>, full <code>./gradlew build</code> green, formatter (<code>spotlessApply</code>) applied, and <code>./gradlew simulateJava</code> launches the WPILib Sim GUI with the robot program running.</p>
 <h3>Cross-platform check</h3>
 <table>
 <tr><th>Platform</th><th><code>gradlew build</code> (incl. tests)</th><th><code>gradlew simulateJava</code></th></tr>
-<tr><td>macOS 26, Apple Silicon, Homebrew JDK 17</td><td>Pass, 7/7</td><td>GUI opens, program runs</td></tr>
-<tr><td>Ubuntu 24.04 ARM64 (Parallels), apt JDK 17</td><td>Pass, 7/7</td><td>GUI opens, program runs (screenshot in the simulator guide)</td></tr>
-<tr><td>Windows 11 ARM64 (Parallels), Temurin JDK 17 x64</td><td>Pass, 7/7 after the Spotless line-ending fix below</td><td>Program boots, Sim GUI extension loads (run from a service session, so the window itself was not visible to the check)</td></tr>
+<tr><td>macOS 26, Apple Silicon, Homebrew JDK 17</td><td>Pass</td><td>GUI opens, program runs</td></tr>
+<tr><td>Ubuntu 24.04 ARM64 (Parallels), apt JDK 17</td><td>Pass</td><td>GUI opens, program runs (screenshot in the simulator guide)</td></tr>
+<tr><td>Windows 11 ARM64 (Parallels), Temurin JDK 17 x64</td><td>Pass after the Spotless line-ending fix below</td><td>Program boots, Sim GUI extension loads (run from a service session, so the window itself was not visible to the check)</td></tr>
 </table>
 <p><span class="tag fix">fix</span> <strong>Spotless line endings.</strong> On Windows the Groovy formatter expected CRLF and <code>spotlessGroovyGradleCheck</code> failed on <code>build.gradle</code>, which breaks <code>gradlew build</code> for every Windows teammate. <code>lineEndings 'UNIX'</code> is now pinned in the <code>spotless</code> block. Found only by running on Windows.</p>
 
@@ -222,7 +238,8 @@
 <tr><td><code>subsystems/Storage/Indexer.java</code></td><td><span class="tag sim">sim</span>Physics; logging; merged inversion fix.</td></tr>
 <tr><td><code>util/SimBattery.java</code></td><td><span class="tag new">new</span>Battery model helper.</td></tr>
 <tr><td><code>deploy/pathplanner/autos/Shoot {Left,Middle,Right}.auto</code></td><td><span class="tag crit">fix</span>Redundant <code>Index</code> removed from the shooting parallel group.</td></tr>
-<tr><td><code>src/test/java/frc/robot/SimulationSmokeTest.java</code></td><td><span class="tag new">new</span>Simulation smoke test.</td></tr>
+<tr><td><code>src/test/java/frc/robot/**</code></td><td><span class="tag new">new</span>Nine test classes plus <code>TestRobot</code> helpers (section 4).</td></tr>
+<tr><td><code>subsystems/Shooter/Kicker.java</code></td><td><span class="tag new">new</span><code>isRunning()</code> getter for RunKicker tests.</td></tr>
 <tr><td><code>commands/*</code>, <code>AutoChooser.java</code>, <code>Lights.java</code></td><td>Merged from the review branch unchanged.</td></tr>
 <tr><td><code>README.md</code>, <code>docs/</code></td><td><span class="tag doc">docs</span>This document and the simulator guide.</td></tr>
 </table>

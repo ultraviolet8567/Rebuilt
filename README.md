@@ -20,7 +20,7 @@ driven and watched in AdvantageScope on a laptop with no robot present.
 
 ```
 ./gradlew simulateJava     # run the simulator (needs Java 17; WPILib VS Code has it)
-./gradlew test             # boot the simulated robot headless and check it behaves
+./gradlew test             # 35 checks: boots the simulated robot headless and verifies it behaves
 ./gradlew build            # compile, format-check and test
 ./gradlew deploy           # deploy to the roboRIO, exactly as before
 ```

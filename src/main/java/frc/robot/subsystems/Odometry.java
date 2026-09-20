@@ -43,12 +43,18 @@ public class Odometry extends SubsystemBase {
         resetHeading();
 
         /* Odometry */
+        // Seed the estimator's heading FROM the gyro so its internal gyro offset is zero.
+        // resetHeading() above just set the yaw to 0 (Blue) or 180 (Red); if the estimator
+        // were seeded with a 0-degree pose while the gyro already reads 180, it would carry a
+        // permanent 180-degree offset and integrate wheel motion in the wrong direction for
+        // Red in teleop (an auto's resetPose() hides this, a practice session does not).
+        Rotation2d initialHeading = gyro.getRotation2d();
         poseEstimator =
                 new SwerveDrivePoseEstimator(
                         DriveConstants.kDriveKinematics,
-                        gyro.getRotation2d(),
+                        initialHeading,
                         swerve.getModulePositions(),
-                        new Pose2d());
+                        new Pose2d(0.0, 0.0, initialHeading));
 
         // poseEstimator.setVisionMeasurementStdDevs(new Matrix<>())
 

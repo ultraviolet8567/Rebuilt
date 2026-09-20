@@ -81,6 +81,9 @@ dependencies {
 
 test {
     useJUnitPlatform()
+    // Each test class builds its own robot hardware in the HAL simulator; CAN IDs can only be
+    // allocated once per process, so give every test class a fresh JVM.
+    forkEvery = 1
     systemProperty 'junit.jupiter.extensions.autodetection.enabled', 'true'
 }
 
