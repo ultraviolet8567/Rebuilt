@@ -16,6 +16,11 @@ driven and watched in AdvantageScope on a laptop with no robot present.
 
 (Open the HTML files in a browser; GitHub shows them as source.)
 
+## Access
+
+This repository is private. Team members need a GitHub account that has been
+invited to the `ultraviolet8567` organization; ask a programming mentor.
+
 ## Quick start
 
 ```

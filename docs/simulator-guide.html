@@ -114,6 +114,7 @@
 <table>
 <tr><th style="width:26%">Install</th><th>Why</th><th>Where</th></tr>
 <tr><td><strong>WPILib 2026</strong> (includes VS Code, Java, AdvantageScope)</td><td>The <a class="t" data-tip="WPILib is the standard software library and toolset every FRC team uses to program their robot. Its installer also brings a ready-made copy of VS Code and the right version of Java.">FRC software suite</a>. This is the only thing that matters; it bundles the editor, the correct Java, and the viewing tools.</td><td><a href="https://docs.wpilib.org/en/stable/docs/zero-to-robot/step-2/wpilib-setup.html">WPILib installation guide</a></td></tr>
+<tr><td><strong>GitHub account + team access</strong></td><td>The repository is private. You need a GitHub account that has been added to the team's <strong>ultraviolet8567</strong> organization (see section 2).</td><td><a href="https://github.com/signup">Sign up</a>, then ask a mentor for the invitation</td></tr>
 <tr><td><strong>Git</strong></td><td>To download the team's code and switch to this branch.</td><td><a href="https://git-scm.com/downloads">git-scm.com</a> (on a Mac, installing Xcode command-line tools also works)</td></tr>
 <tr><td>Xbox-style controller (optional)</td><td>Much nicer than the keyboard. Any USB or Bluetooth Xbox controller works.</td><td>&mdash;</td></tr>
 </table>
@@ -121,6 +122,14 @@
 <div class="learn"><strong>Learn more:</strong> <a href="https://docs.wpilib.org/en/stable/docs/zero-to-robot/introduction.html">Zero to Robot</a> (WPILib's start-from-nothing walkthrough) &middot; <a href="https://docs.wpilib.org/en/stable/docs/software/vscode-overview/index.html">Using VS Code with WPILib</a></div>
 
 <h2 id="get">2. Getting the code</h2>
+<div class="callout warn">
+<strong>The repository is private.</strong> You need two things before the steps below will work:
+<ol style="margin:8px 0 0">
+<li>A free <a href="https://github.com/signup">GitHub account</a>.</li>
+<li>Membership in the team's GitHub organization, <strong>ultraviolet8567</strong>. Ask a programming mentor or the team's GitHub admin to invite the account you created; the invitation arrives by email and must be accepted. Until then the link below shows a 404 page, and <code>git clone</code> fails with "repository not found".</li>
+</ol>
+<p style="margin:8px 0 0">Because the repository is private, Git will also ask you to sign in the first time you clone. Use your GitHub username and a <a href="https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens">personal access token</a> (not your GitHub password, which Git no longer accepts), or install <a href="https://cli.github.com/">GitHub CLI</a> and run <code>gh auth login</code>, which handles it for you. On Windows, Git for Windows pops up a browser sign-in automatically.</p>
+</div>
 <p>The team's code lives on <a class="t" data-tip="GitHub is a website that stores code and its full history. A repository ('repo') is one project; a branch is a named version of that project that can be worked on separately.">GitHub</a> at <a href="https://github.com/ultraviolet8567/Rebuilt">github.com/ultraviolet8567/Rebuilt</a>. Open a terminal (Mac: <em>Terminal</em> app; Windows: <em>Git Bash</em>, which comes with Git) and run these three lines, one at a time:</p>
 <pre><code>git clone https://github.com/ultraviolet8567/Rebuilt.git
 cd Rebuilt
@@ -441,6 +450,7 @@ git checkout sim/shooter-seperate-sim</code></pre>
 <table>
 <tr><th style="width:34%">Symptom</th><th>Likely cause and fix</th></tr>
 <tr><td>"Unsupported class file major version" or "invalid source release: 17"</td><td>The wrong Java is being used. Run from WPILib VS Code, or set <code>JAVA_HOME</code> to a Java 17 (Mac Homebrew: <code>export JAVA_HOME=/opt/homebrew/opt/openjdk@17</code>).</td></tr>
+<tr><td>"Repository not found" or a GitHub 404 page</td><td>Your GitHub account is not yet in the team organization, or you are not signed in. Check the invitation email, and make sure Git is using the account that was invited.</td></tr>
 <tr><td>First run sits at "Downloading" for a long time</td><td>Normal; it fetches about 1 GB of libraries once. Needs internet.</td></tr>
 <tr><td>Robot does not move when I push the stick</td><td>Check, in order: Robot State is <em>Teleoperated</em>; a device is in <strong>Joystick[0]</strong>; for keyboard, the pane has focus (click it) and axis 4 is mapped if you want to turn.</td></tr>
 <tr><td>Lots of "Joystick Button 7 on port 0 not available" warnings</td><td>Harmless. It means no controller is in slot 0 yet.</td></tr>
@@ -470,7 +480,7 @@ git checkout sim/shooter-seperate-sim</code></pre>
 <tr><th style="width:24%">Platform</th><th>Build + 7 self-tests</th><th>Simulator window</th><th>Notes</th></tr>
 <tr><td>macOS 26 (Apple Silicon)</td><td>Pass</td><td>Opens and runs</td><td>Homebrew <code>openjdk@17</code> or the WPILib JDK. Primary development machine.</td></tr>
 <tr><td>Ubuntu 24.04 (ARM64, Parallels VM)</td><td>Pass</td><td>Opens and runs (screenshot below)</td><td><code>sudo apt install openjdk-17-jdk git</code>. 2 CPUs / 4 GB is enough. Runs under Wayland via XWayland; if the window is black on a virtual GPU, start it with <code>LIBGL_ALWAYS_SOFTWARE=1</code>.</td></tr>
-<tr><td>Windows 11 (ARM64, Parallels VM)</td><td>Pass</td><td>Opens and runs</td><td>Use an <strong>x64</strong> Java 17 (the WPILib installer's, or Temurin x64); WPILib ships no ARM64 Windows natives, so the x64 JDK runs under emulation. Git is optional: the "Download ZIP" button on GitHub works. The <code>lineEndings 'UNIX'</code> Spotless setting on this branch is what makes <code>gradlew build</code> pass on Windows.</td></tr>
+<tr><td>Windows 11 (ARM64, Parallels VM)</td><td>Pass</td><td>Opens and runs</td><td>Use an <strong>x64</strong> Java 17 (the WPILib installer's, or Temurin x64); WPILib ships no ARM64 Windows natives, so the x64 JDK runs under emulation. Git is optional: the "Download ZIP" button on GitHub works once you are signed in with an account that has team access. The <code>lineEndings 'UNIX'</code> Spotless setting on this branch is what makes <code>gradlew build</code> pass on Windows.</td></tr>
 </table>
 <figure>
 <img src="screenshots/ubuntu-24.04-arm64-simgui.png" alt="WPILib simulation window running on Ubuntu 24.04" style="width:100%;border:1px solid var(--line);border-radius:6px">
