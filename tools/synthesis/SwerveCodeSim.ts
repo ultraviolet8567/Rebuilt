@@ -268,3 +268,68 @@ export async function setupPlayer(spawnField: boolean, pos: [number, number, num
     const report = attachSwerveCodeSim(r)
     return { paused: World.physicsSystem.isPaused, status: setupStatus(), report: report.filter(o => o.hingeSign !== undefined) }
 }
+
+/**
+ * Forwards this browser's controllers to the robot code as WPILib Xbox controllers.
+ *
+ * Synthesis does not do this for WPILib robots: its SimGamepadInput is never instantiated and
+ * speaks the FTC gamepad format. First connected controller -> port 0 (driver), second -> port 1
+ * (operator). With no controller on port 0 the keyboard drives: WASD translate, arrows turn.
+ *
+ * Also re-sends `>new_data` each tick. WPILib only applies driver-station and joystick changes on
+ * that signal, so without it Synthesis's own enable/disable buttons never reach the robot.
+ */
+let forwarder: ReturnType<typeof setInterval> | undefined
+const keysDown = new Set<string>()
+
+export async function startControllerForwarding(periodMs = 20) {
+    const { worker } = await import("@/systems/simulation/wpilib_brain/WPILibTypes")
+    const send = (data: unknown) => worker.getValue().postMessage({ command: "update", data })
+    if (forwarder) clearInterval(forwarder)
+    window.addEventListener("keydown", e => keysDown.add(e.code))
+    window.addEventListener("keyup", e => keysDown.delete(e.code))
+    window.addEventListener("blur", () => keysDown.clear())
+
+    forwarder = setInterval(() => {
+        const pads = [...(navigator.getGamepads?.() ?? [])].filter((p): p is Gamepad => !!p && p.connected)
+        for (let port = 0; port < 2; port++) {
+            const pad = pads[port]
+            const data = pad ? xboxFromGamepad(pad) : port === 0 ? xboxFromKeyboard() : undefined
+            if (data) send({ type: "Joystick", device: String(port), data })
+        }
+        send({ type: "DriverStation", device: "", data: { ">new_data": true } })
+    }, periodMs)
+}
+
+export function stopControllerForwarding() {
+    if (forwarder) clearInterval(forwarder)
+    forwarder = undefined
+}
+
+// Browser "standard" gamepad layout -> WPILib XboxController layout.
+// WPILib axes: LX, LY, LT, RT, RX, RY (triggers 0..1). Buttons: A B X Y LB RB Back Start LS RS.
+function xboxFromGamepad(p: Gamepad) {
+    const b = (i: number) => !!p.buttons[i]?.pressed
+    const v = (i: number) => p.buttons[i]?.value ?? 0
+    return {
+        ">axes": [p.axes[0] ?? 0, p.axes[1] ?? 0, v(6), v(7), p.axes[2] ?? 0, p.axes[3] ?? 0],
+        ">buttons": [b(0), b(1), b(2), b(3), b(4), b(5), b(8), b(9), b(10), b(11)],
+        ">povs": [pov(b(12), b(15), b(13), b(14))],
+    }
+}
+
+function xboxFromKeyboard() {
+    const k = (c: string) => (keysDown.has(c) ? 1 : 0)
+    return {
+        ">axes": [k("KeyD") - k("KeyA"), k("KeyS") - k("KeyW"), 0, 0, k("ArrowRight") - k("ArrowLeft"), 0],
+        ">buttons": Array(10).fill(false),
+        ">povs": [-1],
+    }
+}
+
+function pov(up: boolean, right: boolean, down: boolean, left: boolean): number {
+    const x = (right ? 1 : 0) - (left ? 1 : 0)
+    const y = (up ? 1 : 0) - (down ? 1 : 0)
+    if (x === 0 && y === 0) return -1
+    return (Math.round((Math.atan2(x, y) * 180) / Math.PI / 45) * 45 + 360) % 360
+}
