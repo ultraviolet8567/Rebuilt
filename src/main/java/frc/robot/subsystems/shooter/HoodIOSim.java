@@ -63,7 +63,7 @@ public class HoodIOSim implements HoodIO {
     }
 
     /** The angle the absolute encoder would report for this true hood angle, including aliasing. */
-    private static double encodeAbsolute(double hoodAngleRad) {
+    static double encodeAbsolute(double hoodAngleRad) {
         double zero =
                 MathUtil.inputModulus(ShooterConstants.kHoodEncoderOffsetRad, -Math.PI, Math.PI);
         double sign = ShooterConstants.kHoodAbsoluteEncoderInverted ? -1 : 1;

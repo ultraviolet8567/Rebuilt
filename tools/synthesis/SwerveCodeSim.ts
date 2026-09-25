@@ -30,8 +30,22 @@ export type SwerveCodeSimOptions = {
     gyro: string // SimDevice name as Synthesis lists it, e.g. "Pigeon2[30]"
     wheelMaxRadPerSec: number // must equal the robot code's full-output wheel speed
     robotWheelRadius: number // metres; the robot code's wheel, which may differ from the model's
-    hingeSign?: number // -1 if a model's steering reads clockwise-positive
+    // Steering hinge signs. Leave undefined to calibrate at attach time: the same model has come
+    // in with opposite hinge senses on different loads, so fixed signs are not reliable.
+    steerCmdSign?: number
+    steerEncSign?: number
+    // Steering hinge speed at full output. The robot code's steering P loop runs through a 20 ms
+    // loop plus a websocket round trip; at a URDF's default 30 rad/s it oscillated +-3 rad every
+    // 100 ms. SwerveSimple's model carried pi rad/s.
+    steerMaxRadPerSec?: number
+    // Other motor-driven hinges, found by URDF joint name. maxRadPerSec is the joint speed at full
+    // motor output (motor free speed / reduction); the robot code's IO sends volts / 12.
+    // positive: which way the robot code's angle increases, "down" or "up" at the link's centre
+    // of mass. Signs are found by calibration at attach time (see calibrateHinge).
+    mechanisms?: { joint: string; motor: string; maxRadPerSec: number; positive: "down" | "up" }[]
 }
+
+export const SWERVE_SIMPLE_SIGNS = { steerCmdSign: 1, steerEncSign: 1 }
 
 export const DEFAULT_8567: SwerveCodeSimOptions = {
     driveIds: [10, 11, 12, 13],
@@ -39,7 +53,17 @@ export const DEFAULT_8567: SwerveCodeSimOptions = {
     gyro: "Pigeon2[30]",
     wheelMaxRadPerSec: 102.8,
     robotWheelRadius: 0.04863,
+    steerMaxRadPerSec: 6,
+    // PivotIOSynthesis: angle increases toward deployed (down). HoodIOSynthesis: increases up.
+    mechanisms: [
+        { joint: "dof_intake_pivot", motor: "Pivot[5]", maxRadPerSec: 5.28, positive: "down" }, // NEO / (45 * 40/16)
+        { joint: "dof_hood", motor: "Hood[4]", maxRadPerSec: 1.42, positive: "up" }, // NEO / (25 * 168/10)
+    ],
 }
+
+const MODULE_TAGS = ["fl", "fr", "bl", "br"]
+// biome-ignore lint/suspicious/noExplicitAny: drivers carry their joint's mirabuf info
+const jointName = (d: any): string => d.info?.name ?? ""
 
 type Vec = { x: number; y: number; z: number }
 
@@ -79,33 +103,116 @@ function moduleIndex(p: Vec): number {
     return (front ? 0 : 2) + (left ? 0 : 1)
 }
 
-export function attachSwerveCodeSim(robot: MirabufSceneObject, opts: SwerveCodeSimOptions = DEFAULT_8567) {
+/**
+ * Nudge one hinge each way with nothing else driving it and report the output and angle signs
+ * that make "positive" mean `wanted`: measure(before, after) > 0 when the joint moved that way.
+ * Needs the physics running (a visible tab).
+ */
+async function calibrateHinge(h: HingeDriver, measure: () => number, maxVel: number) {
+    const trials: { u: number; dq: number; dm: number }[] = []
+    for (const u of [0.4, -0.4]) {
+        await sleep(150)
+        const q0 = h.constraint.GetCurrentAngle()
+        const m0 = measure()
+        h.accelerationDirection = u * Math.min(1, 3 / maxVel)
+        await sleep(300)
+        h.accelerationDirection = 0
+        await sleep(150)
+        trials.push({ u, dq: h.constraint.GetCurrentAngle() - q0, dm: measure() - m0 })
+    }
+    // Use whichever push actually moved the joint (one may be against a limit).
+    const t = trials.reduce((a, b) => (Math.abs(b.dq) > Math.abs(a.dq) ? b : a))
+    if (Math.abs(t.dq) < 0.02) return { cmd: 1, enc: 1, ok: false, trials }
+    const movedWanted = t.dm > 0
+    const cmd = Math.sign(t.u) * (movedWanted ? 1 : -1)
+    const enc = Math.sign(t.dq) * (movedWanted ? 1 : -1)
+    return { cmd, enc, ok: true, trials }
+}
+
+function yawAboutUp(x: number, z: number) {
+    return Math.atan2(-z, x) // rotation about +Y, counter-clockwise seen from above
+}
+
+function wrap(a: number) {
+    return Math.atan2(Math.sin(a), Math.cos(a))
+}
+
+export async function attachSwerveCodeSim(robot: MirabufSceneObject, opts: SwerveCodeSimOptions = DEFAULT_8567) {
     const layer = World.simulationSystem.getSimulationLayer(robot.mechanism)!
     if (!(robot.brain instanceof WPILibBrain)) robot.brain = new WPILibBrain(robot, "wpilib")
     const brain = robot.brain as WPILibBrain
 
     const wheels = layer.drivers.filter((d): d is WheelDriver => d instanceof WheelDriver)
-    const hinges = layer.drivers.filter((d): d is HingeDriver => d instanceof HingeDriver)
-    if (wheels.length !== 4 || hinges.length !== 4) throw new Error(`need 4 wheels + 4 hinges`)
+    const mechNames = new Set((opts.mechanisms ?? []).map(m => m.joint))
+    const hinges = layer.drivers.filter(
+        (d): d is HingeDriver => d instanceof HingeDriver && !mechNames.has(jointName(d))
+    )
+    if (wheels.length !== 4 || hinges.length !== 4)
+        throw new Error(`need 4 wheels + 4 steering hinges, found ${wheels.length} + ${hinges.length}`)
 
+    // Modules by joint name (dof_fl_steer / dof_fl_wheel) when the model names them, otherwise by
+    // where the wheel sits on the chassis.
     const report: Record<string, unknown>[] = []
     const byModule: { wheel?: WheelDriver; hinge?: HingeDriver }[] = [{}, {}, {}, {}]
+    const tagIndex = (d: unknown) => MODULE_TAGS.findIndex(t => jointName(d).startsWith(`dof_${t}_`))
     wheels.forEach(w => {
         const local = toChassis(robot, wheelWorldPos(w))
-        const i = moduleIndex(local)
+        const i = tagIndex(w) >= 0 ? tagIndex(w) : moduleIndex(local)
         byModule[i].wheel = w
-        report.push({ module: i, wheel: w.idStr, local })
+        report.push({ module: i, wheel: jointName(w) || w.idStr, local })
     })
     hinges.forEach(h => {
         const a = h.worldAnchor
         const local = toChassis(robot, { x: a.GetX(), y: a.GetY(), z: a.GetZ() })
-        const i = moduleIndex(local)
+        const i = tagIndex(h) >= 0 ? tagIndex(h) : moduleIndex(local)
         byModule[i].hinge = h
-        report.push({ module: i, hinge: h.displayName(), local })
+        report.push({ module: i, hinge: jointName(h) || h.displayName(), local })
     })
 
+    const scaled = (stim: Stimulus, k: number) => ({
+        supplierType: stim.supplierType,
+        getSupplierValue: () =>
+            // biome-ignore lint/suspicious/noExplicitAny: [position, velocity] pair
+            (stim.getSupplierValue() as any[]).map(v => ({ ...v, value: k * v.value })),
+    })
     const stimulusFor = (guid: string) =>
         layer.stimuli.find(s => s.id.guid === guid && s.id.type === StimulusType.STIM_ENCODER)
+
+    // Calibrate with no flows attached, so nothing else is driving the joints.
+    brain.loadSimConfig()
+    // biome-ignore lint/suspicious/noExplicitAny: spike clears the brain's flow list
+    ;(brain as any)._simFlows = []
+    // biome-ignore lint/suspicious/noExplicitAny: every Synthesis driver has this field
+    layer.drivers.forEach(d => ((d as any).accelerationDirection = 0))
+    const body = World.physicsSystem.getBody(robot.getRootNodeId()!)!
+    const chassisYaw = () => {
+        const q = body.GetRotation()
+        return Math.atan2(2 * (q.GetW() * q.GetY() + q.GetX() * q.GetZ()), 1 - 2 * (q.GetY() ** 2 + q.GetZ() ** 2))
+    }
+    const wheelYaw = (w: WheelDriver) => {
+        const f = new JOLT.Vec3(1, 0, 0)
+        const u = new JOLT.Vec3(0, 1, 0)
+        const ax = w.constraint.GetWheelWorldTransform(0, f, u).GetAxisX()
+        const y = yawAboutUp(ax.GetX(), ax.GetZ())
+        JOLT.destroy(f)
+        JOLT.destroy(u)
+        return y
+    }
+    const cals: Awaited<ReturnType<typeof calibrateHinge>>[] = []
+    for (const m of byModule) {
+        if (!m.wheel || !m.hinge) throw new Error(`module missing a wheel or hinge: ${JSON.stringify(report)}`)
+        m.hinge.setContinuousRotation()
+        const w = m.wheel
+        let last = wrap(wheelYaw(w) - chassisYaw())
+        let acc = 0 // unwrapped counter-clockwise rotation of the wheel relative to the chassis
+        const measure = () => {
+            const now = wrap(wheelYaw(w) - chassisYaw())
+            acc += wrap(now - last)
+            last = now
+            return acc
+        }
+        cals.push(opts.steerCmdSign !== undefined ? { cmd: 1, enc: 1, ok: true, trials: [] } : await calibrateHinge(m.hinge, measure, opts.steerMaxRadPerSec ?? m.hinge.maxVelocity))
+    }
 
     byModule.forEach((m, i) => {
         if (!m.wheel || !m.hinge) throw new Error(`module ${i} is missing a wheel or hinge: ${JSON.stringify(report)}`)
@@ -121,17 +228,20 @@ export function attachSwerveCodeSim(robot: MirabufSceneObject, opts: SwerveCodeS
         brain.addSimFlow({ supplier: SimCANMotor.genSupplier(driveDev), receiver: m.wheel })
 
         // A hinge takes a velocity fraction typed as "Angle"; relabel the motor output to match.
-        // Measured on SwerveSimple (all hinge axes point down): Synthesis's hinge angle already
-        // reads counter-clockwise-from-above positive, as WPILib expects. Flipping it made the
-        // robot unable to rotate in place. Kept as a knob for models that disagree.
         const hinge = m.hinge
         hinge.setContinuousRotation()
-        const hingeSign = opts.hingeSign ?? 1
+        if (opts.steerMaxRadPerSec) hinge.maxVelocity = opts.steerMaxRadPerSec
+        const cal = cals[i]
+        const hingeSign = opts.steerEncSign ?? cal.enc
+        const steerCmd = opts.steerCmdSign ?? cal.cmd
         brain.addSimFlow({
             supplier: {
                 supplierType: hinge.receiverType,
                 getSupplierValue: () => [
-                    { value: hingeSign * (SimCANMotor.getPercentOutput(turnDev) ?? 0), baseType: hinge.receiverType[0] },
+                    {
+                        value: steerCmd * (SimCANMotor.getPercentOutput(turnDev) ?? 0),
+                        baseType: hinge.receiverType[0],
+                    },
                 ],
             },
             receiver: hinge,
@@ -140,16 +250,42 @@ export function attachSwerveCodeSim(robot: MirabufSceneObject, opts: SwerveCodeS
         const wheelStim = stimulusFor(m.wheel.id.guid)
         const hingeStim = stimulusFor(m.hinge.id.guid)
         if (!wheelStim || !hingeStim) throw new Error(`module ${i}: encoder stimulus not found`)
-        const scaled = (stim: Stimulus, k: number) => ({
-            supplierType: stim.supplierType,
-            getSupplierValue: () =>
-                // biome-ignore lint/suspicious/noExplicitAny: [position, velocity] pair
-                (stim.getSupplierValue() as any[]).map(v => ({ ...v, value: k * v.value })),
-        })
         brain.addSimFlow({ supplier: scaled(wheelStim, radiusRatio), receiver: SimCANEncoder.genReceiver(driveDev) })
         brain.addSimFlow({ supplier: scaled(hingeStim, hingeSign), receiver: SimCANEncoder.genReceiver(turnDev) })
-        report.push({ module: i, hingeSign, radiusRatio: +radiusRatio.toFixed(3) })
+        report.push({ module: i, hingeSign, steerCmd, calibrated: cal.ok, radiusRatio: +radiusRatio.toFixed(3) })
     })
+
+    // Mechanism hinges: motor output -> hinge velocity fraction, hinge angle -> encoder (radians at
+    // the joint; the robot code's IO turns that into its own angle convention).
+    for (const mech of opts.mechanisms ?? []) {
+        const h = layer.drivers.find(d => d instanceof HingeDriver && jointName(d) === mech.joint) as
+            | HingeDriver
+            | undefined
+        if (!h) {
+            report.push({ mechanism: mech.joint, missing: true })
+            continue
+        }
+        h.maxVelocity = mech.maxRadPerSec
+        const bodies = [h.constraint.GetBody1(), h.constraint.GetBody2()]
+        const light = bodies[bodies[0].GetMotionProperties().GetInverseMass() > bodies[1].GetMotionProperties().GetInverseMass() ? 0 : 1]
+        const height = () => light.GetCenterOfMassPosition().GetY() - h.worldAnchor.GetY()
+        const want = mech.positive === "down" ? () => -height() : height
+        const mcal = await calibrateHinge(h, want, mech.maxRadPerSec)
+        const cmd = mcal.cmd
+        const enc = mcal.enc
+        brain.addSimFlow({
+            supplier: {
+                supplierType: h.receiverType,
+                getSupplierValue: () => [
+                    { value: cmd * (SimCANMotor.getPercentOutput(mech.motor) ?? 0), baseType: h.receiverType[0] },
+                ],
+            },
+            receiver: h,
+        })
+        const stim = stimulusFor(h.id.guid)
+        if (stim) brain.addSimFlow({ supplier: scaled(stim as Stimulus, enc), receiver: SimCANEncoder.genReceiver(mech.motor) })
+        report.push({ mechanism: mech.joint, motor: mech.motor, encoder: !!stim, cmd, enc, calibrated: mcal.ok })
+    }
 
     // Gyro: a stimulus on the chassis body, registered with the layer so it is stepped each tick.
     const rootBodyId = robot.mechanism.nodeToBody.get(robot.mechanism.rootBody)!
@@ -188,8 +324,24 @@ const SWERVE_SIMPLE = {
 
 const sleep = (ms: number) => new Promise(r => setTimeout(r, ms))
 
+/** Sphinx (FRC 8567) built by tools/synthesis/urdf/build_sphinx_urdf.py, served from public/. */
+export const SPHINX_URDF_ZIP = "/sphinx_urdf.zip"
+
+async function spawnURDF(url: string, name: string) {
+    const { loadURDF } = await import("@/urdf/URDFLoader")
+    const { default: MirabufCachingService, MiraType } = await import("@/mirabuf/MirabufLoader")
+    const { spawnCachedMira } = await import("@/ui/modals/mirabuf/LibrarySpawnActions")
+    const { ProgressHandle } = await import("@/components/ProgressNotificationData")
+    const buffer = await (await fetch(url)).arrayBuffer()
+    const { assembly } = await loadURDF(buffer, `${name}.zip`, new ProgressHandle(name))
+    assembly.info!.name = name
+    const info = await MirabufCachingService.storeAssemblyInCache(assembly, { miraType: MiraType.ROBOT })
+    if (!info) throw new Error("could not cache URDF assembly")
+    await spawnCachedMira(info)
+}
+
 /** Starts spawns without awaiting them; poll {@link setupStatus} until ready. */
-export async function startSetup(spawnField: boolean) {
+export async function startSetup(spawnField: boolean, robot: "sphinx" | "swerveSimple" = "sphinx") {
     const { spawnRemote } = await import("@/ui/modals/mirabuf/LibrarySpawnActions")
     const { MiraType } = await import("@/mirabuf/MirabufLoader")
     const objs = World.sceneRenderer.mirabufSceneObjects
@@ -200,7 +352,8 @@ export async function startSetup(spawnField: boolean) {
             for (let i = 0; i < 90 && !objs.getField(); i++) await sleep(1000)
         }
         if (mine().length === 0) {
-            spawnRemote({ remotePath: SWERVE_SIMPLE.path, hash: SWERVE_SIMPLE.hash, miraType: MiraType.ROBOT, name: "SwerveSimple v2" })
+            if (robot === "sphinx") spawnURDF(SPHINX_URDF_ZIP, "Sphinx 8567").catch(e => console.error(e))
+            else spawnRemote({ remotePath: SWERVE_SIMPLE.path, hash: SWERVE_SIMPLE.hash, miraType: MiraType.ROBOT, name: "SwerveSimple v2" })
             for (let i = 0; i < 60 && mine().length === 0; i++) await sleep(1000)
         }
     })()
@@ -249,8 +402,12 @@ export async function setRobotMode(mode: "disabled" | "teleop" | "auto", station
 }
 
 /** Whole player setup in one call: join is done by ?autojoin; this spawns, closes panels, attaches. */
-export async function setupPlayer(spawnField: boolean, pos: [number, number, number]) {
-    await startSetup(spawnField)
+export async function setupPlayer(
+    spawnField: boolean,
+    pos: [number, number, number],
+    robot: "sphinx" | "swerveSimple" = "sphinx"
+) {
+    await startSetup(spawnField, robot)
     for (let i = 0; i < 90; i++) {
         const s = setupStatus()
         if (s.field && myRobot()) break
@@ -265,8 +422,8 @@ export async function setupPlayer(spawnField: boolean, pos: [number, number, num
     // biome-ignore lint/suspicious/noExplicitAny: spike teleports through a private method
     ;(r as any).setObjectPosition({ pos, yaw: 0 })
     await sleep(1500)
-    const report = attachSwerveCodeSim(r)
-    return { paused: World.physicsSystem.isPaused, status: setupStatus(), report: report.filter(o => o.hingeSign !== undefined) }
+    const report = await attachSwerveCodeSim(r, robot === "sphinx" ? DEFAULT_8567 : { ...DEFAULT_8567, ...SWERVE_SIMPLE_SIGNS, mechanisms: [] })
+    return { paused: World.physicsSystem.isPaused, status: setupStatus(), report: report.filter(o => o.hingeSign !== undefined || o.mechanism) }
 }
 
 /**

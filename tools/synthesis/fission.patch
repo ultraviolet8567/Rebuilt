@@ -1,0 +1,33 @@
+diff --git a/fission/src/systems/simulation/wpilib_brain/WPILibTypes.ts b/fission/src/systems/simulation/wpilib_brain/WPILibTypes.ts
+index 372ab36..a29c13e 100644
+--- a/fission/src/systems/simulation/wpilib_brain/WPILibTypes.ts
++++ b/fission/src/systems/simulation/wpilib_brain/WPILibTypes.ts
+@@ -1,7 +1,10 @@
+ import Lazy from "@/util/Lazy.ts"
+ import WSWorker from "../shared/WSWorker?worker"
+ 
+-export const WPILIB_WS_URL = "ws://localhost:3300/wpilibws"
++// `?codesim=ws://host:port/wpilibws` points this tab at robot code that is not on localhost:3300,
++// so several players (or several robot programs on one machine) can each drive their own robot.
++export const WPILIB_WS_URL =
++    new URLSearchParams(globalThis.location?.search ?? "").get("codesim") ?? "ws://localhost:3300/wpilibws"
+ export const FTC_WS_URL = "ws://localhost:3301/ftcsimws"
+ 
+ export type DeviceName = string
+diff --git a/fission/src/urdf/URDFLoader.ts b/fission/src/urdf/URDFLoader.ts
+index 4ed4bf4..75d9e06 100644
+--- a/fission/src/urdf/URDFLoader.ts
++++ b/fission/src/urdf/URDFLoader.ts
+@@ -25,8 +25,11 @@ export function applyConservativeURDFImport(assembly: mirabuf.Assembly): void {
+             ? jointData.jointDefinitions[jointInstance.jointReference]
+             : undefined
+         const isDetectedWheel = jointDefinition?.userData?.data?.["wheel"] === "true"
++        // Joints named dof_* are declared movable by the model's author (the onshape-to-robot
++        // convention): swerve steering, arms, hoods. Keep them instead of welding them.
++        const isDeclaredDof = name.startsWith("dof_")
+ 
+-        if (isDetectedWheel && jointInstance.jointReference) {
++        if ((isDetectedWheel || isDeclaredDof) && jointInstance.jointReference) {
+             keptJointInstances[name] = jointInstance
+             keptJointDefinitions[jointInstance.jointReference] = jointDefinition
+             continue

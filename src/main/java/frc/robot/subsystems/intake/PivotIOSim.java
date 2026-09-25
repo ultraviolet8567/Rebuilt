@@ -68,7 +68,7 @@ public class PivotIOSim implements PivotIO {
     }
 
     /** What the absolute encoder would report for this true pivot angle, aliasing included. */
-    private static double encodeAbsolute(double pivotAngleRad) {
+    static double encodeAbsolute(double pivotAngleRad) {
         double zero =
                 MathUtil.inputModulus(
                         IntakeConstants.kPivotEncoderOffsetRad, -2 * Math.PI, Math.PI);

@@ -1,0 +1,45 @@
+{
+  "matched_leaves": 555,
+  "unmatched_leaves": 34,
+  "drive_constants": {
+    "track_m": 0.5524,
+    "wheelbase_m": 0.5524,
+    "wheel_r_m": 0.0486
+  },
+  "cad_module_extent_xy_m": [
+    -0.686,
+    0.686
+  ],
+  "intake_axis_urdf": [
+    0.0,
+    1.0,
+    0.0
+  ],
+  "base_link": {
+    "parts": 232,
+    "triangles": 94129,
+    "origin_m": [
+      0.0,
+      0.0,
+      0.0
+    ]
+  },
+  "intake_arm": {
+    "parts": 62,
+    "triangles": 69189,
+    "origin_m": [
+      0.279,
+      0.327,
+      0.177
+    ]
+  },
+  "hood": {
+    "parts": 46,
+    "triangles": 12000,
+    "origin_m": [
+      -0.075,
+      0.0,
+      0.39
+    ]
+  }
+}

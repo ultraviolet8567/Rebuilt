@@ -37,6 +37,7 @@ import frc.robot.subsystems.intake.Pivot;
 import frc.robot.subsystems.intake.PivotIO;
 import frc.robot.subsystems.intake.PivotIOSim;
 import frc.robot.subsystems.intake.PivotIOSpark;
+import frc.robot.subsystems.intake.PivotIOSynthesis;
 import frc.robot.subsystems.leds.Leds;
 import frc.robot.subsystems.shooter.Flywheel;
 import frc.robot.subsystems.shooter.FlywheelIO;
@@ -46,6 +47,7 @@ import frc.robot.subsystems.shooter.Hood;
 import frc.robot.subsystems.shooter.HoodIO;
 import frc.robot.subsystems.shooter.HoodIOSim;
 import frc.robot.subsystems.shooter.HoodIOSpark;
+import frc.robot.subsystems.shooter.HoodIOSynthesis;
 import frc.robot.subsystems.shooter.Kicker;
 import frc.robot.subsystems.shooter.KickerIO;
 import frc.robot.subsystems.shooter.KickerIOSim;
@@ -121,11 +123,12 @@ public class RobotContainer {
                 } else {
                     drive = localSimDrive();
                 }
+                boolean synthesis = Constants.simBackend == Constants.SimBackend.SYNTHESIS;
                 vision = new Vision(drive, new VisionIOSim());
                 flywheel = new Flywheel(new FlywheelIOSim());
-                hood = new Hood(new HoodIOSim());
+                hood = new Hood(synthesis ? new HoodIOSynthesis() : new HoodIOSim());
                 kicker = new Kicker(new KickerIOSim());
-                pivot = new Pivot(new PivotIOSim());
+                pivot = new Pivot(synthesis ? new PivotIOSynthesis() : new PivotIOSim());
                 funnel = new Funnel(new FunnelIOSim());
                 indexer = new Indexer(new IndexerIOSim());
             }
