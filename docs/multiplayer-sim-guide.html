@@ -1,0 +1,325 @@
+<title>Sphinx Match Night</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Source+Sans+3:ital,wght@0,400;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+  :root {
+    --bg: #f5f4f8;
+    --panel: #ffffff;
+    --ink: #1c1924;
+    --ink-2: #4a4556;
+    --muted: #6d6780;
+    --rule: #dedbe6;
+    --uv: #5b2a86;
+    --uv-soft: #efe8f6;
+    --red: #b8313a;
+    --red-soft: #fbe9ea;
+    --blue: #2856a6;
+    --blue-soft: #e8eefa;
+    --ok: #2c7a4b;
+    --ok-soft: #e5f3ea;
+    --warn: #9a6400;
+    --warn-soft: #fbf1dc;
+    --code-bg: #f0eef5;
+    --display: "Barlow Condensed", "Arial Narrow", "Helvetica Neue", Arial, sans-serif;
+    --body: "Source Sans 3", "Segoe UI", -apple-system, "Helvetica Neue", Arial, sans-serif;
+    --mono: "JetBrains Mono", "SFMono-Regular", Menlo, Consolas, monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      color-scheme: dark;
+      --bg: #16131c; --panel: #1f1b27; --ink: #ece9f3; --ink-2: #c6c0d3; --muted: #9a93ab; --rule: #352f41;
+      --uv: #b995e0; --uv-soft: #2c2338; --red: #ef7a82; --red-soft: #3a1f23; --blue: #86a9ec; --blue-soft: #1c2640;
+      --ok: #7fcb9c; --ok-soft: #1b2e23; --warn: #e3b35c; --warn-soft: #33291a; --code-bg: #29243a;
+    }
+  }
+  :root[data-theme="dark"] {
+    color-scheme: dark;
+    --bg: #16131c; --panel: #1f1b27; --ink: #ece9f3; --ink-2: #c6c0d3; --muted: #9a93ab; --rule: #352f41;
+    --uv: #b995e0; --uv-soft: #2c2338; --red: #ef7a82; --red-soft: #3a1f23; --blue: #86a9ec; --blue-soft: #1c2640;
+    --ok: #7fcb9c; --ok-soft: #1b2e23; --warn: #e3b35c; --warn-soft: #33291a; --code-bg: #29243a;
+  }
+  html { background: var(--bg); }
+  body { background: var(--bg); color: var(--ink); font: 17px/1.6 var(--body); padding-inline: 16px; padding-block: 0 72px; }
+  .wrap { max-width: 780px; margin: 0 auto; }
+  header.top { padding-block: 44px 20px; border-bottom: 3px solid var(--uv); margin-bottom: 28px; }
+  .eyebrow { font: 700 13px/1 var(--body); letter-spacing: .12em; text-transform: uppercase; color: var(--uv); }
+  h1 { font: 700 clamp(40px, 7vw, 60px)/1 var(--display); letter-spacing: .01em; margin: 10px 0 12px; text-wrap: balance; }
+  h2 { font: 700 32px/1.1 var(--display); margin: 52px 0 12px; text-wrap: balance; }
+  h3 { font: 600 20px/1.3 var(--body); margin: 28px 0 8px; }
+  p, li { max-width: 68ch; }
+  p { margin: 0 0 14px; }
+  .lede { font-size: 19px; color: var(--ink-2); }
+  a { color: var(--uv); text-underline-offset: 3px; }
+  a:focus-visible, button:focus-visible, input:focus-visible { outline: 3px solid var(--uv); outline-offset: 2px; }
+  code, kbd, .mono { font-family: var(--mono); font-size: .86em; }
+  code { background: var(--code-bg); border: 1px solid var(--rule); border-radius: 4px; padding: 1px 5px; overflow-wrap: anywhere; }
+  kbd { border: 1px solid var(--rule); border-bottom-width: 2px; border-radius: 4px; padding: 0 5px; background: var(--panel); white-space: nowrap; }
+  nav.toc { display: flex; flex-wrap: wrap; gap: 8px 18px; font-size: 15px; margin-bottom: 8px; }
+  nav.toc a { text-decoration: none; font-weight: 600; }
+  .roles { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 14px; margin: 18px 0; }
+  .role { background: var(--panel); border: 1px solid var(--rule); border-radius: 8px; padding: 16px 18px; }
+  .role h3 { margin: 0 0 6px; font-family: var(--display); font-size: 24px; font-weight: 700; }
+  .role p { margin: 0; font-size: 16px; color: var(--ink-2); }
+  ol.steps { list-style: none; counter-reset: s; padding: 0; margin: 16px 0; display: grid; gap: 14px; }
+  ol.steps > li { counter-increment: s; position: relative; padding-left: 48px; }
+  ol.steps > li::before { content: counter(s); position: absolute; left: 0; top: 0; width: 32px; height: 32px; border-radius: 50%;
+    background: var(--uv); color: var(--bg); font: 700 18px/32px var(--display); text-align: center; }
+  ol.steps > li strong:first-child { display: block; font-size: 18px; }
+  .note { border-left: 4px solid var(--warn); background: var(--warn-soft); padding: 10px 14px; border-radius: 0 6px 6px 0; margin: 14px 0; font-size: 16px; }
+  .good { border-left-color: var(--ok); background: var(--ok-soft); }
+  .tablewrap { overflow-x: auto; margin: 12px 0 18px; border: 1px solid var(--rule); border-radius: 8px; background: var(--panel); }
+  table { border-collapse: collapse; width: 100%; font-size: 15.5px; }
+  th, td { text-align: left; vertical-align: top; padding: 9px 12px; border-bottom: 1px solid var(--rule); }
+  th { font: 600 13px/1.3 var(--body); letter-spacing: .06em; text-transform: uppercase; color: var(--muted); background: var(--bg); }
+  tr:last-child td { border-bottom: 0; }
+  td:first-child { white-space: nowrap; font-weight: 600; }
+  .st { display: inline-block; font: 700 13px/1 var(--mono); padding: 4px 7px; border-radius: 4px; }
+  .st.red { color: var(--red); background: var(--red-soft); }
+  .st.blue { color: var(--blue); background: var(--blue-soft); }
+  figure { margin: 18px 0 24px; }
+  figure svg { width: 100%; height: auto; display: block; }
+  figcaption { font-size: 14px; color: var(--muted); margin-top: 6px; }
+  .builder { background: var(--panel); border: 1px solid var(--rule); border-radius: 8px; padding: 16px 18px; margin: 14px 0 20px; }
+  .builder .row { display: flex; flex-wrap: wrap; gap: 10px 14px; align-items: end; }
+  .builder label { display: grid; gap: 4px; font-size: 14px; font-weight: 600; color: var(--ink-2); flex: 1 1 220px; }
+  .builder input { font: 15px var(--mono); padding: 8px 10px; border: 1px solid var(--rule); border-radius: 6px; background: var(--bg); color: var(--ink); min-width: 0; }
+  .links { display: grid; gap: 8px; margin-top: 14px; }
+  .link { display: grid; grid-template-columns: auto 1fr auto; gap: 10px; align-items: center; }
+  .link .url { font: 13px/1.4 var(--mono); overflow-wrap: anywhere; color: var(--ink-2); }
+  button.copy { font: 600 14px var(--body); padding: 6px 12px; border-radius: 6px; border: 1px solid var(--uv); background: transparent; color: var(--uv); cursor: pointer; }
+  button.copy:hover { background: var(--uv-soft); }
+  .status { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 14px; }
+  .status div { background: var(--panel); border: 1px solid var(--rule); border-radius: 8px; padding: 14px 16px; }
+  .status h3 { margin: 0 0 6px; font-size: 16px; }
+  .status ul { margin: 0; padding-left: 18px; font-size: 15.5px; }
+  footer { margin-top: 56px; padding-top: 16px; border-top: 1px solid var(--rule); font-size: 14px; color: var(--muted); }
+  @media (max-width: 520px) { body { font-size: 16px; } .link { grid-template-columns: 1fr; } td:first-child { white-space: normal; } }
+</style>
+
+<div class="wrap">
+<header class="top">
+  <div class="eyebrow">FRC 8567 Ultraviolet · REBUILT 2026 simulation</div>
+  <h1>Sphinx Match Night</h1>
+  <p class="lede">Six people, six computers, one field. Each player drives Sphinx from home with the team's real robot code, in a shared 3-versus-3 match on the 2026 REBUILT field. This guide gets you from nothing installed to playing a match.</p>
+  <nav class="toc" aria-label="Contents">
+    <a href="#how">How it works</a><a href="#setup">Player setup</a><a href="#night">Match night</a><a href="#controls">Controls</a><a href="#host">Host setup</a><a href="#trouble">Troubleshooting</a><a href="#status">What's tested</a>
+  </nav>
+</header>
+
+<section>
+  <div class="roles">
+    <div class="role"><h3>Players (six)</h3><p>Install two things once, then on match night double-click one file and open one link. No programming.</p></div>
+    <div class="role"><h3>Host (one)</h3><p>Usually a mentor. Runs the match server on a Mac and sends each player a link. The host can also play.</p></div>
+  </div>
+</section>
+
+<section id="how">
+  <h2>How it works</h2>
+  <p>Every player runs two things on their own computer: the <strong>robot program</strong> (the same Java code that runs on Sphinx, in simulation mode) and a <strong>Chrome tab</strong> with the field. The tab does the physics for your robot and sends your controller to your robot program. The host's computer passes positions between all six tabs so everyone sees the same match.</p>
+  <figure>
+    <svg viewBox="0 0 760 300" role="img" aria-label="Each player's computer runs the robot program and a Chrome tab; the tabs connect over the internet to the host, which relays the match to everyone.">
+      <defs>
+        <marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="var(--muted)"/></marker>
+      </defs>
+      <g font-family="Source Sans 3, Segoe UI, Arial, sans-serif" font-size="14" fill="var(--ink)">
+        <rect x="10" y="20" width="250" height="120" rx="8" fill="var(--red-soft)" stroke="var(--red)"/>
+        <text x="24" y="44" font-weight="700" fill="var(--red)">Player computer (red2)</text>
+        <rect x="24" y="58" width="104" height="66" rx="6" fill="var(--panel)" stroke="var(--rule)"/>
+        <text x="34" y="82">Robot</text><text x="34" y="100">program</text><text x="34" y="117" font-size="12" fill="var(--muted)">(8567 code)</text>
+        <rect x="142" y="58" width="104" height="66" rx="6" fill="var(--panel)" stroke="var(--rule)"/>
+        <text x="152" y="82">Chrome tab</text><text x="152" y="100">field + your</text><text x="152" y="117">robot</text>
+        <line x1="128" y1="91" x2="142" y2="91" stroke="var(--muted)" stroke-width="2" marker-end="url(#arr)" marker-start="url(#arr)"/>
+        <rect x="10" y="160" width="250" height="120" rx="8" fill="var(--blue-soft)" stroke="var(--blue)"/>
+        <text x="24" y="184" font-weight="700" fill="var(--blue)">Player computer (blue1)</text>
+        <rect x="24" y="198" width="104" height="66" rx="6" fill="var(--panel)" stroke="var(--rule)"/>
+        <text x="34" y="222">Robot</text><text x="34" y="240">program</text><text x="34" y="257" font-size="12" fill="var(--muted)">(8567 code)</text>
+        <rect x="142" y="198" width="104" height="66" rx="6" fill="var(--panel)" stroke="var(--rule)"/>
+        <text x="152" y="222">Chrome tab</text><text x="152" y="240">field + your</text><text x="152" y="257">robot</text>
+        <line x1="128" y1="231" x2="142" y2="231" stroke="var(--muted)" stroke-width="2" marker-end="url(#arr)" marker-start="url(#arr)"/>
+        <text x="290" y="152" font-size="13" fill="var(--muted)">…four more players</text>
+        <line x1="246" y1="80" x2="470" y2="140" stroke="var(--uv)" stroke-width="2" stroke-dasharray="6 5" marker-end="url(#arr)" marker-start="url(#arr)"/>
+        <line x1="246" y1="240" x2="470" y2="170" stroke="var(--uv)" stroke-width="2" stroke-dasharray="6 5" marker-end="url(#arr)" marker-start="url(#arr)"/>
+        <text x="300" y="104" font-size="13" fill="var(--uv)">internet</text>
+        <rect x="470" y="90" width="280" height="130" rx="8" fill="var(--uv-soft)" stroke="var(--uv)"/>
+        <text x="486" y="116" font-weight="700" fill="var(--uv)">Host computer</text>
+        <text x="486" y="142">Web page (the field app)</text>
+        <text x="486" y="164">Relay: passes positions, score,</text>
+        <text x="486" y="182">match start between players</text>
+        <text x="486" y="206" font-size="12" fill="var(--muted)">Cloudflare tunnel gives it an https address</text>
+      </g>
+    </svg>
+    <figcaption>Your controller only ever talks to your own robot program. Nothing about your computer is exposed to the other players.</figcaption>
+  </figure>
+</section>
+
+<section id="setup">
+  <h2>Player setup (once, about 30 minutes)</h2>
+  <p>You need a Windows 10/11 or Mac computer with 8 GB of memory or more, Google Chrome or Microsoft Edge, an internet connection, and access to the team's GitHub. A game controller (Xbox or PlayStation style) is best; a keyboard works too.</p>
+  <ol class="steps">
+    <li><strong>Install WPILib 2026.</strong> This is the free FRC programming kit; it includes the Java that the robot program needs. Download the installer for your computer from <a href="https://github.com/wpilibsuite/allwpilib/releases">github.com/wpilibsuite/allwpilib/releases</a> (the newest 2026 release: the <code>.iso</code> for Windows, the <code>.dmg</code> for Mac), run it, and accept the installer's defaults. It takes 10–15 minutes.</li>
+    <li><strong>Install GitHub Desktop and get the robot code.</strong> Install <a href="https://desktop.github.com">GitHub Desktop</a>, sign in with your GitHub account, and clone <code>ultraviolet8567/Rebuilt</code>. Then use <em>Current Branch</em> to switch to the simulation branch your mentor names (for now it is <code>claude/multiplayer-shooter-sim-5f688a</code>).</li>
+    <li><strong>Start the robot program once to finish installing.</strong> In the code folder, open the <code>sim</code> folder and double-click <code>Start Robot Sim (Mac).command</code> or <code>Start Robot Sim (Windows).bat</code>. The first run downloads more files and can take several minutes. It is ready when the window prints <code>Robot program startup complete</code>. Close the window.
+      <div class="note"><strong>Mac:</strong> if macOS says the file cannot be opened, right-click it, choose <em>Open</em>, then <em>Open</em> again. <strong>Windows:</strong> if you see <em>Windows protected your PC</em>, click <em>More info</em>, then <em>Run anyway</em>.</div>
+    </li>
+    <li><strong>Plug in your controller</strong> (USB is most reliable) and check it works at <a href="https://hardwaretester.com/gamepad">hardwaretester.com/gamepad</a>.</li>
+  </ol>
+</section>
+
+<section id="night">
+  <h2>Match night</h2>
+  <p>Your host sends each person a link with their station in it, like <span class="st red">red2</span> or <span class="st blue">blue1</span>. Each station is one robot; three per alliance.</p>
+  <ol class="steps">
+    <li><strong>Start your robot program.</strong> Double-click the <code>Start Robot Sim</code> file and wait for <code>Robot program startup complete</code>. Leave the window open all night.</li>
+    <li><strong>Open your link in Chrome or Edge.</strong> Make the window wide (landscape). If a cookie box appears, you can click the <kbd>×</kbd> to decline. If the browser asks whether this site may <em>access devices on your local network</em>, click <em>Allow</em>: that is how the page reaches your robot program.</li>
+    <li><strong>Wait for "Ready at red2. Drive!"</strong> in the corner (about 30 seconds). The page wiggles your robot's joints briefly while it sets up. Keep the tab in front and visible: a hidden tab stops the physics, and setup will fail.</li>
+    <li><strong>Press any button on your controller</strong> so the browser notices it. Then drive. Before a match you can practise freely; the scoreboard shows at the top.</li>
+    <li><strong>When the host starts the match,</strong> every robot jumps to its starting spot. The first 15 seconds are autonomous: your robot runs its selected auto routine, which is <em>Do Nothing</em> unless someone chose one (see Troubleshooting). Then you drive for the rest of the match. When it ends, robots stop until the next match.</li>
+  </ol>
+  <div class="note good">Your starting spot can be close to a wall. Drive away from the wall before you turn, or your bumpers will catch it.</div>
+</section>
+
+<section id="controls">
+  <h2>Controls</h2>
+  <p>The robot code expects two drivers: a <strong>driver</strong> (moving) and an <strong>operator</strong> (intake and shooter). If you have one controller, it does both jobs at once. If a second controller is plugged in, it becomes the operator.</p>
+  <h3>One controller</h3>
+  <div class="tablewrap"><table>
+    <thead><tr><th>Control</th><th>What it does</th></tr></thead>
+    <tbody>
+      <tr><td>Left stick</td><td>Drive. Pushing up always moves away from your alliance wall, whichever way the robot faces.</td></tr>
+      <tr><td>Right stick ←/→</td><td>Turn</td></tr>
+      <tr><td>A</td><td>Lower the intake (hold for a moment)</td></tr>
+      <tr><td>Left bumper</td><td>Run the intake rollers: drive into fuel with the intake down</td></tr>
+      <tr><td>Y</td><td>Raise the intake</td></tr>
+      <tr><td>Right trigger</td><td>Aim at your hub and shoot (hold). The flywheel spins up, then fuel feeds.</td></tr>
+      <tr><td>Right bumper</td><td>Slow driving. With one controller it also spins up a close-range shot, so it fires if you are holding fuel.</td></tr>
+      <tr><td>B</td><td>Run the intake backwards (spit fuel out)</td></tr>
+      <tr><td>X</td><td>Lock the wheels in an X so you are hard to push; also moves the intake halfway</td></tr>
+      <tr><td>Left trigger</td><td>Run the indexer</td></tr>
+      <tr><td>D-pad ↑/↓</td><td>Nudge the hood up or down</td></tr>
+      <tr><td>Back / View</td><td>Do not press it in the simulator: it resets "forward" on the real robot, but here it makes driving rotated. Reload the page to undo it.</td></tr>
+    </tbody>
+  </table></div>
+  <h3>No controller: keyboard</h3>
+  <div class="tablewrap"><table>
+    <thead><tr><th>Key</th><th>What it does</th></tr></thead>
+    <tbody>
+      <tr><td><kbd>W</kbd> <kbd>A</kbd> <kbd>S</kbd> <kbd>D</kbd></td><td>Drive</td></tr>
+      <tr><td><kbd>←</kbd> <kbd>→</kbd></td><td>Turn</td></tr>
+      <tr><td><kbd>E</kbd></td><td>Lower the intake and run it (hold)</td></tr>
+      <tr><td><kbd>Q</kbd></td><td>Raise the intake</td></tr>
+      <tr><td><kbd>F</kbd></td><td>Aim and shoot (hold)</td></tr>
+      <tr><td><kbd>Space</kbd></td><td>Aim at the hub without shooting</td></tr>
+      <tr><td><kbd>R</kbd></td><td>Intake backwards</td></tr>
+      <tr><td><kbd>Shift</kbd></td><td>Slow driving</td></tr>
+    </tbody>
+  </table></div>
+  <h3>Scoring tips</h3>
+  <ul>
+    <li>Shots land best from about 3 to 3.6 metres from the centre of your hub. Closer than about 2 metres, the ball hits the rim.</li>
+    <li>Hold the trigger until the flywheel is up to speed; fuel only feeds once it is.</li>
+    <li>Sphinx holds up to 40 fuel. Drive through fuel with the intake down and the rollers on.</li>
+  </ul>
+</section>
+
+<section id="host">
+  <h2>Host setup</h2>
+  <p>The host needs a Mac (or Linux computer) that stays on during the session. Setup is done once in Terminal; after that each session is one command.</p>
+  <h3>Once</h3>
+  <ol class="steps">
+    <li><strong>Install the tools:</strong> <a href="https://nodejs.org">Node.js</a> 18 or newer, <code>git</code> and <code>git-lfs</code>, <a href="https://bun.sh">Bun</a>, <a href="https://rustup.rs">Rust</a>, and <code>cloudflared</code> (<code>brew install git-lfs cloudflared</code> on a Mac with Homebrew).</li>
+    <li><strong>Build the site and the relay:</strong> in the robot code folder, run <code>tools/synthesis/host/build-site.sh</code>. It downloads a fixed version of Autodesk Synthesis (the free, open-source simulator the field runs in), applies the team's changes, and builds everything into <code>tools/synthesis/host/site</code>. About five minutes.</li>
+  </ol>
+  <h3>Each session</h3>
+  <ol class="steps">
+    <li><strong>Start the server:</strong> <code>tools/synthesis/host/start-host.sh --internet</code>. It prints an <code>https://…trycloudflare.com</code> address and six player links. The address is new every session, so send fresh links each time. Use <code>--internet</code> even when everyone is in one house: without it the links are plain <code>http://</code> addresses, and browsers may refuse game controllers on those (the keyboard still works).</li>
+    <li><strong>Send each player their link</strong> (Discord works). Or paste the address into the link maker below.</li>
+    <li><strong>Join first.</strong> The first player in brings the field and keeps the score, so the host (or whoever will stay all night) should open their link before anyone else. If that person leaves, the score stops updating for everyone.</li>
+    <li><strong>Run matches:</strong> once everyone shows "Ready", click <em>Start Match</em> in the top bar, check the settings (keep <em>use spawn positions</em> on), and start. Click it again for the next match. <kbd>Ctrl</kbd>+<kbd>C</kbd> in Terminal ends the session.</li>
+  </ol>
+  <div class="builder" aria-labelledby="bl">
+    <h3 id="bl" style="margin-top:0">Link maker</h3>
+    <div class="row">
+      <label for="base">Host address (from start-host.sh)
+        <input id="base" value="https://example.trycloudflare.com" autocomplete="off" spellcheck="false"></label>
+      <label for="room" style="flex:0 1 140px">Room code
+        <input id="room" value="SPHINX" maxlength="6" autocomplete="off" spellcheck="false"></label>
+    </div>
+    <div class="links" id="links"></div>
+  </div>
+</section>
+
+<section id="trouble">
+  <h2>Troubleshooting</h2>
+  <div class="tablewrap"><table>
+    <thead><tr><th>What you see</th><th>What to do</th></tr></thead>
+    <tbody>
+      <tr><td>"Could not join room"</td><td>The link is wrong or old, or the host's server is not running. Ask the host for a fresh link.</td></tr>
+      <tr><td>"Setup failed" or nothing happens</td><td>Check the robot program window says <code>Robot program startup complete</code>, then reload the page. Keep the tab visible while it sets up.</td></tr>
+      <tr><td>"A joint did not calibrate"</td><td>The tab was hidden or busy during setup. Keep it in front and reload.</td></tr>
+      <tr><td>Robot does not respond to the controller</td><td>Press a button after the page loads. Use Chrome or Edge. Unplug other controllers.</td></tr>
+      <tr><td>Driving feels rotated</td><td>Someone pressed Back / View. Reload the page; the robot finds its true heading again.</td></tr>
+      <tr><td>Robot sits still for the first 15 seconds</td><td>That is autonomous. To run a real auto routine, open the robot's dashboard (AdvantageScope or Glass, connect to <code>localhost</code>) and choose one under <em>Auto Routine</em> before the match.</td></tr>
+      <tr><td>The field is choppy</td><td>Close other programs and browser tabs. In the page's settings (gear icon), choose Low graphics.</td></tr>
+      <tr><td>Scores stopped changing</td><td>The first player to join (the score keeper) left. Everyone reloads; the host joins first.</td></tr>
+      <tr><td>Robot program window shows red errors and closes</td><td>Make sure WPILib 2026 installed, then try again. Send a screenshot to your mentor.</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<section id="status">
+  <h2>What's tested</h2>
+  <div class="status">
+    <div><h3 style="color:var(--ok)">Tested (September 2026)</h3><ul>
+      <li>Six robot programs and six browser players in one room, all on one computer, through the host server and relay</li>
+      <li>Everyone sees the same robot positions (within 10 cm) and the same score</li>
+      <li>All six robots switch together: autonomous, driving, stopped at the end</li>
+      <li>Driving, intake, hood, collecting fuel, shooting and scoring through the real controls</li>
+      <li>The Mac start file</li>
+    </ul></div>
+    <div><h3 style="color:var(--warn)">Not yet tested</h3><ul>
+      <li>Players on separate computers over the internet (the Cloudflare tunnel)</li>
+      <li>The Windows start file</li>
+      <li>Whether Chrome asks the "local network" question on every computer</li>
+      <li>A full-length match with six real people</li>
+    </ul></div>
+  </div>
+  <p style="margin-top:14px">Try a dry run with two or three people before the real night. Known limits: the shooter is tuned for the simulator (the team's real shot table was never fully tuned); close shots miss; balls fired in quick bursts sometimes collide in the air.</p>
+</section>
+
+<footer>
+  Built on Autodesk Synthesis (Apache 2.0). Robot model generated from the team's Onshape CAD for Sphinx. Setup scripts and technical notes: <code>tools/synthesis/README.md</code> in the robot code.
+</footer>
+</div>
+
+<script>
+(function () {
+  var stations = ["red1", "red2", "red3", "blue1", "blue2", "blue3"];
+  var base = document.getElementById("base"), room = document.getElementById("room"), out = document.getElementById("links");
+  try { var saved = localStorage.getItem("sphinx-host-base"); if (saved) base.value = saved; } catch (e) {}
+  function render() {
+    var b = base.value.trim().replace(/\/+$/, "");
+    var r = (room.value.trim().toUpperCase() || "SPHINX");
+    var relay = b.replace(/^http/, "ws");
+    try { localStorage.setItem("sphinx-host-base", b); } catch (e) {}
+    out.innerHTML = "";
+    stations.forEach(function (st) {
+      var url = b + "/?autojoin=" + encodeURIComponent(r) + "&sphinx=" + st + "&relay=" + encodeURIComponent(relay) + "&field=1";
+      var row = document.createElement("div"); row.className = "link";
+      var tag = document.createElement("span"); tag.className = "st " + (st.indexOf("red") === 0 ? "red" : "blue"); tag.textContent = st;
+      var u = document.createElement("span"); u.className = "url"; u.textContent = url;
+      var btn = document.createElement("button"); btn.className = "copy"; btn.type = "button"; btn.textContent = "Copy";
+      btn.addEventListener("click", function () {
+        var done = function () { btn.textContent = "Copied"; setTimeout(function () { btn.textContent = "Copy"; }, 1500); };
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(url).then(done, function () { select(u); });
+        } else { select(u); }
+      });
+      row.appendChild(tag); row.appendChild(u); row.appendChild(btn); out.appendChild(row);
+    });
+  }
+  function select(el) { var s = window.getSelection(), rg = document.createRange(); rg.selectNodeContents(el); s.removeAllRanges(); s.addRange(rg); }
+  base.addEventListener("input", render); room.addEventListener("input", render);
+  render();
+})();
+</script>
