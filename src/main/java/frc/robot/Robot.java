@@ -4,6 +4,7 @@
 
 package frc.robot;
 
+import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -51,6 +52,16 @@ public class Robot extends LoggedRobot {
                 Logger.addDataReceiver(new NT4Publisher());
             }
             case SIM -> {
+                // A second player's copy on the same computer needs its own NetworkTables port,
+                // or it would publish into the first copy's tables.
+                String ntPort = System.getenv("ROBOT_NT_PORT");
+                if (ntPort != null) {
+                    NetworkTableInstance nt = NetworkTableInstance.getDefault();
+                    nt.stopServer();
+                    int port4 = Integer.parseInt(ntPort);
+                    nt.startServer("networktables.json", "", 1735 + port4 - 5810, port4);
+                }
+                Logger.recordMetadata("SimBackend", Constants.simBackend.toString());
                 new File("logs").mkdirs();
                 Logger.addDataReceiver(new WPILOGWriter("logs/"));
                 Logger.addDataReceiver(new NT4Publisher());

@@ -22,9 +22,11 @@ import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.drive.GyroIO;
 import frc.robot.subsystems.drive.GyroIOPigeon2;
 import frc.robot.subsystems.drive.GyroIOSim;
+import frc.robot.subsystems.drive.GyroIOSynthesis;
 import frc.robot.subsystems.drive.ModuleIO;
 import frc.robot.subsystems.drive.ModuleIOSim;
 import frc.robot.subsystems.drive.ModuleIOSpark;
+import frc.robot.subsystems.drive.ModuleIOSynthesis;
 import frc.robot.subsystems.intake.Funnel;
 import frc.robot.subsystems.intake.FunnelIO;
 import frc.robot.subsystems.intake.FunnelIOSim;
@@ -108,23 +110,17 @@ public class RobotContainer {
                 indexer = new Indexer(new IndexerIOSpark());
             }
             case SIM -> {
-                // The gyro reads its rotation rate from the drivetrain, which does not exist yet.
-                // A holder breaks the cycle without giving the gyro a reference to the whole
-                // subsystem.
-                Drive[] self = new Drive[1];
-                drive =
-                        new Drive(
-                                new GyroIOSim(
-                                        () ->
-                                                self[0] == null
-                                                        ? 0.0
-                                                        : self[0].getChassisSpeeds()
-                                                                .omegaRadiansPerSecond),
-                                new ModuleIOSim(),
-                                new ModuleIOSim(),
-                                new ModuleIOSim(),
-                                new ModuleIOSim());
-                self[0] = drive;
+                if (Constants.simBackend == Constants.SimBackend.SYNTHESIS) {
+                    drive =
+                            new Drive(
+                                    new GyroIOSynthesis(),
+                                    new ModuleIOSynthesis(0),
+                                    new ModuleIOSynthesis(1),
+                                    new ModuleIOSynthesis(2),
+                                    new ModuleIOSynthesis(3));
+                } else {
+                    drive = localSimDrive();
+                }
                 vision = new Vision(drive, new VisionIOSim());
                 flywheel = new Flywheel(new FlywheelIOSim());
                 hood = new Hood(new HoodIOSim());
@@ -308,5 +304,26 @@ public class RobotContainer {
 
     public Indexer getIndexer() {
         return indexer;
+    }
+
+    /** Drivetrain whose physics runs inside this program (no field, no other robots). */
+    private static Drive localSimDrive() {
+        // The gyro reads its rotation rate from the drivetrain, which does not exist yet.
+        // A holder breaks the cycle without giving the gyro a reference to the whole
+        // subsystem.
+        Drive[] self = new Drive[1];
+        Drive local =
+                new Drive(
+                        new GyroIOSim(
+                                () ->
+                                        self[0] == null
+                                                ? 0.0
+                                                : self[0].getChassisSpeeds().omegaRadiansPerSecond),
+                        new ModuleIOSim(),
+                        new ModuleIOSim(),
+                        new ModuleIOSim(),
+                        new ModuleIOSim());
+        self[0] = local;
+        return local;
     }
 }

@@ -85,8 +85,21 @@ test {
 }
 
 // Simulation configuration (e.g. environment variables).
-wpi.sim.addGui().defaultEnabled = true
+// `./gradlew simulateJava -Psynthesis` runs the robot for Autodesk Synthesis: the drivetrain's
+// physics come from Synthesis over the HALSim websocket, and Synthesis also acts as the driver
+// station, so the desktop sim GUI is left off. `-PsimPort=3301 -PntPort=5811` lets a second
+// copy run on the same computer for a second player.
+def synthesis = project.hasProperty('synthesis')
+wpi.sim.addGui().defaultEnabled = !synthesis
 wpi.sim.addDriverstation()
+wpi.sim.addWebsocketsServer().defaultEnabled = synthesis
+if (synthesis) {
+    wpi.sim.envVar("ROBOT_SIM_BACKEND", "synthesis")
+    wpi.sim.envVar("HALSIMWS_PORT", project.findProperty('simPort') ?: "3300")
+    if (project.hasProperty('ntPort')) {
+        wpi.sim.envVar("ROBOT_NT_PORT", project.findProperty('ntPort'))
+    }
+}
 
 // Setting up my Jar File. In this case, adding all libraries into the main jar ('fat jar')
 // in order to make them all available at runtime. Also adding the manifest so WPILib

@@ -34,6 +34,25 @@ public final class Constants {
 
     public static final Mode currentMode = RobotBase.isReal() ? Mode.REAL : kSimMode;
 
+    /**
+     * Which physics a desktop simulation uses.
+     *
+     * <p>LOCAL runs every mechanism's model inside this program ({@code *IOSim}). SYNTHESIS hands
+     * the drivetrain to Autodesk Synthesis over the HALSim websocket, so the robot shares one
+     * physics world -- field, game pieces, other players' robots -- with everyone in the room.
+     * Chosen at launch with {@code ./gradlew simulateJava -Psynthesis}, which sets the
+     * ROBOT_SIM_BACKEND environment variable.
+     */
+    public static enum SimBackend {
+        LOCAL,
+        SYNTHESIS
+    }
+
+    public static final SimBackend simBackend =
+            "synthesis".equalsIgnoreCase(System.getenv("ROBOT_SIM_BACKEND"))
+                    ? SimBackend.SYNTHESIS
+                    : SimBackend.LOCAL;
+
     /** Publishes tunable numbers to NetworkTables. Turn OFF for competition. */
     public static final boolean tuningMode = true;
 
