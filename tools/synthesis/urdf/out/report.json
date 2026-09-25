@@ -41,5 +41,60 @@
       0.0,
       0.39
     ]
+  },
+  "sim": {
+    "intake": {
+      "link": "intake_arm",
+      "point": [
+        -0.0967,
+        -0.327,
+        0.2877
+      ],
+      "diameter": 0.45,
+      "maxPieces": 40
+    },
+    "launcher": {
+      "link": "hood",
+      "point": [
+        0.06,
+        0.0,
+        0.2
+      ],
+      "direction": [
+        0.46947156278589086,
+        0.0,
+        0.8829475928589269
+      ],
+      "flywheelRadius": 0.0508,
+      "efficiencyByRpm": [
+        [
+          2927,
+          0.49
+        ],
+        [
+          3604,
+          0.4
+        ],
+        [
+          3833,
+          0.352
+        ],
+        [
+          4130,
+          0.337
+        ],
+        [
+          4234,
+          0.329
+        ],
+        [
+          5290,
+          0.263
+        ]
+      ]
+    },
+    "fieldFrame": {
+      "note": "x_code = 8.27 - X, y_code = 4.041 + Z, heading_code = heading + pi"
+    }
   }
 }

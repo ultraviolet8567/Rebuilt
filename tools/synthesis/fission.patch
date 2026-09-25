@@ -1,3 +1,152 @@
+diff --git a/fission/src/Synthesis.tsx b/fission/src/Synthesis.tsx
+index ab613cc..efd928d 100644
+--- a/fission/src/Synthesis.tsx
++++ b/fission/src/Synthesis.tsx
+@@ -52,6 +52,23 @@ const Synthesis = () => {
+             window.close()
+             return
+         }
++        // ?relay=wss://host[:port] or ws://host:port -- where the multiplayer relay is, so one
++        // link carries everything a player needs.
++        const relay = urlParams.get("relay")
++        if (relay) {
++            try {
++                const u = new URL(relay)
++                const secure = u.protocol === "wss:" || u.protocol === "https:"
++                PreferencesSystem.setUserPreference("MultiplayerHost", u.hostname)
++                PreferencesSystem.setUserPreference("MultiplayerPort", Number(u.port || (secure ? 443 : 80)))
++                PreferencesSystem.setUserPreference("MultiplayerSecure", secure)
++                if (urlParams.get("name")) PreferencesSystem.setUserPreference("MultiplayerUsername", urlParams.get("name")!)
++                PreferencesSystem.savePreferences()
++            } catch (e) {
++                console.error("Bad relay parameter", relay, e)
++            }
++        }
++
+         if (urlParams.has("autojoin")) {
+             const room = urlParams.get("autojoin")!
+             const name = PreferencesSystem.getUserPreference("MultiplayerUsername") ?? "TestUser"
+@@ -62,6 +79,18 @@ const Synthesis = () => {
+             setTimeout(() => startMultiplayerWorld({ displayName: name, ws, keepAssets: false, isHost: false }))
+         }
+ 
++        // FRC 8567 simulation: ?sphinx=red2 spawns Sphinx at that station, attaches the robot
++        // program running on this computer, and forwards this computer's controllers to it.
++        if (urlParams.has("sphinx")) {
++            import("@/dev/SwerveCodeSim.ts")
++                .then(m => {
++                    // biome-ignore lint/suspicious/noExplicitAny: handle for scripted players and tests
++                    ;(window as any).__X = m
++                    setTimeout(() => m.autoStart(urlParams).catch(console.error), 4000)
++                })
++                .catch(console.error)
++        }
++
+         applyAutoToast()
+         const autoOpenMultiplayer = SessionStorage.load("autoOpenMultiplayer")
+ 
+diff --git a/fission/src/mirabuf/ScoringZoneSceneObject.ts b/fission/src/mirabuf/ScoringZoneSceneObject.ts
+index 3b9cfae..020ba37 100644
+--- a/fission/src/mirabuf/ScoringZoneSceneObject.ts
++++ b/fission/src/mirabuf/ScoringZoneSceneObject.ts
+@@ -103,6 +103,7 @@ class ScoringZoneSceneObject extends ZoneSceneObject<ScoringZonePreferences> {
+     }
+ 
+     private zoneCollisionGeneric(gpID: Jolt.BodyID, scoringFactor: number): void {
++        if (!World.scoreTracker.isScoreAuthority) return
+         const associate = <RigidNodeAssociate>World.physicsSystem.getBodyAssociation(gpID)
+         const robotAlliancePoints =
+             associate.robotLastInContactWith?.alliance !== this.prefs?.alliance ? -this.prefs.points : this.prefs.points
+diff --git a/fission/src/systems/match_mode/ScoreTracker.ts b/fission/src/systems/match_mode/ScoreTracker.ts
+index 06a325e..33a2ec3 100644
+--- a/fission/src/systems/match_mode/ScoreTracker.ts
++++ b/fission/src/systems/match_mode/ScoreTracker.ts
+@@ -44,8 +44,28 @@ export default class ScoreTracker {
+         }
+     }
+ 
++    /**
++     * In multiplayer only one client counts goals: the one that owns the field. Every client
++     * simulates the balls a little differently, so independent counts drift apart.
++     */
++    public get isScoreAuthority(): boolean {
++        if (!World.multiplayerSystem) return true
++        const field = World.sceneRenderer.mirabufSceneObjects.getField()
++        return field !== undefined && field.multiplayerOwnerName === undefined
++    }
++
++    /** Scores received from the authority. */
++    public setScores(blue: number, red: number) {
++        this._blueScore = blue
++        this._redScore = red
++        EventSystem.dispatch("ScoreChangedEvent", { red: this.redScore, blue: this.blueScore })
++    }
++
+     private notifyChange() {
+         EventSystem.dispatch("ScoreChangedEvent", { red: this.redScore, blue: this.blueScore })
++        if (World.multiplayerSystem && this.isScoreAuthority) {
++            World.multiplayerSystem.broadcast({ type: "scoreSync", data: { blue: this.blueScore, red: this.redScore } })
++        }
+     }
+ 
+     /**
+diff --git a/fission/src/systems/multiplayer/MessageHandlers.ts b/fission/src/systems/multiplayer/MessageHandlers.ts
+index c01811c..ba2bbc6 100644
+--- a/fission/src/systems/multiplayer/MessageHandlers.ts
++++ b/fission/src/systems/multiplayer/MessageHandlers.ts
+@@ -12,6 +12,7 @@ import type {
+     LatencyInfoBody,
+     MatchModePenaltyBody,
+     MatchModeStateBody,
++    ScoreSyncBody,
+     MessageType,
+     NeedAssemblyBody,
+     NewObjectBody,
+@@ -40,6 +41,7 @@ export const peerMessageHandlers = {
+     matchModeState: handleMatchModeStateMessage,
+     matchModePenalty: handleMatchModePenaltyMessage,
+     latencyInfo: handleLatencyInfoMessage,
++    scoreSync: handleScoreSyncMessage,
+ } as const satisfies {
+     [K in keyof MessageType]: (data: MessageType[K], peerId: string, timestamp: number) => Promise<void> | void
+ }
+@@ -47,6 +49,10 @@ export const peerMessageHandlers = {
+ const pendingOperations: (() => void)[] = []
+ const progressHandles: Map<SceneObjectId, ProgressHandle> = new Map()
+ 
++function handleScoreSyncMessage(data: ScoreSyncBody) {
++    World.scoreTracker.setScores(data.blue, data.red)
++}
++
+ async function handleMatchModeStateMessage(data: MatchModeStateBody) {
+     const matchMode = MatchMode.getInstance()
+     switch (data.event) {
+diff --git a/fission/src/systems/multiplayer/MultiplayerMessageTypes.ts b/fission/src/systems/multiplayer/MultiplayerMessageTypes.ts
+index f44f80f..36c1b1b 100644
+--- a/fission/src/systems/multiplayer/MultiplayerMessageTypes.ts
++++ b/fission/src/systems/multiplayer/MultiplayerMessageTypes.ts
+@@ -32,6 +32,13 @@ export interface MessageType {
+     latencyInfo: LatencyInfoBody
+     matchModeState: MatchModeStateBody
+     matchModePenalty: MatchModePenaltyBody
++    /** Match score from the one client that counts it (the field's owner). */
++    scoreSync: ScoreSyncBody
++}
++
++export interface ScoreSyncBody {
++    blue: number
++    red: number
+ }
+ 
+ type MessageKeys = keyof MessageType | ServerToClientMessage["type"] | ClientToServerMessage["type"]
+@@ -46,6 +53,7 @@ export const shouldLog: { [K in MessageKeys]: boolean } = {
+     latencyInfo: false,
+     matchModePenalty: true,
+     matchModeState: true,
++    scoreSync: false,
+     needAssembly: true,
+     newObject: true,
+     ping: false,
 diff --git a/fission/src/systems/simulation/wpilib_brain/WPILibTypes.ts b/fission/src/systems/simulation/wpilib_brain/WPILibTypes.ts
 index 372ab36..a29c13e 100644
 --- a/fission/src/systems/simulation/wpilib_brain/WPILibTypes.ts
@@ -14,8 +163,25 @@ index 372ab36..a29c13e 100644
  export const FTC_WS_URL = "ws://localhost:3301/ftcsimws"
  
  export type DeviceName = string
+diff --git a/fission/src/ui/StateProvider.tsx b/fission/src/ui/StateProvider.tsx
+index 1a04ec6..7639f3b 100644
+--- a/fission/src/ui/StateProvider.tsx
++++ b/fission/src/ui/StateProvider.tsx
+@@ -6,7 +6,11 @@ import { StateContext, type StateProviderProps } from "./helpers/StateProviderHe
+ 
+ export const StateProvider: React.FC<StateProviderProps> = ({ children }) => {
+     const [selectedScheme, setSelectedScheme] = useState<InputScheme | undefined>(undefined)
+-    const [appMode, setAppMode] = useState<AppMode>("Configure")
++    // FRC 8567 simulation links (?sphinx=...) open straight into Gameplay: players drive, the
++    // configuration tools are for whoever builds the robot model.
++    const [appMode, setAppMode] = useState<AppMode>(
++        new URLSearchParams(window.location.search).has("sphinx") ? "Gameplay" : "Configure"
++    )
+ 
+     const stateContextValue = useMemo(
+         () => ({
 diff --git a/fission/src/urdf/URDFLoader.ts b/fission/src/urdf/URDFLoader.ts
-index 4ed4bf4..75d9e06 100644
+index 4ed4bf4..38fd0af 100644
 --- a/fission/src/urdf/URDFLoader.ts
 +++ b/fission/src/urdf/URDFLoader.ts
 @@ -25,8 +25,11 @@ export function applyConservativeURDFImport(assembly: mirabuf.Assembly): void {
@@ -27,7 +193,7 @@ index 4ed4bf4..75d9e06 100644
 +        const isDeclaredDof = name.startsWith("dof_")
  
 -        if (isDetectedWheel && jointInstance.jointReference) {
-+        if ((isDetectedWheel || isDeclaredDof) && jointInstance.jointReference) {
++        if ((isDetectedWheel || isDeclaredDof) && jointInstance.jointReference && jointDefinition) {
              keptJointInstances[name] = jointInstance
              keptJointDefinitions[jointInstance.jointReference] = jointDefinition
              continue

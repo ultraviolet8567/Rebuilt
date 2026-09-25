@@ -28,6 +28,16 @@ import edu.wpi.first.hal.SimDouble;
 public final class SynthesisDevices {
     private SynthesisDevices() {}
 
+    private static FieldPose fieldPose;
+
+    /** The one field-pose reader; a SimDevice name can only be created once. */
+    public static synchronized FieldPose fieldPose() {
+        if (fieldPose == null) {
+            fieldPose = new FieldPose();
+        }
+        return fieldPose;
+    }
+
     /** A motor controller. Synthesis reads the output; everything else is informational. */
     public static final class Motor {
         private final SimDouble percentOutput;
@@ -118,6 +128,38 @@ public final class SynthesisDevices {
                 case 'y' -> rateY.get();
                 default -> rateZ.get();
             };
+        }
+    }
+
+    /**
+     * The robot's true field pose, written by Synthesis each physics step.
+     *
+     * <p>Synthesis only writes to motor, encoder and gyro devices, so the pose rides on two encoder
+     * channels: "FieldPoseXY" carries x in position and y in velocity (metres, WPILib field frame),
+     * and "FieldPoseTheta" carries the heading (radians) in position and, in velocity, a counter
+     * that Synthesis bumps whenever it places or teleports the robot.
+     */
+    public static final class FieldPose {
+        private final Encoder xy = new Encoder("FieldPoseXY", 90);
+        private final Encoder theta = new Encoder("FieldPoseTheta", 91);
+
+        private FieldPose() {}
+
+        public double x() {
+            return xy.getPositionRad();
+        }
+
+        public double y() {
+            return xy.getVelocityRadPerSec();
+        }
+
+        public double headingRad() {
+            return theta.getPositionRad();
+        }
+
+        /** 0 until Synthesis has written a pose; increments on every placement. */
+        public int placementCount() {
+            return (int) Math.round(theta.getVelocityRadPerSec());
         }
     }
 }

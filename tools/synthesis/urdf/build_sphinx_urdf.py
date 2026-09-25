@@ -332,6 +332,38 @@ for link, o in origins.items():
     buf = io.BytesIO(); m.export(buf, file_type="stl"); files[f"meshes/{link}.stl"] = buf.getvalue()
     report[link] = {"parts": n, "triangles": len(m.faces), "origin_m": [round(float(x), 3) for x in o]}
 
+# Game-piece handling points for Synthesis, in each link's own frame (URDF axes, metres):
+#  * intake: the pickup zone at the arm's leading roller, located on the deployed CAD arm and
+#    carried into the stowed link frame the joint uses;
+#  * launcher: where fuel leaves the shooter and which way, in the hood frame (origin on the
+#    flywheel axis). The ball wraps under the flywheel and leaves forward and up past the hood.
+arm_pts = to_urdf(np.vstack([p["V"] for p in parts if p["link"] == "intake_arm"]))
+lead = arm_pts[arm_pts[:, 0] > arm_pts[:, 0].max() - 0.08]          # the front-most 8 cm
+pick_deployed = np.array([lead[:, 0].mean(), 0.0, lead[:, 2].mean()]) - intake_o
+unstow = trimesh.transformations.rotation_matrix(STOW_FROM_CAD, intake_axis)[:3, :3]
+pick_link = unstow @ pick_deployed
+LAUNCH_ELEVATION_DEG = 62.0
+launch = {"point": [0.06, 0.0, 0.20],
+          "direction": [float(np.cos(np.radians(LAUNCH_ELEVATION_DEG))), 0.0,
+                        float(np.sin(np.radians(LAUNCH_ELEVATION_DEG)))]}
+sim_meta = {
+    "intake": {"link": "intake_arm", "point": [round(float(v), 4) for v in pick_link], "diameter": 0.45,
+               "maxPieces": 40},
+    # Exit speed = efficiency(rpm) x flywheel surface speed. Calibrated in Synthesis on
+    # 2026-09-25 by firing the robot code's own ranged shots and bisecting on where the ball comes
+    # down through rim height (1.83 m): 2.4 m -> 0.40 at 3604 rpm, 3.0 m -> 0.352 at 3833,
+    # 3.6 m -> 0.337 at 4130, 4.4 m -> 0.329 at 4234 (7.2-7.6 m/s; Synthesis damps game pieces
+    # heavily, so range is flat in speed). The ends hold that exit speed. The team's real shot
+    # table was never well tuned, so this makes the simulated shooter consistent with it rather
+    # than claiming the real robot scores this way.
+    "launcher": {"link": "hood", **launch, "flywheelRadius": 0.0508,
+                 "efficiencyByRpm": [[2927, 0.49], [3604, 0.40], [3833, 0.352], [4130, 0.337],
+                                     [4234, 0.329], [5290, 0.263]]},
+    "fieldFrame": {"note": "x_code = 8.27 - X, y_code = 4.041 + Z, heading_code = heading + pi"},
+}
+files["sim.json"] = json.dumps(sim_meta, indent=2).encode()
+report["sim"] = sim_meta
+
 # Generated module meshes: a thin steering housing and the wheel.
 steer = trimesh.creation.cylinder(radius=0.055, height=0.05)
 wheel = trimesh.creation.cylinder(radius=WHEEL_R, height=WHEEL_W, sections=48)

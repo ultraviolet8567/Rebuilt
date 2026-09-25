@@ -9,6 +9,11 @@ import frc.robot.util.SynthesisDevices;
  *
  * <p>Unlike {@link GyroIOSim}, which integrates the rotation the modules asked for, this reports
  * what the chassis actually did -- including being spun by a collision with another robot.
+ *
+ * <p>Yaw comes from the true field heading Synthesis publishes (see {@link
+ * SynthesisDevices.FieldPose}) rather than from Synthesis's integrating gyro sensor: in a match
+ * that sensor drifted about 240 degrees while the robot bumped through fuel, where a real Pigeon 2
+ * drifts a degree or two. The rate still comes from the gyro sensor.
  */
 public class GyroIOSynthesis implements GyroIO {
     /** Synthesis reports yaw (rotation about the vertical axis) on its 'z' channel. */
@@ -19,10 +24,13 @@ public class GyroIOSynthesis implements GyroIO {
 
     private final SynthesisDevices.Gyro gyro =
             new SynthesisDevices.Gyro("Pigeon2", DriveConstants.kPigeonId);
+    private final SynthesisDevices.FieldPose fieldPose = SynthesisDevices.fieldPose();
     private double offsetRad = 0.0;
 
     private double rawYawRad() {
-        return kYawSign * Units.degreesToRadians(gyro.getAngleDeg(kYawAxis));
+        return fieldPose.placementCount() > 0
+                ? fieldPose.headingRad()
+                : kYawSign * Units.degreesToRadians(gyro.getAngleDeg(kYawAxis));
     }
 
     @Override

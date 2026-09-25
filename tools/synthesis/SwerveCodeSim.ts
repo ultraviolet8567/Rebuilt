@@ -11,12 +11,18 @@
  *
  * Module order matches the robot code: 0 front-left, 1 front-right, 2 back-left, 3 back-right.
  */
+import * as THREE from "three"
+import type Jolt from "@synthesis.adsk/jolt-physics"
 import JOLT from "@/util/loading/JoltSyncLoader"
+import { SimInput } from "@/systems/simulation/wpilib_brain/SimInput"
+import SimGeneric from "@/systems/simulation/wpilib_brain/sim/SimGeneric"
+import { SimType } from "@/systems/simulation/wpilib_brain/WPILibTypes"
 import World from "@/systems/World"
 import type MirabufSceneObject from "@/mirabuf/MirabufSceneObject"
 import WPILibBrain from "@/systems/simulation/wpilib_brain/WPILibBrain"
 import WheelDriver from "@/systems/simulation/driver/WheelDriver"
 import HingeDriver from "@/systems/simulation/driver/HingeDriver"
+import IntakeDriver from "@/systems/simulation/driver/IntakeDriver"
 import type Stimulus from "@/systems/simulation/stimulus/Stimulus"
 import GyroStimulus from "@/systems/simulation/stimulus/GyroStimulus"
 import { StimulusType } from "@/systems/simulation/stimulus/Stimulus"
@@ -42,7 +48,7 @@ export type SwerveCodeSimOptions = {
     // motor output (motor free speed / reduction); the robot code's IO sends volts / 12.
     // positive: which way the robot code's angle increases, "down" or "up" at the link's centre
     // of mass. Signs are found by calibration at attach time (see calibrateHinge).
-    mechanisms?: { joint: string; motor: string; maxRadPerSec: number; positive: "down" | "up" }[]
+    mechanisms?: { joint: string; motor: string; maxRadPerSec: number; positive: "down" | "up" | "forward" }[]
 }
 
 export const SWERVE_SIMPLE_SIGNS = { steerCmdSign: 1, steerEncSign: 1 }
@@ -56,7 +62,9 @@ export const DEFAULT_8567: SwerveCodeSimOptions = {
     steerMaxRadPerSec: 6,
     // PivotIOSynthesis: angle increases toward deployed (down). HoodIOSynthesis: increases up.
     mechanisms: [
-        { joint: "dof_intake_pivot", motor: "Pivot[5]", maxRadPerSec: 5.28, positive: "down" }, // NEO / (45 * 40/16)
+        // Deploying swings the arm out FORWARD. "down" is ambiguous from stowed (arm pointing up):
+        // both ways lower it, and calibration once folded the arm back into the robot.
+        { joint: "dof_intake_pivot", motor: "Pivot[5]", maxRadPerSec: 5.28, positive: "forward" }, // NEO / (45 * 40/16)
         { joint: "dof_hood", motor: "Hood[4]", maxRadPerSec: 1.42, positive: "up" }, // NEO / (25 * 168/10)
     ],
 }
@@ -269,10 +277,31 @@ export async function attachSwerveCodeSim(robot: MirabufSceneObject, opts: Swerv
         const bodies = [h.constraint.GetBody1(), h.constraint.GetBody2()]
         const light = bodies[bodies[0].GetMotionProperties().GetInverseMass() > bodies[1].GetMotionProperties().GetInverseMass() ? 0 : 1]
         const height = () => light.GetCenterOfMassPosition().GetY() - h.worldAnchor.GetY()
-        const want = mech.positive === "down" ? () => -height() : height
+        const chassis = World.physicsSystem.getBody(robot.getRootNodeId()!)!
+        const forward = () => {
+            const c = light.GetCenterOfMassPosition()
+            const [cx, cz] = [c.GetX(), c.GetZ()]
+            const a = h.worldAnchor
+            const [ax, az] = [a.GetX(), a.GetZ()]
+            const q = chassis.GetRotation()
+            const [x, y, z, w] = [q.GetX(), q.GetY(), q.GetZ(), q.GetW()]
+            const fx = 1 - 2 * (y * y + z * z)
+            const fz = 2 * (x * z - w * y) // chassis +X (forward) in world
+            return (cx - ax) * fx + (cz - az) * fz
+        }
+        const want = mech.positive === "down" ? () => -height() : mech.positive === "forward" ? forward : height
         const mcal = await calibrateHinge(h, want, mech.maxRadPerSec)
         const cmd = mcal.cmd
         const enc = mcal.enc
+        // Return to the model's zero (stowed intake, lowered hood): the robot code boots believing
+        // it is there, and the pickup / launch points are computed for that pose.
+        const up = Math.sign(mcal.trials.find(t => Math.abs(t.dq) > 0.02)?.dq ?? 1) * Math.sign(mcal.trials.find(t => Math.abs(t.dq) > 0.02)?.u ?? 1)
+        for (let i = 0; i < 40 && Math.abs(h.constraint.GetCurrentAngle()) > 0.01; i++) {
+            const qNow = h.constraint.GetCurrentAngle()
+            h.accelerationDirection = -up * Math.max(-0.5, Math.min(0.5, 3 * qNow))
+            await sleep(50)
+        }
+        h.accelerationDirection = 0
         brain.addSimFlow({
             supplier: {
                 supplierType: h.receiverType,
@@ -333,6 +362,7 @@ async function spawnURDF(url: string, name: string) {
     const { spawnCachedMira } = await import("@/ui/modals/mirabuf/LibrarySpawnActions")
     const { ProgressHandle } = await import("@/components/ProgressNotificationData")
     const buffer = await (await fetch(url)).arrayBuffer()
+    await loadMeta(url)
     const { assembly } = await loadURDF(buffer, `${name}.zip`, new ProgressHandle(name))
     assembly.info!.name = name
     const info = await MirabufCachingService.storeAssemblyInCache(assembly, { miraType: MiraType.ROBOT })
@@ -402,9 +432,16 @@ export async function setRobotMode(mode: "disabled" | "teleop" | "auto", station
 }
 
 /** Whole player setup in one call: join is done by ?autojoin; this spawns, closes panels, attaches. */
+export type Station = `${"red" | "blue"}${1 | 2 | 3}`
+
+/**
+ * Whole player setup in one call (joining is done by ?autojoin): spawn, close the setup panels,
+ * attach the robot code, and put the robot at `where` -- an alliance station ("red2") or a raw
+ * Synthesis position.
+ */
 export async function setupPlayer(
     spawnField: boolean,
-    pos: [number, number, number],
+    where: [number, number, number] | Station,
     robot: "sphinx" | "swerveSimple" = "sphinx"
 ) {
     await startSetup(spawnField, robot)
@@ -419,11 +456,87 @@ export async function setupPlayer(
         await sleep(500)
     }
     const r = myRobot()!
-    // biome-ignore lint/suspicious/noExplicitAny: spike teleports through a private method
-    ;(r as any).setObjectPosition({ pos, yaw: 0 })
+    const station = typeof where === "string" ? where : undefined
+    if (station) {
+        r.alliance = station.startsWith("red") ? "red" : "blue"
+        r.station = Number(station.slice(-1)) as 1 | 2 | 3
+        r.moveToSpawnLocation()
+    } else {
+        // biome-ignore lint/suspicious/noExplicitAny: spike teleports through a private method
+        ;(r as any).setObjectPosition({ pos: where, yaw: 0 })
+    }
     await sleep(1500)
     const report = await attachSwerveCodeSim(r, robot === "sphinx" ? DEFAULT_8567 : { ...DEFAULT_8567, ...SWERVE_SIMPLE_SIGNS, mechanisms: [] })
-    return { paused: World.physicsSystem.isPaused, status: setupStatus(), report: report.filter(o => o.hingeSign !== undefined || o.mechanism) }
+    const extras = robot === "sphinx" ? attachSphinxExtras(r) : {}
+    if (station) {
+        placeAtStation(r, r.alliance as "red" | "blue", r.station as 1 | 2 | 3) // back to the start after calibration
+        myStation = station
+    }
+    return {
+        paused: World.physicsSystem.isPaused,
+        status: setupStatus(),
+        extras,
+        report: report.filter(o => o.hingeSign !== undefined || o.mechanism),
+    }
+}
+
+let myStation: Station = "blue1"
+
+/**
+ * Follow Synthesis match mode with the robot program's driver station: disabled before the
+ * match, autonomous for the auto period (the robot runs its selected auto), teleop after, and
+ * disabled when the match ends. Outside a match (sandbox) the robot stays in teleop so people can
+ * practise.
+ */
+export async function followMatchMode() {
+    const { MatchModeType } = await import("@/systems/match_mode/MatchModeTypes")
+    const EventSystem = (await import("@/systems/EventSystem")).default
+    // biome-ignore lint/suspicious/noExplicitAny: event payload shape differs between versions
+    EventSystem.listen("MatchStateChangedEvent", (e: any) => {
+        const mode = e?.data?.mode ?? e?.mode
+        const next =
+            mode === MatchModeType.AUTONOMOUS
+                ? "auto"
+                : mode === MatchModeType.TELEOP || mode === MatchModeType.ENDGAME || mode === MatchModeType.SANDBOX
+                  ? "teleop"
+                  : "disabled"
+        setRobotMode(next as "auto" | "teleop" | "disabled", myStation)
+    })
+    await setRobotMode("teleop", myStation)
+}
+
+/**
+ * One-step start for players: ?autojoin=ROOM&sphinx=red2[&field=1][&codesim=ws://...].
+ * `field=1` only for the host, who brings the field; everyone else receives it.
+ */
+export async function autoStart(params: URLSearchParams) {
+    const station = (params.get("sphinx") ?? "blue1") as Station
+    const { globalAddToast } = await import("@/components/GlobalUIControls")
+    globalAddToast("info", "8567 simulation", `Setting up ${station}. Keep this tab visible.`)
+    try {
+        // Joining happens in the background from ?autojoin; give it a moment, then refuse to
+        // carry on alone -- a player who silently misses the room sees nobody else.
+        const room = params.get("autojoin")
+        for (let i = 0; i < 20 && room && !World.multiplayerSystem?.roomId; i++) await sleep(500)
+        if (room && World.multiplayerSystem?.roomId !== room) {
+            throw new Error(`could not join room ${room}. Check the link, or ask the host whether the relay is running.`)
+        }
+        const r = await setupPlayer(params.get("field") === "1", station, "sphinx")
+        await startControllerForwarding()
+        await followMatchMode()
+        const ok = r.report.every((x: Record<string, unknown>) => x.calibrated !== false)
+        globalAddToast(ok ? "info" : "warning", "8567 simulation", ok ? `Ready at ${station}. Drive!` : "Ready, but a joint did not calibrate: keep the tab visible and reload.")
+        // biome-ignore lint/suspicious/noExplicitAny: status flag for scripted players and tests
+        ;(window as any).__sphinx = { ready: true, ...r }
+        // biome-ignore lint/suspicious/noExplicitAny: handles for scripted players and tests
+        ;(window as any).__W = World
+        return r
+    } catch (e) {
+        globalAddToast("error", "8567 simulation", `Setup failed: ${e}`)
+        // biome-ignore lint/suspicious/noExplicitAny: status flag for scripted players and tests
+        ;(window as any).__sphinx = { ready: false, error: String(e) }
+        throw e
+    }
 }
 
 /**
@@ -449,11 +562,12 @@ export async function startControllerForwarding(periodMs = 20) {
 
     forwarder = setInterval(() => {
         const pads = [...(navigator.getGamepads?.() ?? [])].filter((p): p is Gamepad => !!p && p.connected)
-        for (let port = 0; port < 2; port++) {
-            const pad = pads[port]
-            const data = pad ? xboxFromGamepad(pad) : port === 0 ? xboxFromKeyboard() : undefined
-            if (data) send({ type: "Joystick", device: String(port), data })
-        }
+        // One controller: it is both driver and operator (the robot code binds them to ports 0
+        // and 1). The overlaps are usable: RT aims and shoots at once. No controller: keyboard.
+        const driver = pads[0] ? xboxFromGamepad(pads[0]) : xboxFromKeyboard("driver")
+        const operator = pads[1] ? xboxFromGamepad(pads[1]) : pads[0] ? driver : xboxFromKeyboard("operator")
+        send({ type: "Joystick", device: "0", data: driver })
+        send({ type: "Joystick", device: "1", data: operator })
         send({ type: "DriverStation", device: "", data: { ">new_data": true } })
     }, periodMs)
 }
@@ -475,13 +589,29 @@ function xboxFromGamepad(p: Gamepad) {
     }
 }
 
-function xboxFromKeyboard() {
+/**
+ * Keyboard play. Driver: WASD move, arrow keys turn, Shift slow, Space aim at hub.
+ * Operator: E deploy intake + run it, Q stow, F shoot (with aim), R reverse the funnel.
+ */
+function xboxFromKeyboard(role: "driver" | "operator") {
     const k = (c: string) => (keysDown.has(c) ? 1 : 0)
-    return {
-        ">axes": [k("KeyD") - k("KeyA"), k("KeyS") - k("KeyW"), 0, 0, k("ArrowRight") - k("ArrowLeft"), 0],
-        ">buttons": Array(10).fill(false),
-        ">povs": [-1],
+    const b = (c: string) => keysDown.has(c)
+    const buttons = Array(10).fill(false)
+    const axes = [0, 0, 0, 0, 0, 0]
+    if (role === "driver") {
+        axes[0] = k("KeyD") - k("KeyA")
+        axes[1] = k("KeyS") - k("KeyW")
+        axes[4] = k("ArrowRight") - k("ArrowLeft")
+        axes[3] = b("Space") || b("KeyF") ? 1 : 0 // RT: aim at hub (also while shooting)
+        buttons[5] = b("ShiftLeft") || b("ShiftRight") // RB: slow
+    } else {
+        buttons[0] = b("KeyE") // A: deploy intake
+        buttons[4] = b("KeyE") // LB: funnel in
+        buttons[3] = b("KeyQ") // Y: stow
+        buttons[1] = b("KeyR") // B: funnel out
+        axes[3] = b("KeyF") ? 1 : 0 // RT: ranged shot
     }
+    return { ">axes": axes, ">buttons": buttons, ">povs": [-1] }
 }
 
 function pov(up: boolean, right: boolean, down: boolean, left: boolean): number {
@@ -489,4 +619,205 @@ function pov(up: boolean, right: boolean, down: boolean, left: boolean): number 
     const y = (up ? 1 : 0) - (down ? 1 : 0)
     if (x === 0 && y === 0) return -1
     return (Math.round((Math.atan2(x, y) * 180) / Math.PI / 45) * 45 + 360) % 360
+}
+
+/* ------------------------------------------------------------------------------------------------
+ * Game pieces and field position
+ * ---------------------------------------------------------------------------------------------- */
+
+export type SphinxMeta = {
+    intake: { link: string; point: number[]; diameter: number; maxPieces: number }
+    launcher: {
+        link: string
+        point: number[]
+        direction: number[]
+        flywheelRadius: number
+        efficiencyByRpm: [number, number][] // piecewise-linear, clamped at the ends
+    }
+}
+let sphinxMeta: SphinxMeta | undefined
+
+async function loadMeta(url: string) {
+    const JSZip = (await import("jszip")).default
+    const zip = await JSZip.loadAsync(await (await fetch(url)).arrayBuffer())
+    const f = Object.values(zip.files).find(x => x.name.endsWith("sim.json"))
+    sphinxMeta = f ? JSON.parse(await f.async("text")) : undefined
+}
+
+// URDF (x forward, y left, z up) -> Synthesis Y-up, the same conversion the URDF importer uses.
+const yup = (v: number[]) => new THREE.Vector3(v[0], v[2], -v[1])
+
+function nodeForLink(robot: MirabufSceneObject, link: string): string | undefined {
+    // biome-ignore lint/suspicious/noExplicitAny: parser rigid nodes carry the URDF link names as parts
+    const nodes: any[] = [...(robot.mirabufInstance.parser.rigidNodes as any).values()]
+    return nodes.find(n => [...(n.parts ?? [])].includes(link))?.id
+}
+
+function bodyMatrix(id: Jolt.BodyID) {
+    const b = World.physicsSystem.getBody(id)!
+    const t = b.GetPosition()
+    const q = b.GetRotation()
+    const pos = new THREE.Vector3(t.GetX(), t.GetY(), t.GetZ()) // copy at once: Jolt reuses these
+    const rot = new THREE.Quaternion(q.GetX(), q.GetY(), q.GetZ(), q.GetW())
+    return new THREE.Matrix4().compose(pos, rot, new THREE.Vector3(1, 1, 1))
+}
+
+function hingeAnchor(robot: MirabufSceneObject, joint: string) {
+    const layer = World.simulationSystem.getSimulationLayer(robot.mechanism)!
+    const h = layer.drivers.find(d => jointName(d) === joint) as HingeDriver | undefined
+    if (!h) return undefined
+    const a = h.worldAnchor
+    return new THREE.Vector3(a.GetX(), a.GetY(), a.GetZ())
+}
+
+/**
+ * Pose of a point on a link in the frame of the physics body that carries the link, as the
+ * column-major array Synthesis stores in intake / ejector preferences. `dir` becomes the frame's
+ * +Z, which is the direction Synthesis launches a held piece.
+ *
+ * Measured: every link body's frame coincides with the chassis frame when its joint is at zero
+ * (the URDF importer builds all bodies at the robot origin), so the answer depends only on the
+ * chassis frame and the joint's anchor, which is fixed to the chassis. It does not matter where
+ * the joint happens to be when this runs; using the link body's current pose did, and put the
+ * pickup zone inside the robot when calibration left the arm off zero.
+ */
+function linkPointToBody(robot: MirabufSceneObject, link: string, joint: string, point: number[], dir?: number[]) {
+    const node = nodeForLink(robot, link)!
+    const chassis = bodyMatrix(robot.mechanism.nodeToBody.get(robot.rootNodeId)!)
+    const toChassis = chassis.clone().invert()
+    const anchor = hingeAnchor(robot, joint)!.applyMatrix4(toChassis) // joint origin, chassis frame
+    const pos = anchor.add(yup(point))
+    const z = (dir ? yup(dir) : new THREE.Vector3(0, 0, 1)).normalize()
+    const x = new THREE.Vector3(0, 1, 0).cross(z)
+    if (x.lengthSq() < 1e-6) x.set(1, 0, 0)
+    x.normalize()
+    const y = z.clone().cross(x)
+    const local = new THREE.Matrix4().makeBasis(x, y, z).setPosition(pos)
+    return { node, delta: local.toArray() }
+}
+
+export function attachGamePieces(robot: MirabufSceneObject, meta: SphinxMeta) {
+    const intake = linkPointToBody(robot, meta.intake.link, "dof_intake_pivot", meta.intake.point)
+    const launcher = linkPointToBody(robot, meta.launcher.link, "dof_hood", meta.launcher.point, meta.launcher.direction)
+    robot.intakePreferences = {
+        ...robot.intakePreferences,
+        deltaTransformation: intake.delta,
+        zoneDiameter: meta.intake.diameter,
+        parentNode: intake.node,
+        showZoneAlways: false,
+        maxPieces: meta.intake.maxPieces,
+    }
+    robot.ejectorPreferences = {
+        ...robot.ejectorPreferences,
+        deltaTransformation: launcher.delta,
+        ejectorVelocity: 8,
+        parentNode: launcher.node,
+        ejectOrder: "FIFO",
+    }
+    robot.updateIntakeSensor()
+    return { intakeNode: intake.node, launcherNode: launcher.node }
+}
+
+function interpolate(table: [number, number][], x: number) {
+    if (x <= table[0][0]) return table[0][1]
+    for (let i = 1; i < table.length; i++) {
+        const [x0, y0] = table[i - 1]
+        const [x1, y1] = table[i]
+        if (x <= x1) return y0 + ((y1 - y0) * (x - x0)) / (x1 - x0)
+    }
+    return table[table.length - 1][1]
+}
+
+/** Reads the robot code's roller outputs each physics step and runs Synthesis's intake / ejector. */
+class GamePieceControl extends SimInput {
+    private _lastShot = 0
+    constructor(
+        private _robot: MirabufSceneObject,
+        private _meta: SphinxMeta
+    ) {
+        super("GamePieceControl")
+    }
+    public update(_dt: number) {
+        const out = (dev: string) => SimCANMotor.getPercentOutput(dev) ?? 0
+        // Funnel pulling in -> collect. The arm's position decides whether the zone reaches fuel.
+        // Synthesis's own IntakeDriver copies its value onto the robot every frame, so set the
+        // driver rather than the robot's flag.
+        const on = out("Funnel[6]") > 0.2
+        const layer = World.simulationSystem.getSimulationLayer(this._robot.mechanism)
+        const intakeDriver = layer?.drivers.find(d => d instanceof IntakeDriver) as IntakeDriver | undefined
+        if (intakeDriver) intakeDriver.value = on
+        this._robot.intakeActive = on
+        const rpm = out("Flywheel[1]") * 10000 // FlywheelIOSynthesis.kRpmScale
+        const feeding = out("Kicker[3]") > 0.3
+        const now = performance.now()
+        // biome-ignore lint/suspicious/noExplicitAny: held pieces are private to the scene object
+        const held: any[] = (this._robot as any)._ejectables
+        if (feeding && rpm > 500 && held.length > 0 && now - this._lastShot >= 100) {
+            this._lastShot = now
+            const surface = (rpm * 2 * Math.PI) / 60 * this._meta.launcher.flywheelRadius
+            held[0]._ejectVelocity = surface * interpolate(this._meta.launcher.efficiencyByRpm, rpm)
+            this._robot.eject()
+        }
+    }
+}
+
+/**
+ * Publishes the robot's pose in the robot code's field frame (blue alliance wall at x = 0) on
+ * the FieldPoseXY[90] / FieldPoseTheta[91] encoder channels VisionIOSynthesis reads. Measured on
+ * the 2026 field: blue is +X, field centre at the origin, hub centres at X = +-3.65 on Z = 0.
+ */
+class FieldPosePublisher extends SimInput {
+    private _count = 0
+    private _last?: THREE.Vector3
+    constructor(private _robot: MirabufSceneObject) {
+        super("FieldPose")
+    }
+    public bump() {
+        this._count++
+    }
+    public update(_dt: number) {
+        const m = bodyMatrix(this._robot.mechanism.nodeToBody.get(this._robot.rootNodeId)!)
+        const pos = new THREE.Vector3().setFromMatrixPosition(m)
+        const fwd = new THREE.Vector3(1, 0, 0).transformDirection(m)
+        if (this._last && pos.distanceTo(this._last) > 0.3) this._count++ // teleported
+        if (this._count === 0) this._count = 1
+        this._last = pos
+        const x = 8.27 - pos.x
+        const y = 4.041 + pos.z
+        const heading = Math.atan2(-fwd.z, fwd.x) + Math.PI
+        SimGeneric.set(SimType.CAN_ENCODER, "FieldPoseXY[90]", ">position", x)
+        SimGeneric.set(SimType.CAN_ENCODER, "FieldPoseXY[90]", ">velocity", y)
+        SimGeneric.set(SimType.CAN_ENCODER, "FieldPoseTheta[91]", ">position", Math.atan2(Math.sin(heading), Math.cos(heading)))
+        SimGeneric.set(SimType.CAN_ENCODER, "FieldPoseTheta[91]", ">velocity", this._count)
+    }
+}
+let posePublisher: FieldPosePublisher | undefined
+
+export function attachSphinxExtras(robot: MirabufSceneObject) {
+    const brain = robot.brain as WPILibBrain
+    // biome-ignore lint/suspicious/noExplicitAny: re-attaching must not stack inputs
+    ;(brain as any)._simInputs = []
+    posePublisher = new FieldPosePublisher(robot)
+    brain.addSimInput(posePublisher)
+    if (!sphinxMeta) return { gamePieces: false }
+    const nodes = attachGamePieces(robot, sphinxMeta)
+    brain.addSimInput(new GamePieceControl(robot, sphinxMeta))
+    return { gamePieces: true, ...nodes }
+}
+
+/** Put this player's robot on its alliance station and tell the robot code where it is. */
+export function placeAtStation(robot: MirabufSceneObject, alliance: "red" | "blue", station: 1 | 2 | 3) {
+    robot.alliance = alliance
+    robot.station = station
+    robot.moveToSpawnLocation()
+    posePublisher?.bump()
+}
+
+/** Start a Synthesis match for everyone in the room (what the Start Match button does). */
+export async function startMatch(times?: { autonomousTime?: number; teleopTime?: number; endgameTime?: number }) {
+    const MatchMode = (await import("@/systems/match_mode/MatchMode")).default.getInstance()
+    // biome-ignore lint/suspicious/noExplicitAny: config shape comes from MatchModeConfigPanel
+    const config = (MatchMode as any)._matchModeConfig
+    if (times) MatchMode.setMatchModeConfig({ ...config, ...times })
+    await MatchMode.start(null, true, true)
 }

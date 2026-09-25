@@ -30,6 +30,7 @@ import frc.robot.subsystems.drive.ModuleIOSynthesis;
 import frc.robot.subsystems.intake.Funnel;
 import frc.robot.subsystems.intake.FunnelIO;
 import frc.robot.subsystems.intake.FunnelIOSim;
+import frc.robot.subsystems.intake.FunnelIOSynthesis;
 import frc.robot.subsystems.intake.FunnelIOTalonFX;
 import frc.robot.subsystems.intake.Intake;
 import frc.robot.subsystems.intake.IntakeConstants;
@@ -43,6 +44,7 @@ import frc.robot.subsystems.shooter.Flywheel;
 import frc.robot.subsystems.shooter.FlywheelIO;
 import frc.robot.subsystems.shooter.FlywheelIOSim;
 import frc.robot.subsystems.shooter.FlywheelIOSpark;
+import frc.robot.subsystems.shooter.FlywheelIOSynthesis;
 import frc.robot.subsystems.shooter.Hood;
 import frc.robot.subsystems.shooter.HoodIO;
 import frc.robot.subsystems.shooter.HoodIOSim;
@@ -52,6 +54,7 @@ import frc.robot.subsystems.shooter.Kicker;
 import frc.robot.subsystems.shooter.KickerIO;
 import frc.robot.subsystems.shooter.KickerIOSim;
 import frc.robot.subsystems.shooter.KickerIOSpark;
+import frc.robot.subsystems.shooter.KickerIOSynthesis;
 import frc.robot.subsystems.shooter.Shooter;
 import frc.robot.subsystems.storage.Indexer;
 import frc.robot.subsystems.storage.IndexerIO;
@@ -62,6 +65,7 @@ import frc.robot.subsystems.vision.VisionConstants;
 import frc.robot.subsystems.vision.VisionIO;
 import frc.robot.subsystems.vision.VisionIOLimelight;
 import frc.robot.subsystems.vision.VisionIOSim;
+import frc.robot.subsystems.vision.VisionIOSynthesis;
 
 /**
  * Builds the robot: picks a hardware implementation for each subsystem based on where the code is
@@ -86,6 +90,9 @@ public class RobotContainer {
             new CommandXboxController(OIConstants.kOperatorControllerPort);
 
     private final GenericEntry demoToggle;
+
+    /** Only in a Synthesis simulation: the true-pose camera, also used to seed odometry. */
+    private VisionIOSynthesis synthesisVision = null;
 
     public RobotContainer() {
         Flywheel flywheel;
@@ -124,12 +131,18 @@ public class RobotContainer {
                     drive = localSimDrive();
                 }
                 boolean synthesis = Constants.simBackend == Constants.SimBackend.SYNTHESIS;
-                vision = new Vision(drive, new VisionIOSim());
-                flywheel = new Flywheel(new FlywheelIOSim());
+                if (synthesis) {
+                    synthesisVision = new VisionIOSynthesis();
+                    vision = new Vision(drive, synthesisVision);
+                } else {
+                    vision = new Vision(drive, new VisionIOSim());
+                }
+                flywheel =
+                        new Flywheel(synthesis ? new FlywheelIOSynthesis() : new FlywheelIOSim());
                 hood = new Hood(synthesis ? new HoodIOSynthesis() : new HoodIOSim());
-                kicker = new Kicker(new KickerIOSim());
+                kicker = new Kicker(synthesis ? new KickerIOSynthesis() : new KickerIOSim());
                 pivot = new Pivot(synthesis ? new PivotIOSynthesis() : new PivotIOSim());
-                funnel = new Funnel(new FunnelIOSim());
+                funnel = new Funnel(synthesis ? new FunnelIOSynthesis() : new FunnelIOSim());
                 indexer = new Indexer(new IndexerIOSim());
             }
             default -> {
@@ -278,6 +291,12 @@ public class RobotContainer {
      */
     public void updateDashboardInputs() {
         RobotState.getInstance().setDemoMode(demoToggle.getBoolean(false));
+
+        // When Synthesis places the robot (spawn, match start, reset), take its pose outright, the
+        // way an autonomous routine seeds odometry from its starting position.
+        if (synthesisVision != null) {
+            synthesisVision.takePlacement().ifPresent(drive::resetPose);
+        }
     }
 
     public Command getAutonomousCommand() {
