@@ -47,11 +47,29 @@ Every binding in `RobotContainer.configureBindings()` was exercised this way on 
 produced the expected robot response (drive, slow mode, X-lock, heading reset, aim-at-hub, funnel,
 indexer, hood trim, both shots with the kicker interlock, pivot positions, shake).
 
+## Player links
+
+`start-host.sh` (in `host/`) prints one link per station. Parameters:
+
+| Parameter | Meaning |
+|---|---|
+| `autojoin=ROOM` | relay room (must already exist: glueball `-r ROOM`) |
+| `sphinx=red2` | station; spawns Sphinx there and runs the whole setup |
+| `relay=ws(s)://host:port` | relay address (sets the Synthesis multiplayer preferences) |
+| `field=1` | spawn the field if nobody has; the first player in keeps score |
+| `codesim=ws://localhost:3300/wpilibws` | this player's robot program (default port 3300) |
+| `view=driver\|station\|follow` | starting camera (default `driver`); V cycles it in play |
+
+Camera views use the field's own camera points ("Red Alliance 1" ... "Blue Alliance 3"; the 2026
+field ships them at 1.5 m eye height behind each station). Station 1 is the drivers' left.
+
+Any number of players from 1 to 6 works: empty stations just have no robot. Checked 2026-09-26
+with `count_test.mjs` (1, 2, 3 and 5 robots; 6 was checked 2026-09-25): every client saw every
+robot, each camera sat at its own station, and all robots went auto -> teleop -> endgame ->
+ended together.
+
 ## Known gaps
 
-- Odometry is not seeded from where Synthesis places the robot, so field-position features
-  (aim-at-hub target, ranged-shot distance) use a wrong pose.
-- Shooter, intake and indexer run on the robot's local models; no fuel leaves the robot.
 - Keep the browser tab landscape. In portrait Synthesis shows an overlay, and a drive test run
   that way moved the robot 0.15 m where the same command in landscape moved it 1.67 m.
 

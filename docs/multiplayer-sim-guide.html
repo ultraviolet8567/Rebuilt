@@ -173,11 +173,12 @@ git clone -b claude/multiplayer-shooter-sim-5f688a https://github.com/ultraviole
 
 <section id="night">
   <h2>Match night</h2>
-  <p>Your host sends each person a link with their station in it, like <span class="st red">red2</span> or <span class="st blue">blue1</span>. Each station is one robot; three per alliance.</p>
+  <p>Your host sends each person a link with their station in it, like <span class="st red">red2</span> or <span class="st blue">blue1</span>. Each station is one robot; three per alliance. Station 1 is on the drivers' left, 2 in the middle and 3 on the right, the same on both alliances.</p>
+  <p>Any number from one to six can play. Stations nobody takes simply have no robot, so two people can play one-on-one and one person can practise alone. The match server still has to be running somewhere; a host can start it and play alone on the same computer.</p>
   <ol class="steps">
     <li><strong>Start your robot program.</strong> Double-click the <code>Start Robot Sim</code> file and wait for <code>Robot program startup complete</code>. Leave the window open all night.</li>
     <li><strong>Open your link in Chrome or Edge</strong> (or Firefox on Ubuntu). Make the window wide (landscape). If a cookie box appears, you can click the <kbd>×</kbd> to decline. If the browser asks whether this site may <em>access devices on your local network</em>, click <em>Allow</em>: that is how the page reaches your robot program.</li>
-    <li><strong>Wait for "Ready at red2. Drive!"</strong> in the corner (about 30 seconds). The page wiggles your robot's joints briefly while it sets up. Keep the tab in front and visible: a hidden tab stops the physics, and setup will fail.</li>
+    <li><strong>Wait for "Ready at red2. Drive!"</strong> in the corner (about 30 seconds). The page wiggles your robot's joints briefly while it sets up. Keep the tab in front and visible: a hidden tab stops the physics, and setup will fail. Your view starts from behind your own driver station, as a real driver sees the field; press <kbd>V</kbd> to change it (see Camera below).</li>
     <li><strong>Press any button on your controller</strong> so the browser notices it. Then drive. Before a match you can practise freely; the scoreboard shows at the top.</li>
     <li><strong>When the host starts the match,</strong> every robot jumps to its starting spot. The first 15 seconds are autonomous: your robot runs its selected auto routine, which is <em>Do Nothing</em> unless someone chose one (see Troubleshooting). Then you drive for the rest of the match. When it ends, robots stop until the next match.</li>
   </ol>
@@ -217,8 +218,20 @@ git clone -b claude/multiplayer-shooter-sim-5f688a https://github.com/ultraviole
       <tr><td><kbd>Space</kbd></td><td>Aim at the hub without shooting</td></tr>
       <tr><td><kbd>R</kbd></td><td>Intake backwards</td></tr>
       <tr><td><kbd>Shift</kbd></td><td>Slow driving</td></tr>
+      <tr><td><kbd>V</kbd></td><td>Change the camera view (works with a controller too)</td></tr>
     </tbody>
   </table></div>
+  <h3>Camera</h3>
+  <p>Press <kbd>V</kbd> to step through three views. The page shows which one you are in.</p>
+  <div class="tablewrap"><table>
+    <thead><tr><th>View</th><th>What you see</th></tr></thead>
+    <tbody>
+      <tr><td>Driver station (start)</td><td>From behind your own station's glass at eye height, turning to keep your robot in view. This is what you would see at a real event.</td></tr>
+      <tr><td>Driver station, fixed</td><td>The same spot, looking at the middle of the field without turning.</td></tr>
+      <tr><td>Chase camera</td><td>Above and behind your robot, on your alliance's side. Easier for picking up fuel far away.</td></tr>
+    </tbody>
+  </table></div>
+  <p>The scroll wheel zooms in any view. Pushing up on the stick always moves away from your alliance wall, so the driver-station views match the controls.</p>
   <h3>Scoring tips</h3>
   <ul>
     <li>Shots land best from about 3 to 3.6 metres from the centre of your hub. Closer than about 2 metres, the ball hits the rim.</li>
@@ -277,7 +290,8 @@ git clone -b claude/multiplayer-shooter-sim-5f688a https://github.com/ultraviole
   <h2>What's tested</h2>
   <div class="status">
     <div><h3 style="color:var(--ok)">Tested (September 2026)</h3><ul>
-      <li>Six robot programs and six browser players in one room, all on one computer, through the host server and relay</li>
+      <li>Matches with 1, 2, 3, 5 and 6 robots in one room (on one computer, through the host server and relay), including one-on-one across alliances and a full alliance with no opponents</li>
+      <li>Each player's camera starting behind their own driver station, and <kbd>V</kbd> switching views</li>
       <li>Everyone sees the same robot positions (within 10 cm) and the same score</li>
       <li>All six robots switch together: autonomous, driving, stopped at the end</li>
       <li>Driving, intake, hood, collecting fuel, shooting and scoring through the real controls</li>

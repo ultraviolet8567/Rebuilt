@@ -517,13 +517,16 @@ export async function autoStart(params: URLSearchParams) {
         // Joining happens in the background from ?autojoin; give it a moment, then refuse to
         // carry on alone -- a player who silently misses the room sees nobody else.
         const room = params.get("autojoin")
-        for (let i = 0; i < 20 && room && !World.multiplayerSystem?.roomId; i++) await sleep(500)
+        for (let i = 0; i < 60 && room && !World.multiplayerSystem?.roomId; i++) await sleep(500)
         if (room && World.multiplayerSystem?.roomId !== room) {
             throw new Error(`could not join room ${room}. Check the link, or ask the host whether the relay is running.`)
         }
         const r = await setupPlayer(params.get("field") === "1", station, "sphinx")
         await startControllerForwarding()
         await followMatchMode()
+        const view = params.get("view") as View
+        await setView(VIEWS.includes(view) ? view : "driver", station)
+        installViewKey()
         const ok = r.report.every((x: Record<string, unknown>) => x.calibrated !== false)
         globalAddToast(ok ? "info" : "warning", "8567 simulation", ok ? `Ready at ${station}. Drive!` : "Ready, but a joint did not calibrate: keep the tab visible and reload.")
         // biome-ignore lint/suspicious/noExplicitAny: status flag for scripted players and tests
@@ -537,6 +540,65 @@ export async function autoStart(params: URLSearchParams) {
         ;(window as any).__sphinx = { ready: false, error: String(e) }
         throw e
     }
+}
+
+/**
+ * Camera views, cycled with V:
+ * - "driver": standing behind your own driver station, turning to keep your robot in view -- what
+ *   a real driver sees. The field's camera points supply the stations ("Red Alliance 2", ...);
+ *   station 1 is on the drivers' left, 3 on their right.
+ * - "station": the same spot, looking at the field centre without turning.
+ * - "follow": above and behind your robot, from your own alliance's side.
+ */
+export const VIEWS = ["driver", "station", "follow"] as const
+export type View = (typeof VIEWS)[number]
+let currentView: View = "driver"
+
+export async function setView(view: View, station: Station = myStation) {
+    const { CustomFieldViewControls, CustomTargetControls } = await import("@/systems/scene/CameraControls")
+    const field = World.sceneRenderer.mirabufSceneObjects.getField()
+    const robot = myRobot()
+    const alliance = station.startsWith("red") ? "Red" : "Blue"
+    const name = `${alliance} Alliance ${station.slice(-1)}`
+    const index = field?.fieldPreferences?.cameraPoints?.findIndex(p => p.name === name) ?? -1
+    if (view !== "follow" && field && index >= 0) {
+        World.sceneRenderer.setCameraControls("FieldView")
+        const c = World.sceneRenderer.currentCameraControls
+        if (c instanceof CustomFieldViewControls) {
+            c.selectPoint(field, index)
+            c.focusRobot(view === "driver" ? robot : undefined)
+        }
+    } else {
+        // "follow", or a field without driver-station camera points.
+        World.sceneRenderer.setCameraControls("Target")
+        const c = World.sceneRenderer.currentCameraControls
+        if (c instanceof CustomTargetControls && robot) {
+            c.focusProvider = robot
+            // The focus change re-syncs the orbit to wherever the camera was on the next frame;
+            // then sit above and behind the robot on your own alliance's side, facing the other
+            // alliance, so "up" on the stick is still "up" on screen. Blue's wall is at +X.
+            await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)))
+            c.setImmediateCoordinates({ theta: station.startsWith("blue") ? Math.PI / 2 : -Math.PI / 2, phi: -Math.PI / 6, r: 4 })
+        }
+        view = "follow"
+    }
+    currentView = view
+    return view
+}
+
+let viewKeysInstalled = false
+function installViewKey() {
+    if (viewKeysInstalled) return
+    viewKeysInstalled = true
+    window.addEventListener("keydown", async e => {
+        if (e.code !== "KeyV" || e.repeat) return
+        if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return
+        const next = VIEWS[(VIEWS.indexOf(currentView) + 1) % VIEWS.length]
+        const shown = await setView(next)
+        const { globalAddToast } = await import("@/components/GlobalUIControls")
+        const label = { driver: "Driver station, turning to your robot", station: "Driver station, fixed", follow: "Chase camera above your robot" }
+        globalAddToast("info", "Camera", `${label[shown]} (V to change)`)
+    })
 }
 
 /**
