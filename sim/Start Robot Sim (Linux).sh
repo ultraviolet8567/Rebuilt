@@ -5,7 +5,7 @@
 # Leave the window open while you play; close it (or press Ctrl+C) to stop.
 
 # Started from Files there is no window to show progress in, so reopen in a terminal.
-if [ ! -t 1 ] && [ -z "${SIM_IN_TERMINAL:-}" ]; then
+if [ ! -t 1 ] && [ -z "${SIM_IN_TERMINAL:-}" ] && [ -n "${DISPLAY:-}${WAYLAND_DISPLAY:-}" ]; then
     export SIM_IN_TERMINAL=1
     for t in gnome-terminal ptyxis kgx konsole xfce4-terminal x-terminal-emulator xterm; do
         if command -v "$t" >/dev/null; then
