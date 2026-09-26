@@ -471,6 +471,7 @@ export async function setupPlayer(
     await sleep(1500)
     const report = await attachSwerveCodeSim(r, robot === "sphinx" ? DEFAULT_8567 : { ...DEFAULT_8567, ...SWERVE_SIMPLE_SIGNS, mechanisms: [] })
     const extras = robot === "sphinx" ? attachSphinxExtras(r) : {}
+    scoreHubsAtOpening()
     if (station) {
         placeAtStation(r, r.alliance as "red" | "blue", r.station as 1 | 2 | 3) // back to the start after calibration
         myStation = station
@@ -484,6 +485,73 @@ export async function setupPlayer(
 }
 
 let myStation: Station = "blue1"
+
+/**
+ * Count a hub goal as the ball drops into the hub, not as it leaves.
+ *
+ * The 2026 field's scoring zones sit at the hubs' exit chutes, so a ball scored only after it had
+ * fallen all the way through. Balls that piled up inside a hub (measured: 3 of 5 in one volley)
+ * never reached the chute and never counted, although they had plainly gone in. This moves each
+ * hub's zone into the hub itself, from just under the rim down; the exit chute no longer scores,
+ * so nothing counts twice.
+ */
+const HUB_X = 3.65 // hub centres at X = +-3.65 (blue at +X), Z = 0
+// The whole inside of the hub, rim (1.83 m) down to 0.8 m: a ball stays in the zone while it
+// rattles around inside and counts once; a thin zone under the rim counted re-entries (47 from 40).
+// 0.8 m across keeps the box's corners inside the hexagonal opening.
+const HUB_ZONE = { size: [0.8, 1.0, 0.8], centreY: 1.3 }
+
+/**
+ * A ball that bounces back out of the top and drops in again would count twice; count it once
+ * until it has been back on the floor (out through the chute, or bounced out and landed).
+ */
+// biome-ignore lint/suspicious/noExplicitAny: wraps a private scene-object method
+function countOncePerVisit(z: any) {
+    if (z.__oncePerVisit) return
+    z.__oncePerVisit = true
+    const scored = new Map<number, Jolt.BodyID>()
+    const original = z.zoneCollision.bind(z)
+    z.zoneCollision = (gp: Jolt.BodyID) => {
+        const key = gp.GetIndexAndSequenceNumber()
+        if (scored.has(key)) return
+        scored.set(key, gp)
+        original(gp)
+    }
+    const check = z.checkObjectsInZone.bind(z)
+    z.checkObjectsInZone = () => {
+        for (const [key, gp] of scored) {
+            const body = World.physicsSystem.isBodyAdded(gp) ? World.physicsSystem.getBody(gp) : undefined
+            if (!body || body.GetCenterOfMassPosition().GetY() < 0.3) scored.delete(key)
+        }
+        check()
+    }
+}
+
+export function scoreHubsAtOpening() {
+    const field = World.sceneRenderer.mirabufSceneObjects.getField()
+    // biome-ignore lint/suspicious/noExplicitAny: zone scene objects are private to the field
+    const zones: any[] = (field as any)?._scoringZones ?? []
+    if (!field || zones.length === 0) return 0
+    let moved = 0
+    for (const z of zones) {
+        if (!/hub/i.test(z.prefs?.name ?? "") || !z.parentBodyId) continue
+        const parent = bodyMatrix(z.parentBodyId)
+        const world = new THREE.Matrix4().compose(
+            new THREE.Vector3(z.prefs.alliance === "blue" ? HUB_X : -HUB_X, HUB_ZONE.centreY, 0),
+            new THREE.Quaternion(),
+            new THREE.Vector3(...HUB_ZONE.size)
+        )
+        const delta = parent.invert().multiply(world)
+        z._deltaTransformation = delta
+        z._deltaTransHasUpdated = true
+        z.prefs.deltaTransformation = delta.toArray()
+        z.reset?.()
+        if (z.mesh) z.mesh.visible = false // the chute hid this box; in the opening it would cover the hub
+        countOncePerVisit(z)
+        moved++
+    }
+    return moved
+}
 
 /**
  * Follow Synthesis match mode with the robot program's driver station: disabled before the

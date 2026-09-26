@@ -69,20 +69,22 @@ await page.evaluate(() => {
     }
     // Where airborne fuel comes down through the hub's rim height (1.83 m) over the next ms.
     window.__track = ms => new Promise(resolve => {
-        const f = W.sceneRenderer.mirabufSceneObjects.getField(), last = new Map(), out = []
+        const f = W.sceneRenderer.mirabufSceneObjects.getField(), last = new Map(), out = [], inHub = new Set()
         const t0 = performance.now()
         const id = setInterval(() => {
             for (const [node, bid] of f.mechanism.nodeToBody) {
                 if (!String(node).endsWith("_gp")) continue
                 const p = W.physicsSystem.getBody(bid).GetCenterOfMassPosition()
                 const cur = [p.GetX(), p.GetY(), p.GetZ()], prev = last.get(node)
-                if (prev && prev[1] >= 1.83 && cur[1] < 1.83) out.push(cur.map(v => +v.toFixed(2)))
+                if (prev && prev[1] >= 1.83 && cur[1] < 1.83) out.push([...cur.map(v => +v.toFixed(2)), node])
+                // Inside a hub: within 0.42 m of its centre axis and below the rim.
+                for (const hx of [-3.65, 3.65]) if (Math.hypot(cur[0] - hx, cur[2]) < 0.42 && cur[1] < 1.75 && cur[1] > 0.4) inHub.add(node)
                 // Full path of the first ball to leave the robot.
                 if (!window.__path && prev && cur[1] > 0.9 && cur[1] > prev[1] + 0.02) { window.__path = []; window.__pathNode = node }
                 if (window.__pathNode === node) window.__path.push([+(performance.now() - t0).toFixed(0), ...cur.map(v => +v.toFixed(2))])
                 last.set(node, cur)
             }
-            if (performance.now() - t0 > ms) { clearInterval(id); const path = window.__path; window.__path = undefined; window.__pathNode = undefined; resolve({ out, path: path?.filter((_, i) => i % 3 === 0) }) }
+            if (performance.now() - t0 > ms) { clearInterval(id); const path = window.__path; window.__path = undefined; window.__pathNode = undefined; resolve({ out, inHub: inHub.size, path: path?.filter((_, i) => i % 3 === 0) }) }
         }, 16)
     })
     const wrap = a => Math.atan2(Math.sin(a), Math.cos(a))
@@ -92,14 +94,14 @@ await page.evaluate(() => {
             const id = setInterval(() => {
                 const s = window.__state()
                 const dx = tx - s.x, dz = tz - s.z, d = Math.hypot(dx, dz)
-                const k = Math.min(speed, 0.35 + d * 0.4) / Math.max(d, 1e-3)
+                const k = Math.min(speed, 0.35 + d * 0.6) / Math.max(d, 1e-3)
                 // Field-relative sticks, from this alliance's driver station: up = away from own wall.
                 const fwd = (red ? dx : -dx) * k, right = (red ? dz : -dz) * k
                 const eh = heading === undefined ? 0 : wrap(heading - s.heading)
                 pad.axes[0] = Math.max(-1, Math.min(1, right))
                 pad.axes[1] = Math.max(-1, Math.min(1, -fwd))
                 pad.axes[2] = Math.max(-0.6, Math.min(0.6, -eh * 1.5))
-                const done = (d < tol && Math.abs(eh) < 0.15) || performance.now() - t0 > 20000
+                const done = (d < tol && Math.abs(eh) < 0.3) || performance.now() - t0 > 20000
                 if (done) {
                     clearInterval(id)
                     pad.axes[0] = pad.axes[1] = pad.axes[2] = 0
@@ -123,27 +125,27 @@ const actionStart = (Date.now() - t0) / 1000
 // Facing +X is 0 rad; facing the red hub (-X) is pi.
 const TOWARD_BLUE = 0, TOWARD_RED = Math.PI
 await page.waitForTimeout(1500)
-await go(-2.0, 3.45, TOWARD_BLUE, 0.6) // under the trench into the neutral zone
+await go(-2.0, 3.45, TOWARD_BLUE, 1.0) // under the trench into the neutral zone
 await buttons({ deploy: true, intake: true })
-await go(-1.5, 1.6, TOWARD_BLUE, 0.4) // line up on the first row
-await go(1.4, 1.6, TOWARD_BLUE, 0.3, 0.3) // sweep it
+await go(-1.5, 1.6, TOWARD_BLUE, 0.8) // line up on the first row
+await go(1.4, 1.6, TOWARD_BLUE, 0.7, 0.3) // sweep it
 // Heading back toward red: move the camera behind the robot again (blue side).
 await page.evaluate(() => window.__cam(0.4, -0.74, 5.2, 2000)) // high, from the +Z side: nothing between camera and robot
-await go(1.9, 0.2, TOWARD_RED, 0.35, 0.35) // loop round
-await go(-0.4, 0.2, TOWARD_RED, 0.3, 0.3) // sweep the second row back toward red
+await go(1.9, 0.2, TOWARD_RED, 0.8, 0.35) // loop round
+await go(-0.4, 0.2, TOWARD_RED, 0.7, 0.3) // sweep the second row back toward red
 const loaded = await st()
 log(`collected ${loaded.held} fuel`)
 await page.waitForTimeout(600)
 await buttons({ intake: false, deploy: false, stow: true })
 // The hub only takes shots from inside your own alliance zone (a backboard blocks the
 // neutral-zone side), so go home under the trench and shoot from about 3.3 m in front of it.
-await go(-1.6, 3.45, TOWARD_RED, 0.5, 0.35)
+await go(-1.6, 3.45, TOWARD_RED, 0.9, 0.35)
 await buttons({})
-await go(-5.4, 3.45, TOWARD_RED, 0.7, 0.35)
-await go(-6.3, 1.8, TOWARD_RED, 0.5, 0.3) // clear of the side wall before turning round
+await go(-5.4, 3.45, TOWARD_RED, 1.0, 0.35)
+await go(-6.3, 1.8, TOWARD_RED, 0.8, 0.3) // clear of the side wall before turning round
 // High, from the +Z side inside the field: the robot below, the hub to its right.
 await page.evaluate(() => window.__cam(0.17, -0.86, 4.6, 2500))
-await go(-6.9, 0.6, TOWARD_BLUE, 0.4, 0.2) // turn to face the hub, about 3.3 m out
+await go(-6.9, 0.6, TOWARD_BLUE, 0.6, 0.2) // turn to face the hub, about 3.3 m out
 await page.waitForTimeout(800)
 const score = () => page.evaluate(() => document.body.innerText.match(/RED\s*(\d+)\s*BLUE\s*(\d+)/)?.slice(1).map(Number))
 if (E.CAL) {
@@ -157,14 +159,22 @@ if (E.CAL) {
         await buttons({ shoot: true })
         for (let i = 0; i < 100 && (await st()).held > h0 - 5; i++) await page.waitForTimeout(50)
         await buttons({ shoot: false })
-        await page.waitForTimeout(4000)
+        await page.waitForTimeout(+(E.CALWAIT ?? 4000))
         const s1 = await score()
-        results.push({ gain, fired: h0 - (await st()).held, scored: s1[0] - s0[0], rimCrossings: await track })
+        const tr = await track
+        // Balls that came down inside the opening (hub centre -3.65, 0; about 0.55 m across the flats).
+        const into = tr.out.filter(c => Math.hypot(c[0] + 3.65, c[2]) < 0.55)
+        const where = await page.evaluate(nodes => {
+            const f = window.__W.sceneRenderer.mirabufSceneObjects.getField()
+            return nodes.map(n => { const p = window.__W.physicsSystem.getBody(f.mechanism.nodeToBody.get(n)).GetCenterOfMassPosition(); return [+p.GetX().toFixed(2), +p.GetY().toFixed(2), +p.GetZ().toFixed(2)] })
+        }, into.map(c => c[3]))
+        results.push({ gain, fired: h0 - (await st()).held, scored: s1[0] - s0[0], wentIn: into.length, nowAt: where })
         log(JSON.stringify(results.at(-1)))
     }
     fs.writeFileSync(`${OUT}/cal.json`, JSON.stringify(results))
 }
 const before = await page.evaluate(() => document.body.innerText.match(/RED\s*(\d+)\s*BLUE\s*(\d+)/)?.slice(1))
+const volley = page.evaluate(() => window.__track(14000))
 await buttons({ shoot: true })
 for (let i = 0; i < 25; i++) {
     await page.waitForTimeout(1000)
@@ -175,7 +185,9 @@ await page.waitForTimeout(3000)
 await buttons({ shoot: false })
 const after = await page.evaluate(() => document.body.innerText.match(/RED\s*(\d+)\s*BLUE\s*(\d+)/)?.slice(1))
 const end = await st()
-log(`score before ${before} after ${after}; still holding ${end.held}`)
+const v = await volley
+const dropped = v.out.filter(c => Math.hypot(c[0] + 3.65, c[2]) < 0.45).length
+log(`score before ${before} after ${after}; still holding ${end.held}; ${v.inHub} balls were inside the hub (${dropped} crossed the rim near the centre)`)
 await page.waitForTimeout(2500)
 const actionEnd = (Date.now() - t0) / 1000
 const video = page.video()
