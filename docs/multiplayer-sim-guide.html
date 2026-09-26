@@ -157,14 +157,14 @@
 
 <section id="setup">
   <h2>Player setup (once, about 30 minutes)</h2>
-  <p>You need a Windows 10/11, Mac, or Ubuntu (22.04 or newer) computer with 8 GB of memory or more, Google Chrome or Microsoft Edge (Chromium on Ubuntu is fine too), and an internet connection. A game controller (Xbox or PlayStation style) is best; a keyboard works too.</p>
+  <p>You need a Windows 10/11, Mac, or Ubuntu (22.04 or newer) computer with 8 GB of memory or more, Google Chrome or Microsoft Edge (on Ubuntu, the built-in Firefox also works), and an internet connection. A game controller (Xbox or PlayStation style) is best; a keyboard works too.</p>
   <ol class="steps">
     <li><strong>Install WPILib 2026.</strong> This is the free FRC programming kit; it includes the Java that the robot program needs. Download the installer for your computer from <a href="https://github.com/wpilibsuite/allwpilib/releases">github.com/wpilibsuite/allwpilib/releases</a> (the newest 2026 release: the <code>.iso</code> for Windows, the <code>.dmg</code> for Mac, the <code>Linux</code> <code>.tar.gz</code> for Ubuntu), run it, and accept the installer's defaults. The download is about 2.5 GB and the WPILib server can be slow, so start it a day or two early. Installing takes 10–15 minutes.
       <div class="note"><strong>Ubuntu:</strong> double-click the <code>.tar.gz</code> to extract it, open the extracted folder, and run <code>WPILibInstaller</code>. On an ARM computer use the <code>LinuxArm64</code> file.</div></li>
     <li><strong>Get the robot code.</strong> On Windows or Mac, install <a href="https://desktop.github.com">GitHub Desktop</a> and clone <code>ultraviolet8567/Rebuilt</code> (<em>File → Clone repository → URL</em>). Then use <em>Current Branch</em> to switch to the simulation branch your mentor names (for now it is <code>claude/multiplayer-shooter-sim-5f688a</code>).
       <div class="note"><strong>Ubuntu:</strong> GitHub Desktop has no Ubuntu version. Open Terminal and paste these two lines; the code lands in a folder called <code>Rebuilt</code> in your home folder.<pre><code>sudo apt install -y git
 git clone -b claude/multiplayer-shooter-sim-5f688a https://github.com/ultraviolet8567/Rebuilt.git</code></pre></div></li>
-    <li><strong>Start the robot program once to finish installing.</strong> In the code folder, open the <code>sim</code> folder and double-click <code>Start Robot Sim (Mac).command</code> or <code>Start Robot Sim (Windows).bat</code>. On Ubuntu, right-click <code>Start Robot Sim (Linux).sh</code> and choose <em>Run as a Program</em>. The first run downloads more files and can take several minutes. It is ready when the window prints <code>Robot program startup complete</code>. Close the window.
+    <li><strong>Start the robot program once to finish installing.</strong> In the code folder, open the <code>sim</code> folder and double-click <code>Start Robot Sim (Mac).command</code> or <code>Start Robot Sim (Windows).bat</code>. On Ubuntu, right-click <code>Start Robot Sim (Linux).sh</code> and choose <em>Run as a Program</em> (double-clicking only opens it in the text editor). The first run downloads more files and can take several minutes. It is ready when the window prints <code>Robot program startup complete</code>. Close the window.
       <div class="note"><strong>Mac:</strong> if macOS says the file cannot be opened, right-click it, choose <em>Open</em>, then <em>Open</em> again. <strong>Windows:</strong> if you see <em>Windows protected your PC</em>, click <em>More info</em>, then <em>Run anyway</em>. <strong>Ubuntu:</strong> if <em>Run as a Program</em> is missing, open Terminal and run <code>bash ~/Rebuilt/sim/*Linux.sh</code> instead.</div>
     </li>
     <li><strong>Plug in your controller</strong> (USB is most reliable) and check it works at <a href="https://hardwaretester.com/gamepad">hardwaretester.com/gamepad</a>.</li>
@@ -176,7 +176,7 @@ git clone -b claude/multiplayer-shooter-sim-5f688a https://github.com/ultraviole
   <p>Your host sends each person a link with their station in it, like <span class="st red">red2</span> or <span class="st blue">blue1</span>. Each station is one robot; three per alliance.</p>
   <ol class="steps">
     <li><strong>Start your robot program.</strong> Double-click the <code>Start Robot Sim</code> file and wait for <code>Robot program startup complete</code>. Leave the window open all night.</li>
-    <li><strong>Open your link in Chrome or Edge.</strong> Make the window wide (landscape). If a cookie box appears, you can click the <kbd>×</kbd> to decline. If the browser asks whether this site may <em>access devices on your local network</em>, click <em>Allow</em>: that is how the page reaches your robot program.</li>
+    <li><strong>Open your link in Chrome or Edge</strong> (or Firefox on Ubuntu). Make the window wide (landscape). If a cookie box appears, you can click the <kbd>×</kbd> to decline. If the browser asks whether this site may <em>access devices on your local network</em>, click <em>Allow</em>: that is how the page reaches your robot program.</li>
     <li><strong>Wait for "Ready at red2. Drive!"</strong> in the corner (about 30 seconds). The page wiggles your robot's joints briefly while it sets up. Keep the tab in front and visible: a hidden tab stops the physics, and setup will fail.</li>
     <li><strong>Press any button on your controller</strong> so the browser notices it. Then drive. Before a match you can practise freely; the scoreboard shows at the top.</li>
     <li><strong>When the host starts the match,</strong> every robot jumps to its starting spot. The first 15 seconds are autonomous: your robot runs its selected auto routine, which is <em>Do Nothing</em> unless someone chose one (see Troubleshooting). Then you drive for the rest of the match. When it ends, robots stop until the next match.</li>
@@ -265,7 +265,8 @@ git clone -b claude/multiplayer-shooter-sim-5f688a https://github.com/ultraviole
       <tr><td>Robot does not respond to the controller</td><td>Press a button after the page loads. Use Chrome or Edge. Unplug other controllers.</td></tr>
       <tr><td>Driving feels rotated</td><td>Someone pressed Back / View. Reload the page; the robot finds its true heading again.</td></tr>
       <tr><td>Robot sits still for the first 15 seconds</td><td>That is autonomous. To run a real auto routine, open the robot's dashboard (AdvantageScope or Glass, connect to <code>localhost</code>) and choose one under <em>Auto Routine</em> before the match.</td></tr>
-      <tr><td>The field is choppy</td><td>Close other programs and browser tabs. In the page's settings (gear icon), choose Low graphics. On Ubuntu, make sure your graphics driver is installed (<em>Software &amp; Updates → Additional Drivers</em>); without it the field can drop to a few frames per second.</td></tr>
+      <tr><td>The field is choppy</td><td>Close other programs and browser tabs. In the page's settings (gear icon), choose Low graphics.</td></tr>
+      <tr><td>"Performance issues detected" and a Settings box opens</td><td>The page switched itself to simple graphics because the field was running slowly. Click <em>Accept</em> and carry on.</td></tr>
       <tr><td>Scores stopped changing</td><td>The first player to join (the score keeper) left. Everyone reloads; the host joins first.</td></tr>
       <tr><td>Robot program window shows red errors and closes</td><td>Make sure WPILib 2026 installed, then try again. Send a screenshot to your mentor.</td></tr>
     </tbody>
@@ -282,13 +283,11 @@ git clone -b claude/multiplayer-shooter-sim-5f688a https://github.com/ultraviole
       <li>Driving, intake, hood, collecting fuel, shooting and scoring through the real controls</li>
       <li>The Mac start file</li>
       <li>The Windows start file and keyboard driving in Chrome (Windows 11, in a virtual machine, over the home network)</li>
-      <li>The Ubuntu start file (Ubuntu 24.04), and Chromium on Ubuntu loading the field, joining the room and connecting to the robot program</li>
+      <li>The Ubuntu start file (Ubuntu 24.04), started from Files with <em>Run as a Program</em>, and keyboard driving in Firefox (in a virtual machine, over the home network)</li>
     </ul></div>
     <div><h3 style="color:var(--warn)">Not yet tested</h3><ul>
       <li>Players on separate computers over the internet (the Cloudflare tunnel)</li>
-      <li>Driving from Ubuntu: the only Ubuntu test machine was a small virtual machine without graphics acceleration, where the field ran at 3 frames per second</li>
       <li>The WPILib installers for Windows and Ubuntu (the tests used a separately installed Java 17, which is the part of WPILib the start files use)</li>
-      <li>Starting the Ubuntu file from Files with <em>Run as a Program</em> (it was tested from Terminal)</li>
       <li>Whether Chrome asks the "local network" question on every computer</li>
       <li>A full-length match with six real people</li>
     </ul></div>
