@@ -346,7 +346,23 @@ LAUNCH_ELEVATION_DEG = 62.0
 launch = {"point": [0.06, 0.0, 0.20],
           "direction": [float(np.cos(np.radians(LAUNCH_ELEVATION_DEG))), 0.0,
                         float(np.sin(np.radians(LAUNCH_ELEVATION_DEG)))]}
+# Hopper: the space between the hopper side plates, from just ahead of the shooter to the slider's
+# front plate. Held fuel is drawn there (Synthesis itself parks every held piece at the exit).
+report["hopper_parts"] = {}
+hop = []
+for p in parts:
+    if re.search(r"hopper", p["name"], re.I):
+        P = to_urdf(p["V"])
+        hop.append(P)
+        report["hopper_parts"].setdefault(p["name"], []).append(
+            [[round(float(v), 3) for v in P.min(0)], [round(float(v), 3) for v in P.max(0)]])
+hop = np.vstack(hop)
+side = [to_urdf(p["V"]) for p in parts if re.search(r"hopper static", p["name"], re.I)]
+inner_y = min(abs(S[:, 1]).min() for S in side)                  # inside face of the side plates
+hopper_box = {"min": [round(float(hop[:, 0].min()) + 0.01, 3), round(-inner_y, 3), 0.10],
+              "max": [round(float(hop[:, 0].max()) - 0.01, 3), round(inner_y, 3), round(float(hop[:, 2].max()), 3)]}
 sim_meta = {
+    "hopper": hopper_box,
     "intake": {"link": "intake_arm", "point": [round(float(v), 4) for v in pick_link], "diameter": 0.45,
                "maxPieces": 40},
     # Exit speed = efficiency(rpm) x flywheel surface speed. Calibrated in Synthesis on

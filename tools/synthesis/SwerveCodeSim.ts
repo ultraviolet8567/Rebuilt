@@ -700,6 +700,7 @@ function pov(up: boolean, right: boolean, down: boolean, left: boolean): number 
  * ---------------------------------------------------------------------------------------------- */
 
 export type SphinxMeta = {
+    hopper?: { min: number[]; max: number[] } // robot (URDF) frame, metres
     intake: { link: string; point: number[]; diameter: number; maxPieces: number }
     launcher: {
         link: string
@@ -803,13 +804,114 @@ function interpolate(table: [number, number][], x: number) {
 }
 
 /** Reads the robot code's roller outputs each physics step and runs Synthesis's intake / ejector. */
+/** Fuel diameter (5.91 in). */
+const FUEL_D = 0.15
+
+/**
+ * Where held fuel sits. Synthesis parks every held piece at the ejector, so 40 balls would sit
+ * inside one another on top of the shooter and the hopper would look empty. Here each held ball
+ * gets its own spot in the hopper: a grid between the side plates, bottom layer first, nearest
+ * the shooter first. The ball due to fire next moves up to the ejector just before it goes, and
+ * balls above an emptied spot drop into it.
+ */
+class Hopper {
+    readonly slots: THREE.Vector3[] = [] // chassis-body frame
+    private readonly _below: number[] = [] // index of the slot directly underneath, or -1
+
+    constructor(box: { min: number[]; max: number[] }) {
+        const n = (a: number, b: number) => Math.max(1, Math.floor((b - a) / FUEL_D))
+        const [nx, ny, nz] = [0, 1, 2].map(i => n(box.min[i], box.max[i] + FUEL_D / 2))
+        const at = (i: number, k: number, count: number) =>
+            box.min[i] + (box.max[i] - box.min[i] - count * FUEL_D) / 2 + FUEL_D * (k + 0.5)
+        for (let z = 0; z < nz; z++)
+            for (let x = 0; x < nx; x++)
+                for (let y = 0; y < ny; y++) {
+                    this.slots.push(yup([at(0, x, nx), at(1, y, ny), box.min[2] + FUEL_D * (z + 0.5)]))
+                    this._below.push(z === 0 ? -1 : this.slots.length - 1 - nx * ny)
+                }
+    }
+
+    below(slot: number) {
+        return this._below[slot]
+    }
+}
+
 class GamePieceControl extends SimInput {
     private _lastShot = 0
+    private _headSince = 0
+    private _hopper?: Hopper
     constructor(
         private _robot: MirabufSceneObject,
         private _meta: SphinxMeta
     ) {
         super("GamePieceControl")
+        if (_meta.hopper) this._hopper = new Hopper(_meta.hopper)
+    }
+
+    /** Re-aim a held piece at a new spot, moving there over `seconds`. */
+    // biome-ignore lint/suspicious/noExplicitAny: ejectable internals are private to Synthesis
+    private moveHeld(e: any, parentBody: Jolt.BodyID, delta: THREE.Matrix4, seconds: number) {
+        const gp = e.gamePieceBodyId && World.physicsSystem.getBody(e.gamePieceBodyId)
+        if (gp) {
+            const c = gp.GetCenterOfMassPosition()
+            const q = gp.GetRotation()
+            e._startTranslation = new THREE.Vector3(c.GetX(), c.GetY(), c.GetZ())
+            e._startRotation = new THREE.Quaternion(q.GetX(), q.GetY(), q.GetZ(), q.GetW())
+            e._animationStartTime = performance.now()
+            e._animationDuration = seconds
+        }
+        e._parentBodyId = parentBody
+        e._deltaTransformation = delta
+    }
+
+    /** Lay the held pieces out in the hopper; returns true once the next shot is at the ejector. */
+    // biome-ignore lint/suspicious/noExplicitAny: ejectable internals are private to Synthesis
+    private arrangeHopper(held: any[], now: number): boolean {
+        const hopper = this._hopper
+        const prefs = this._robot.ejectorPreferences
+        if (!hopper || !prefs || held.length === 0) return true
+        const chassis = this._robot.mechanism.nodeToBody.get(this._robot.rootNodeId)!
+        const launcher = this._robot.mechanism.nodeToBody.get(prefs.parentNode ?? this._robot.rootNodeId)!
+        const exitDelta = new THREE.Matrix4().fromArray(prefs.deltaTransformation)
+        const slotDelta = (i: number) => new THREE.Matrix4().setPosition(hopper.slots[i])
+
+        // New pieces (Synthesis aimed them at the ejector) go to the lowest free spot.
+        const used = new Set(held.map(e => e.__slot).filter((x: number | undefined) => x !== undefined && x >= 0))
+        for (const e of held) {
+            if (e.__slot !== undefined) continue
+            const free = hopper.slots.findIndex((_, i) => !used.has(i))
+            e.__slot = free
+            used.add(free)
+            if (free >= 0) {
+                e._parentBodyId = chassis // keeps Synthesis's pickup animation, now ending here
+                e._deltaTransformation = slotDelta(free)
+            }
+        }
+        // Anything over an empty spot drops into it.
+        for (const e of held) {
+            if (e.__slot === undefined || e.__slot < 0) continue
+            const b = hopper.below(e.__slot)
+            if (b >= 0 && !used.has(b)) {
+                used.delete(e.__slot)
+                used.add(b)
+                e.__slot = b
+                this.moveHeld(e, chassis, slotDelta(b), 0.15)
+            }
+        }
+        // The next shot: the lowest ball nearest the shooter, brought up to the ejector.
+        if (held[0].__slot !== -2) {
+            let best = 0
+            held.forEach((e, i) => {
+                if ((e.__slot ?? 1e9) >= 0 && (e.__slot ?? 1e9) < (held[best].__slot ?? 1e9)) best = i
+            })
+            const [head] = held.splice(best, 1)
+            held.unshift(head)
+            used.delete(head.__slot)
+            head.__slot = -2
+            this.moveHeld(head, launcher, exitDelta, 0.08)
+            this._headSince = now
+        }
+        return now - this._headSince >= 80
     }
     public update(_dt: number) {
         const out = (dev: string) => SimCANMotor.getPercentOutput(dev) ?? 0
@@ -826,7 +928,8 @@ class GamePieceControl extends SimInput {
         const now = performance.now()
         // biome-ignore lint/suspicious/noExplicitAny: held pieces are private to the scene object
         const held: any[] = (this._robot as any)._ejectables
-        if (feeding && rpm > 500 && held.length > 0 && now - this._lastShot >= 100) {
+        const ready = this.arrangeHopper(held, now)
+        if (feeding && rpm > 500 && held.length > 0 && ready && now - this._lastShot >= 100) {
             this._lastShot = now
             const surface = (rpm * 2 * Math.PI) / 60 * this._meta.launcher.flywheelRadius
             held[0]._ejectVelocity = surface * interpolate(this._meta.launcher.efficiencyByRpm, rpm) * shotTuning.gain
