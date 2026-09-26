@@ -354,6 +354,9 @@ const SWERVE_SIMPLE = {
 const sleep = (ms: number) => new Promise(r => setTimeout(r, ms))
 
 /** Sphinx (FRC 8567) built by tools/synthesis/urdf/build_sphinx_urdf.py, served from public/. */
+/** Multiplies every shot's exit speed; for calibrating the efficiency table (1 = as measured). */
+export const shotTuning = { gain: 1 }
+
 export const SPHINX_URDF_ZIP = "/sphinx_urdf.zip"
 
 async function spawnURDF(url: string, name: string) {
@@ -613,12 +616,19 @@ function installViewKey() {
  */
 let forwarder: ReturnType<typeof setInterval> | undefined
 const keysDown = new Set<string>()
+let intakeLatched = false // C toggles the intake on and off, so it can run while you drive
 
 export async function startControllerForwarding(periodMs = 20) {
     const { worker } = await import("@/systems/simulation/wpilib_brain/WPILibTypes")
     const send = (data: unknown) => worker.getValue().postMessage({ command: "update", data })
     if (forwarder) clearInterval(forwarder)
-    window.addEventListener("keydown", e => keysDown.add(e.code))
+    window.addEventListener("keydown", e => {
+        keysDown.add(e.code)
+        if (e.code === "KeyC" && !e.repeat) {
+            intakeLatched = !intakeLatched
+            import("@/components/GlobalUIControls").then(m => m.globalAddToast("info", "Intake", intakeLatched ? "On (C to stop)" : "Off"))
+        }
+    })
     window.addEventListener("keyup", e => keysDown.delete(e.code))
     window.addEventListener("blur", () => keysDown.clear())
 
@@ -653,7 +663,8 @@ function xboxFromGamepad(p: Gamepad) {
 
 /**
  * Keyboard play. Driver: WASD move, arrow keys turn, Shift slow, Space aim at hub.
- * Operator: E deploy intake + run it, Q stow, F shoot (with aim), R reverse the funnel.
+ * Operator: E deploy intake + run it (C toggles that on/off), Q stow, F shoot (with aim),
+ * R reverse the funnel.
  */
 function xboxFromKeyboard(role: "driver" | "operator") {
     const k = (c: string) => (keysDown.has(c) ? 1 : 0)
@@ -667,8 +678,9 @@ function xboxFromKeyboard(role: "driver" | "operator") {
         axes[3] = b("Space") || b("KeyF") ? 1 : 0 // RT: aim at hub (also while shooting)
         buttons[5] = b("ShiftLeft") || b("ShiftRight") // RB: slow
     } else {
-        buttons[0] = b("KeyE") // A: deploy intake
-        buttons[4] = b("KeyE") // LB: funnel in
+        buttons[0] = b("KeyE") || intakeLatched // A: deploy intake
+        buttons[4] = b("KeyE") || intakeLatched // LB: funnel in
+        if (b("KeyQ")) intakeLatched = false
         buttons[3] = b("KeyQ") // Y: stow
         buttons[1] = b("KeyR") // B: funnel out
         axes[3] = b("KeyF") ? 1 : 0 // RT: ranged shot
@@ -817,7 +829,7 @@ class GamePieceControl extends SimInput {
         if (feeding && rpm > 500 && held.length > 0 && now - this._lastShot >= 100) {
             this._lastShot = now
             const surface = (rpm * 2 * Math.PI) / 60 * this._meta.launcher.flywheelRadius
-            held[0]._ejectVelocity = surface * interpolate(this._meta.launcher.efficiencyByRpm, rpm)
+            held[0]._ejectVelocity = surface * interpolate(this._meta.launcher.efficiencyByRpm, rpm) * shotTuning.gain
             this._robot.eject()
         }
     }

@@ -7,9 +7,22 @@ import edu.wpi.first.wpilibj.simulation.FlywheelSim;
 import frc.robot.Constants;
 import frc.robot.util.SimBattery;
 
-/** Independent physics model per shooter side. */
+/**
+ * Independent physics model per shooter side.
+ *
+ * <p>Each wheel carries the drag the real shooter showed. The team's measured kV (volts per RPM) is
+ * a few percent above an ideal Vortex's, and that difference is friction and windage. Without it
+ * the frictionless model ran every setpoint about 2.5% fast -- 105 RPM at a 3.4 m shot -- which put
+ * the wheel just outside the 100 RPM ready band, so the kicker interlock never fed again.
+ */
 public class FlywheelIOSim implements FlywheelIO {
     private static final DCMotor kGearbox = DCMotor.getNeoVortex(1);
+
+    /** Volts per RPM an ideal motor needs; the rest of the measured kV is drag. */
+    private static final double kIdealVoltsPerRpm =
+            1.0
+                    / (kGearbox.KvRadPerSecPerVolt * 60.0 / (2.0 * Math.PI))
+                    * ShooterConstants.kFlywheelReduction;
 
     private final FlywheelSim leadSim = makeSim();
     private final FlywheelSim followerSim = makeSim();
@@ -28,8 +41,9 @@ public class FlywheelIOSim implements FlywheelIO {
 
     @Override
     public void updateInputs(FlywheelIOInputs inputs) {
-        leadSim.setInputVoltage(leadVolts);
-        followerSim.setInputVoltage(followerVolts);
+        leadSim.setInputVoltage(leadVolts - drag(ShooterConstants.kLeadV.get(), leadSim));
+        followerSim.setInputVoltage(
+                followerVolts - drag(ShooterConstants.kFollowerV.get(), followerSim));
         leadSim.update(Constants.kLoopPeriodSecs);
         followerSim.update(Constants.kLoopPeriodSecs);
 
@@ -44,6 +58,11 @@ public class FlywheelIOSim implements FlywheelIO {
 
         SimBattery.addCurrent(leadSim.getCurrentDrawAmps());
         SimBattery.addCurrent(followerSim.getCurrentDrawAmps());
+    }
+
+    /** Voltage lost to drag at the wheel's current speed. */
+    private static double drag(double measuredVoltsPerRpm, FlywheelSim sim) {
+        return Math.max(0.0, measuredVoltsPerRpm - kIdealVoltsPerRpm) * sim.getAngularVelocityRPM();
     }
 
     @Override
