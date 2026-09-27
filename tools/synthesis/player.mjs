@@ -7,7 +7,9 @@ const RELAY = E.RELAY ?? "10.211.55.5", ROOM = E.ROOM ?? "RBLT26", STATION = E.S
 const CODESIM = E.CODESIM ?? "ws://localhost:3300/wpilibws", PROBE = E.PROBE_DIR ?? "probe"
 const BASE = E.BASE ?? "http://localhost:3000"
 const browser = await chromium.launch({ channel: "chrome", headless: true, handleSIGTERM: false,
-    args: ["--use-angle=metal", "--enable-webgl", "--ignore-gpu-blocklist"] })
+    // A scripted player cannot click Chrome's "access devices on your local network" prompt, which
+    // an https page (the internet tunnel) needs to reach the robot program on localhost.
+    args: ["--use-angle=metal", "--enable-webgl", "--ignore-gpu-blocklist", "--disable-features=LocalNetworkAccessChecks"] })
 const page = await browser.newPage({ viewport: { width: 1280, height: 800 } })
 await page.goto(BASE + "/"); await page.waitForTimeout(3000)
 await page.evaluate(([relay, name, port, secure]) => {

@@ -442,8 +442,16 @@ export async function startSetup(spawnField: boolean, robot: "sphinx" | "swerveS
     })()
 }
 
+/**
+ * This player's own robot: the one no other client owns. Not "no owner name": a player whose link
+ * set no name has a blank one, and a peer's name is missing until its info arrives, and either
+ * made that player's robot look local here.
+ */
 export function myRobot(): MirabufSceneObject | undefined {
-    return World.sceneRenderer.mirabufSceneObjects.getRobots().find(r => !r.multiplayerOwnerName)
+    return World.sceneRenderer.mirabufSceneObjects
+        .getRobots()
+        // biome-ignore lint/suspicious/noExplicitAny: the owning client id is private to the scene object
+        .find(r => (r as any)._multiplayerOwningClientId == null)
 }
 
 export function setupStatus() {

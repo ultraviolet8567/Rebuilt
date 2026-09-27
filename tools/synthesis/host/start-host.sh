@@ -22,8 +22,10 @@ if [ "${1:-}" = "--internet" ]; then
     command -v cloudflared >/dev/null || { echo "Install cloudflared first (brew install cloudflared)."; exit 1; }
     cloudflared tunnel --url "http://localhost:$PORT" > "$HERE/tunnel.log" 2>&1 &
     for _ in $(seq 1 30); do
-        BASE="$(grep -o 'https://[a-z0-9-]*\.trycloudflare\.com' "$HERE/tunnel.log" | head -1)"; [ -n "$BASE" ] && break; sleep 1
+        # No match yet is normal while the tunnel starts; don't let set -e treat it as a failure.
+        BASE="$(grep -o 'https://[a-z0-9-]*\.trycloudflare\.com' "$HERE/tunnel.log" | head -1 || true)"; [ -n "$BASE" ] && break; sleep 1
     done
+    [ -n "$BASE" ] && [[ "$BASE" == https://* ]] || { echo "The Cloudflare tunnel did not start; see $HERE/tunnel.log."; exit 1; }
 fi
 RELAY="${BASE/http/ws}"
 

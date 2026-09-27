@@ -2,7 +2,7 @@ diff --git a/fission/src/Synthesis.tsx b/fission/src/Synthesis.tsx
 index ab613cc..efd928d 100644
 --- a/fission/src/Synthesis.tsx
 +++ b/fission/src/Synthesis.tsx
-@@ -52,6 +52,23 @@ const Synthesis = () => {
+@@ -52,6 +52,24 @@ const Synthesis = () => {
              window.close()
              return
          }
@@ -16,7 +16,8 @@ index ab613cc..efd928d 100644
 +                PreferencesSystem.setUserPreference("MultiplayerHost", u.hostname)
 +                PreferencesSystem.setUserPreference("MultiplayerPort", Number(u.port || (secure ? 443 : 80)))
 +                PreferencesSystem.setUserPreference("MultiplayerSecure", secure)
-+                if (urlParams.get("name")) PreferencesSystem.setUserPreference("MultiplayerUsername", urlParams.get("name")!)
++                const name = urlParams.get("name") ?? urlParams.get("sphinx") // default: the station, e.g. blue1
++                if (name) PreferencesSystem.setUserPreference("MultiplayerUsername", name)
 +                PreferencesSystem.savePreferences()
 +            } catch (e) {
 +                console.error("Bad relay parameter", relay, e)
@@ -26,7 +27,7 @@ index ab613cc..efd928d 100644
          if (urlParams.has("autojoin")) {
              const room = urlParams.get("autojoin")!
              const name = PreferencesSystem.getUserPreference("MultiplayerUsername") ?? "TestUser"
-@@ -62,6 +79,18 @@ const Synthesis = () => {
+@@ -62,6 +80,18 @@ const Synthesis = () => {
              setTimeout(() => startMultiplayerWorld({ displayName: name, ws, keepAssets: false, isHost: false }))
          }
  
