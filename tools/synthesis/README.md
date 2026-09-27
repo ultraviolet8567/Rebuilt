@@ -59,6 +59,8 @@ indexer, hood trim, both shots with the kicker interlock, pivot positions, shake
 | `field=1` | spawn the field if nobody has; the first player in keeps score |
 | `codesim=ws://localhost:3300/wpilibws` | this player's robot program (default port 3300) |
 | `view=driver\|station\|follow` | starting camera (default `driver`); V cycles it in play |
+| `hopper=live` | practice mode: loads `sphinx_live_urdf.zip` (hollow hopper, `dof_hopper_slide` extension following the intake, feed gate), so fuel stays a physics body inside the robot and fires from the feed zone; about half the frame rate with a full hopper |
+| `name=...` | player name (default: the station) |
 
 Camera views use the field's own camera points ("Red Alliance 1" ... "Blue Alliance 3"; the 2026
 field ships them at 1.5 m eye height behind each station). Station 1 is the drivers' left.

@@ -413,6 +413,20 @@ for link, o in origins.items():
                      "max": [round(float(v), 3) for v in to_base(np.vstack([p["U"] for p in g])).max(0)]}
                     for g in groups if _in_hull(to_base(np.vstack([p["U"] for p in g])), VOID).any()]}
 
+# The normal model (the default): one hull per link, hopper slider parts back on the frame where
+# the CAD has them. Only a player who asks for ?hopper=live gets the hollow model above.
+normal_files = {}
+for link in ("base_link", "intake_arm", "hood"):
+    o = origins[link]
+    ps = [dict(p, U=to_urdf(p["V"]) - o) for p in parts
+          if p["link"] in ((link, "hopper_slider") if link == "base_link" else (link,))
+          and p["diag"] >= MIN_PART_M and not DROP.search(p["name"])]
+    M = pose.get(link, np.eye(4))
+    for p in ps:
+        p["U"] = (M[:3, :3] @ p["U"].T).T + M[:3, 3]
+    m = piece_mesh(ps, BUDGET[link])
+    buf = io.BytesIO(); m.export(buf, file_type="stl"); normal_files[f"meshes/{link}.stl"] = buf.getvalue()
+
 # Game-piece handling points for Synthesis, in each link's own frame (URDF axes, metres):
 #  * intake: the pickup zone at the arm's leading roller, located on the deployed CAD arm and
 #    carried into the stowed link frame the joint uses;
@@ -481,6 +495,8 @@ sim_meta = {
     "fieldFrame": {"note": "x_code = 8.27 - X, y_code = 4.041 + Z, heading_code = heading + pi"},
 }
 files["sim.json"] = json.dumps(sim_meta, indent=2).encode()
+normal_meta = dict(sim_meta, hopper={k: hopper_box[k] for k in ("min", "max")})
+normal_files["sim.json"] = json.dumps(normal_meta, indent=2).encode()
 report["sim"] = sim_meta
 
 # Generated module meshes: a thin steering housing and the wheel.
@@ -489,6 +505,7 @@ wheel = trimesh.creation.cylinder(radius=WHEEL_R, height=WHEEL_W, sections=48)
 wheel.apply_transform(trimesh.transformations.rotation_matrix(np.pi / 2, [1, 0, 0]))  # axle along y
 for nm, m in (("steer", steer), ("wheel", wheel)):
     buf = io.BytesIO(); m.export(buf, file_type="stl"); files[f"meshes/{nm}.stl"] = buf.getvalue()
+    normal_files[f"meshes/{nm}.stl"] = files[f"meshes/{nm}.stl"]
 
 
 def xyz(v):
@@ -512,55 +529,63 @@ def link_xml(name, mesh, mass, rgba="0.45 0.2 0.6 1"):
 # Intake: joint 0 is stowed (robot code 0.1 rad) and deploying is +1.9 about the axis. Synthesis
 # has imported this joint's sense and limits both ways on different loads, so the limits are
 # symmetric and the adapter calibrates direction at attach time.
-xml = ['<?xml version="1.0"?>\n<robot name="sphinx_8567">\n']
-xml.append(link_xml("base_link", "base_link", 45.0))
-xml.append(link_xml("intake_arm", "intake_arm", 3.0, "0.3 0.3 0.3 1"))
-xml.append(link_xml("hood", "hood", 1.5, "0.3 0.3 0.3 1"))
-xml.append(link_xml("hopper_slider", "hopper_slider", 1.0))
-xml.append(f"""  <joint name="dof_hopper_slide" type="prismatic">
-    <parent link="base_link"/><child link="hopper_slider"/>
-    <origin xyz="0 0 0"/><axis xyz="1 0 0"/>
-    <limit lower="{-SLIDE_TRAVEL}" upper="{SLIDE_TRAVEL}" effort="200" velocity="1"/>
-  </joint>
-""")
-# Hollow-hopper pieces: welded to their link (fixed joint, zero offset, meshes in its frame).
-for link, names in pieces.items():
-    for name in names[1:]:
-        rgba = "0.2 0.2 0.2 1" if name == "hopper_gate" else "0.45 0.2 0.6 1" if link in ("base_link", "hopper_slider") else "0.3 0.3 0.3 1"
-        xml.append(link_xml(name, name, 0.05, rgba))
-        xml.append(f"""  <joint name="{name}_weld" type="fixed">
-    <parent link="{link}"/><child link="{name}"/><origin xyz="0 0 0"/>
-  </joint>
-""")
-xml.append(f"""  <joint name="dof_intake_pivot" type="revolute">
-    <parent link="base_link"/><child link="intake_arm"/>
-    <origin xyz="{xyz(intake_o)}"/><axis xyz="{axis(intake_axis)}"/>
-    <limit lower="-2.0" upper="2.0" effort="100" velocity="6"/>
-  </joint>
-  <joint name="dof_hood" type="revolute">
-    <parent link="base_link"/><child link="hood"/>
-    <origin xyz="{xyz(hood_o)}"/><axis xyz="{axis(hood_axis)}"/>
-    <limit lower="-0.35" upper="0.35" effort="50" velocity="4"/>
-  </joint>
-""")
-for tag, x, y in MODULES:
-    xml.append(link_xml(f"{tag}_steer", "steer", 0.8, "0.15 0.15 0.15 1"))
-    xml.append(link_xml(f"{tag}_wheel", "wheel", 0.4, "0.05 0.05 0.05 1"))
-    xml.append(f"""  <joint name="dof_{tag}_steer" type="continuous">
-    <parent link="base_link"/><child link="{tag}_steer"/>
-    <origin xyz="{x:.5f} {y:.5f} {WHEEL_R:.5f}"/><axis xyz="0 0 1"/>
-  </joint>
-  <joint name="dof_{tag}_wheel" type="continuous">
-    <parent link="{tag}_steer"/><child link="{tag}_wheel"/>
-    <origin xyz="0 0 0"/><axis xyz="0 1 0"/>
-  </joint>
-""")
-xml.append("</robot>\n")
-files["sphinx.urdf"] = "".join(xml).encode()
+def build_xml(live):
+    xml = ['<?xml version="1.0"?>\n<robot name="sphinx_8567">\n']
+    xml.append(link_xml("base_link", "base_link", 45.0))
+    xml.append(link_xml("intake_arm", "intake_arm", 3.0, "0.3 0.3 0.3 1"))
+    xml.append(link_xml("hood", "hood", 1.5, "0.3 0.3 0.3 1"))
+    if live:
+      xml.append(link_xml("hopper_slider", "hopper_slider", 1.0))
+      xml.append(f"""  <joint name="dof_hopper_slide" type="prismatic">
+        <parent link="base_link"/><child link="hopper_slider"/>
+        <origin xyz="0 0 0"/><axis xyz="1 0 0"/>
+        <limit lower="{-SLIDE_TRAVEL}" upper="{SLIDE_TRAVEL}" effort="200" velocity="1"/>
+      </joint>
+    """)
+    # Hollow-hopper pieces: welded to their link (fixed joint, zero offset, meshes in its frame).
+    for link, names in (pieces.items() if live else []):
+        for name in names[1:]:
+            rgba = "0.2 0.2 0.2 1" if name == "hopper_gate" else "0.45 0.2 0.6 1" if link in ("base_link", "hopper_slider") else "0.3 0.3 0.3 1"
+            xml.append(link_xml(name, name, 0.05, rgba))
+            xml.append(f"""  <joint name="{name}_weld" type="fixed">
+        <parent link="{link}"/><child link="{name}"/><origin xyz="0 0 0"/>
+      </joint>
+    """)
+    xml.append(f"""  <joint name="dof_intake_pivot" type="revolute">
+        <parent link="base_link"/><child link="intake_arm"/>
+        <origin xyz="{xyz(intake_o)}"/><axis xyz="{axis(intake_axis)}"/>
+        <limit lower="-2.0" upper="2.0" effort="100" velocity="6"/>
+      </joint>
+      <joint name="dof_hood" type="revolute">
+        <parent link="base_link"/><child link="hood"/>
+        <origin xyz="{xyz(hood_o)}"/><axis xyz="{axis(hood_axis)}"/>
+        <limit lower="-0.35" upper="0.35" effort="50" velocity="4"/>
+      </joint>
+    """)
+    for tag, x, y in MODULES:
+        xml.append(link_xml(f"{tag}_steer", "steer", 0.8, "0.15 0.15 0.15 1"))
+        xml.append(link_xml(f"{tag}_wheel", "wheel", 0.4, "0.05 0.05 0.05 1"))
+        xml.append(f"""  <joint name="dof_{tag}_steer" type="continuous">
+        <parent link="base_link"/><child link="{tag}_steer"/>
+        <origin xyz="{x:.5f} {y:.5f} {WHEEL_R:.5f}"/><axis xyz="0 0 1"/>
+      </joint>
+      <joint name="dof_{tag}_wheel" type="continuous">
+        <parent link="{tag}_steer"/><child link="{tag}_wheel"/>
+        <origin xyz="0 0 0"/><axis xyz="0 1 0"/>
+      </joint>
+    """)
+    xml.append("</robot>\n")
+    return "".join(xml).encode()
 
-with zipfile.ZipFile(out / "sphinx_urdf.zip", "w", zipfile.ZIP_DEFLATED) as z:
-    for name, data in files.items():
-        z.writestr(f"sphinx/{name}", data)
+
+files["sphinx.urdf"] = build_xml(True)
+normal_files["sphinx.urdf"] = build_xml(False)
+
+
+for zname, fs in (("sphinx_urdf.zip", normal_files), ("sphinx_live_urdf.zip", files)):
+    with zipfile.ZipFile(out / zname, "w", zipfile.ZIP_DEFLATED) as z:
+        for name, data in fs.items():
+            z.writestr(f"sphinx/{name}", data)
 (out / "report.json").write_text(json.dumps(report, indent=2))
 print(json.dumps(report, indent=2))
 print("API calls this run:", api.calls)

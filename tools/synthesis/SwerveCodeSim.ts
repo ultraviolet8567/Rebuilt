@@ -461,6 +461,12 @@ export function countInHopperForTest() {
 export const shotTuning = { gain: 1 }
 
 export const SPHINX_URDF_ZIP = "/sphinx_urdf.zip"
+/**
+ * Live-hopper model (?hopper=live): hollow hopper, sliding extension and feed gate, so fuel stays
+ * a physics body inside the robot. Heavier on the frame rate, so it is opt-in for practice.
+ */
+export const SPHINX_LIVE_URDF_ZIP = "/sphinx_live_urdf.zip"
+let sphinxZip = SPHINX_URDF_ZIP
 
 async function spawnURDF(url: string, name: string) {
     const { loadURDF } = await import("@/urdf/URDFLoader")
@@ -488,7 +494,7 @@ export async function startSetup(spawnField: boolean, robot: "sphinx" | "swerveS
             for (let i = 0; i < 90 && !objs.getField(); i++) await sleep(1000)
         }
         if (mine().length === 0) {
-            if (robot === "sphinx") spawnURDF(SPHINX_URDF_ZIP, "Sphinx 8567").catch(e => console.error(e))
+            if (robot === "sphinx") spawnURDF(sphinxZip, "Sphinx 8567").catch(e => console.error(e))
             else spawnRemote({ remotePath: SWERVE_SIMPLE.path, hash: SWERVE_SIMPLE.hash, miraType: MiraType.ROBOT, name: "SwerveSimple v2" })
             for (let i = 0; i < 60 && mine().length === 0; i++) await sleep(1000)
         }
@@ -693,8 +699,13 @@ export async function followMatchMode() {
  */
 export async function autoStart(params: URLSearchParams) {
     const station = (params.get("sphinx") ?? "blue1") as Station
+    if (params.get("hopper") === "live") sphinxZip = SPHINX_LIVE_URDF_ZIP
     const { globalAddToast } = await import("@/components/GlobalUIControls")
-    globalAddToast("info", "8567 simulation", `Setting up ${station}. Keep this tab visible.`)
+    globalAddToast(
+        "info",
+        "8567 simulation",
+        `Setting up ${station}${sphinxZip === SPHINX_LIVE_URDF_ZIP ? " with the live hopper" : ""}. Keep this tab visible.`
+    )
     try {
         // Joining happens in the background from ?autojoin; give it a moment, then refuse to
         // carry on alone -- a player who silently misses the room sees nobody else.

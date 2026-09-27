@@ -233,6 +233,13 @@ git clone -b claude/multiplayer-shooter-sim-5f688a https://github.com/ultraviole
     </tbody>
   </table></div>
   <p>The scroll wheel zooms in any view. Pushing up on the stick always moves away from your alliance wall, so the driver-station views match the controls.</p>
+  <h3>Practice mode: live hopper</h3>
+  <p>Add <code>&amp;hopper=live</code> to the end of your link to practise with fuel that behaves like real balls inside Sphinx. The balls roll down the hopper, pile up, shift when you drive hard, and feed to the shooter one at a time from the bottom of the ramp. The hopper extension slides out when the intake goes down.</p>
+  <ul>
+    <li>Fuel can get stuck on the ledges either side of the feeder. Hold <strong>D-pad left</strong> (the team's shake command) while shooting to rock the intake and shake it loose, as on the real robot.</li>
+    <li>It is heavier on the computer: the field can drop from 60 to about 30 frames per second with a full hopper. Use it for practice, or in small matches on a fast computer.</li>
+    <li>Each player chooses: a live-hopper player and normal players can share a match.</li>
+  </ul>
   <h3>Scoring tips</h3>
   <ul>
     <li>Shoot from inside your own alliance zone: the hub's side facing the middle of the field has a backboard that blocks shots.</li>
@@ -302,6 +309,7 @@ git clone -b claude/multiplayer-shooter-sim-5f688a https://github.com/ultraviole
       <li>Driving, intake, hood, collecting fuel, shooting and scoring through the real controls</li>
       <li>Collected fuel shown in Sphinx's hopper, filling and emptying as it collects and shoots</li>
       <li>Hub scoring: the scoreboard matched the balls tracked going into the hub (33 of 33 in the last check)</li>
+      <li>Practice mode (<code>hopper=live</code>): live fuel collected, carried and fed from the bottom of the ramp; D-pad left shakes stuck fuel loose; a live-hopper player and a normal player in the same room</li>
       <li>Heading stays right after the robot is placed at its station and at match start (earlier builds could leave field-relative driving rotated by 90 degrees)</li>
       <li>The Mac start file</li>
       <li>Over the internet through the Cloudflare tunnel (September 27): a Windows 11 player (code downloaded as a ZIP from GitHub, started with the Windows start file, Chrome) and a Mac player in one room. The Mac robot drove the length of the field and pushed the Windows robot 1.2 m, and both computers agreed on where it ended up (within 1 cm)</li>

@@ -23,7 +23,7 @@ await page.addInitScript(() => {
     window.__pad = [mk(0), mk(1)]; navigator.getGamepads = () => window.__pad
 })
 const relayParam = E.RELAY_URL ? `&relay=${encodeURIComponent(E.RELAY_URL)}&name=${encodeURIComponent(E.NAME ?? STATION)}` : ""
-const url = `${BASE}/?autojoin=${ROOM}&sphinx=${STATION}${E.FIELD === "1" ? "&field=1" : ""}&codesim=${encodeURIComponent(CODESIM)}${relayParam}`
+const url = `${BASE}/?autojoin=${ROOM}&sphinx=${STATION}${E.FIELD === "1" ? "&field=1" : ""}&codesim=${encodeURIComponent(CODESIM)}${relayParam}${E.EXTRA ?? ""}`
 await page.goto(url)
 await page.waitForFunction(() => window.__sphinx, null, { timeout: 180000, polling: 1000 })
 const status = await page.evaluate(() => window.__sphinx)

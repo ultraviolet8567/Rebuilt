@@ -19,7 +19,7 @@ git checkout -q -f "$SYNTHESIS_COMMIT"
 git apply "$KIT/fission.patch"
 mkdir -p fission/src/dev
 cp "$KIT/SwerveCodeSim.ts" fission/src/dev/
-cp "$KIT/urdf/out/sphinx_urdf.zip" fission/public/
+cp "$KIT/urdf/out/sphinx_urdf.zip" "$KIT/urdf/out/sphinx_live_urdf.zip" fission/public/
 
 # Field and robot models (the 2026 field is in Synthesis's asset pack).
 git lfs pull --include fission/public/assetpack.zip
