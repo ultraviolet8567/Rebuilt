@@ -354,6 +354,56 @@ const SWERVE_SIMPLE = {
 const sleep = (ms: number) => new Promise(r => setTimeout(r, ms))
 
 /** Sphinx (FRC 8567) built by tools/synthesis/urdf/build_sphinx_urdf.py, served from public/. */
+/**
+ * Test helper for calibration: drops loose floor fuel, one ball at a time, into this robot's
+ * intake zone while the intake runs, until the robot holds `target` balls. Returns how many it
+ * holds. Not used in play.
+ */
+export async function feedIntakeForTest(target: number, timeoutMs = 20000) {
+    const robot = myRobot()!
+    const field = World.sceneRenderer.mirabufSceneObjects.getField()!
+    const prefs = robot.intakePreferences!
+    // biome-ignore lint/suspicious/noExplicitAny: held pieces are private to the scene object
+    const held = () => ((robot as any)._ejectables as unknown[]).length
+    const t0 = performance.now()
+    while (held() < target && performance.now() - t0 < timeoutMs) {
+        // Synthesis's own intake sensor body: where pieces are actually picked up.
+        // biome-ignore lint/suspicious/noExplicitAny: the sensor is private to the scene object
+        const sensorId = (robot as any)._intakeSensor?._joltBodyId as Jolt.BodyID | undefined
+        const at = sensorId
+            ? new THREE.Vector3().setFromMatrixPosition(bodyMatrix(sensorId))
+            : new THREE.Vector3().setFromMatrixPosition(
+                  bodyMatrix(robot.mechanism.nodeToBody.get(prefs.parentNode ?? robot.rootNodeId)!).multiply(
+                      new THREE.Matrix4().fromArray(prefs.deltaTransformation)
+                  )
+              )
+        // The nearest ball lying on the floor outside both hubs.
+        let best: Jolt.BodyID | undefined
+        let bestD = 1e9
+        for (const [node, id] of field.mechanism.nodeToBody) {
+            if (!String(node).endsWith("_gp") || !World.physicsSystem.isBodyAdded(id)) continue
+            const p = World.physicsSystem.getBody(id).GetCenterOfMassPosition()
+            const [x, y, z] = [p.GetX(), p.GetY(), p.GetZ()]
+            if (y > 0.2 || Math.hypot(Math.abs(x) - HUB_X, z) < 1.0) continue
+            const d = Math.hypot(x - at.x, z - at.z)
+            if (d > 0.8 && d < bestD) {
+                bestD = d
+                best = id
+            }
+        }
+        if (!best) break
+        // A fuel body's origin is the field's reference point, not the ball's centre: move the
+        // origin by however far the centre has to go.
+        const body = World.physicsSystem.getBody(best)
+        const o = body.GetPosition()
+        const c = body.GetCenterOfMassPosition()
+        const [ox, oy, oz, cx, cy, cz] = [o.GetX(), o.GetY(), o.GetZ(), c.GetX(), c.GetY(), c.GetZ()]
+        World.physicsSystem.setBodyPosition(best, new JOLT.RVec3(ox + at.x - cx, oy + at.y + 0.05 - cy, oz + at.z - cz))
+        await sleep(250)
+    }
+    return held()
+}
+
 /** Multiplies every shot's exit speed; for calibrating the efficiency table (1 = as measured). */
 export const shotTuning = { gain: 1 }
 

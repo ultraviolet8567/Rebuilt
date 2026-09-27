@@ -365,16 +365,19 @@ sim_meta = {
     "hopper": hopper_box,
     "intake": {"link": "intake_arm", "point": [round(float(v), 4) for v in pick_link], "diameter": 0.45,
                "maxPieces": 40},
-    # Exit speed = efficiency(rpm) x flywheel surface speed. Calibrated in Synthesis on
-    # 2026-09-25 by firing the robot code's own ranged shots and bisecting on where the ball comes
-    # down through rim height (1.83 m): 2.4 m -> 0.40 at 3604 rpm, 3.0 m -> 0.352 at 3833,
-    # 3.6 m -> 0.337 at 4130, 4.4 m -> 0.329 at 4234 (7.2-7.6 m/s; Synthesis damps game pieces
-    # heavily, so range is flat in speed). The ends hold that exit speed. The team's real shot
-    # table was never well tuned, so this makes the simulated shooter consistent with it rather
-    # than claiming the real robot scores this way.
+    # Exit speed = efficiency(rpm) x flywheel surface speed. Recalibrated in Synthesis on
+    # 2026-09-27 (tools/synthesis/calib.mjs), after the simulated flywheel got the drag its measured
+    # kV implies and stopped running 2.5% fast: at each distance the robot code aims and picks its
+    # rpm, and a speed gain was searched until balls came down through rim height (1.83 m) at the
+    # hub centre. 2.0 m -> 0.469 at 3313 rpm, 2.5 m -> 0.399 at 3685, 3.1 m -> 0.346 at 4021,
+    # 3.6 m -> 0.336 at 4218, 4.1 m -> 0.334 at 4362, 4.5 m -> 0.345 at 4429 (exit 8.0-8.3 m/s;
+    # Synthesis damps game pieces heavily, so range is flat in speed). 1.5 m scales with 2.0 m; the
+    # top end holds the 4.5 m exit speed. The team's real shot table was never well tuned, so this
+    # makes the simulated shooter consistent with it rather than claiming the real robot scores
+    # this way.
     "launcher": {"link": "hood", **launch, "flywheelRadius": 0.0508,
-                 "efficiencyByRpm": [[2927, 0.49], [3604, 0.40], [3833, 0.352], [4130, 0.337],
-                                     [4234, 0.329], [5290, 0.263]]},
+                 "efficiencyByRpm": [[2927, 0.524], [3313, 0.469], [3685, 0.399], [4021, 0.346],
+                                     [4218, 0.336], [4362, 0.334], [4429, 0.345], [5290, 0.289]]},
     "fieldFrame": {"note": "x_code = 8.27 - X, y_code = 4.041 + Z, heading_code = heading + pi"},
 }
 files["sim.json"] = json.dumps(sim_meta, indent=2).encode()
