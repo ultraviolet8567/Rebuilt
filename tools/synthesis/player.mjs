@@ -36,7 +36,7 @@ for (;;) {
         try { out = await page.evaluate(`(async () => { ${fs.readFileSync(PROBE + "/" + f, "utf8")} })()`) }
         catch (e) { out = { error: String(e).slice(0, 500) } }
         if (f.includes("shot")) await page.screenshot({ path: `${PROBE}/${f}.png` })
-        fs.writeFileSync(`${PROBE}/${f}.out`, JSON.stringify(out))
+        fs.writeFileSync(`${PROBE}/${f}.out`, JSON.stringify(out ?? null))
     }
     if (fs.existsSync(PROBE + "/STOP")) break
     await new Promise(r => setTimeout(r, 300))

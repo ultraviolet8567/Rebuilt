@@ -142,10 +142,12 @@ await buttons({ intake: false, deploy: false, stow: true })
 await go(-1.6, 3.45, TOWARD_RED, 0.9, 0.35)
 await buttons({})
 await go(-5.4, 3.45, TOWARD_RED, 1.0, 0.35)
-await go(-6.3, 1.8, TOWARD_RED, 0.8, 0.3) // clear of the side wall before turning round
+await go(-6.0, 2.2, TOWARD_RED, 0.8, 0.3) // clear of the side wall before turning round
 // High, from the +Z side inside the field: the robot below, the hub to its right.
 await page.evaluate(() => window.__cam(0.17, -0.86, 4.6, 2500))
-await go(-6.9, 0.6, TOWARD_BLUE, 0.6, 0.2) // turn to face the hub, about 3.3 m out
+// 3.4 m from the hub and clear of the red tower: shooting from against the tower, a corner of
+// the robot caught it while aiming and levered the robot up to 0.5 m sideways.
+await go(-6.7, 1.6, TOWARD_BLUE, 0.6, 0.2)
 await page.waitForTimeout(800)
 const score = () => page.evaluate(() => document.body.innerText.match(/RED\s*(\d+)\s*BLUE\s*(\d+)/)?.slice(1).map(Number))
 if (E.CAL) {

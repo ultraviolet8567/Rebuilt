@@ -295,7 +295,7 @@ public class RobotContainer {
         // When Synthesis places the robot (spawn, match start, reset), take its pose outright, the
         // way an autonomous routine seeds odometry from its starting position.
         if (synthesisVision != null) {
-            synthesisVision.takePlacement().ifPresent(drive::resetPose);
+            synthesisVision.takePlacement().ifPresent(drive::resetPoseFromPlacement);
         }
     }
 

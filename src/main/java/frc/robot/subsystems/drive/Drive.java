@@ -274,6 +274,23 @@ public class Drive extends SubsystemBase {
         simTruePose = pose;
     }
 
+    /**
+     * Reset to where the simulator just placed the robot, taking the gyro to read that pose's
+     * heading.
+     *
+     * <p>{@link #resetPose} pairs the pose with the gyro reading from earlier in this loop. When
+     * Synthesis teleports the robot between that reading and the reset, the reading is from before
+     * the move, and the pose estimator carried the teleport's turn (90 degrees at the spawn) as a
+     * permanent heading error: field-relative driving came out rotated. The Synthesis gyro reports
+     * the placed heading from the next loop on (the gyro is re-zeroed to it here, in case a heading
+     * reset had left it offset), so both now agree.
+     */
+    public void resetPoseFromPlacement(Pose2d pose) {
+        gyroIO.setYaw(pose.getRotation());
+        rawGyroRotation = pose.getRotation();
+        resetPose(pose);
+    }
+
     /** Declare the robot to be facing away from our alliance wall. */
     public void resetHeading() {
         Rotation2d heading =

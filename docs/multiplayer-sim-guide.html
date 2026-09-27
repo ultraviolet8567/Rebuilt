@@ -236,7 +236,9 @@ git clone -b claude/multiplayer-shooter-sim-5f688a https://github.com/ultraviole
   <h3>Scoring tips</h3>
   <ul>
     <li>Shoot from inside your own alliance zone: the hub's side facing the middle of the field has a backboard that blocks shots.</li>
-    <li>Shots land best from about 3 to 3.6 metres from the centre of your hub. Closer than about 2 metres, the ball hits the rim.</li>
+    <li>Shots land best from about 3 to 3.6 metres from the centre of your hub: from there, 29 to 36 of 40 went in during testing. Closer than about 2 metres, the ball hits the rim.</li>
+    <li>Keep clear of your tower (the climbing structure against your alliance wall) and other robots while you aim. Aiming turns the robot on the spot, and a corner that catches the tower pushes the robot off line.</li>
+    <li>A ball counts as soon as it drops into the hub, even if it gets stuck inside.</li>
     <li>Hold the trigger until the flywheel is up to speed; fuel only feeds once it is.</li>
     <li>Sphinx holds up to 40 fuel. Drive through fuel with the intake down and the rollers on.</li>
   </ul>
@@ -250,6 +252,7 @@ git clone -b claude/multiplayer-shooter-sim-5f688a https://github.com/ultraviole
     <li><strong>Install the tools:</strong> <a href="https://nodejs.org">Node.js</a> 18 or newer, <code>git</code> and <code>git-lfs</code>, <a href="https://bun.sh">Bun</a>, <a href="https://rustup.rs">Rust</a>, and <code>cloudflared</code> (<code>brew install git-lfs cloudflared</code> on a Mac with Homebrew).</li>
     <li><strong>Build the site and the relay:</strong> in the robot code folder, run <code>tools/synthesis/host/build-site.sh</code>. It downloads a fixed version of Autodesk Synthesis (the free, open-source simulator the field runs in), applies the team's changes, and builds everything into <code>tools/synthesis/host/site</code>. About five minutes.</li>
   </ol>
+  <div class="note">After pulling new code, run <code>build-site.sh</code> again before the next session (about three minutes). Scoring, the hopper and the camera views live in the site, so players only get fixes once the host rebuilds. Players also restart their robot program after pulling.</div>
   <h3>Each session</h3>
   <ol class="steps">
     <li><strong>Start the server:</strong> <code>tools/synthesis/host/start-host.sh --internet</code>. It prints an <code>https://…trycloudflare.com</code> address and six player links. The address is new every session, so send fresh links each time. Use <code>--internet</code> even when everyone is in one house: without it the links are plain <code>http://</code> addresses, and browsers may refuse game controllers on those (the keyboard still works).</li>
@@ -297,6 +300,9 @@ git clone -b claude/multiplayer-shooter-sim-5f688a https://github.com/ultraviole
       <li>Everyone sees the same robot positions (within 10 cm) and the same score</li>
       <li>All six robots switch together: autonomous, driving, stopped at the end</li>
       <li>Driving, intake, hood, collecting fuel, shooting and scoring through the real controls</li>
+      <li>Collected fuel shown in Sphinx's hopper, filling and emptying as it collects and shoots</li>
+      <li>Hub scoring: the scoreboard matched the balls tracked going into the hub (33 of 33 in the last check)</li>
+      <li>Heading stays right after the robot is placed at its station and at match start (earlier builds could leave field-relative driving rotated by 90 degrees)</li>
       <li>The Mac start file</li>
       <li>The Windows start file and keyboard driving in Chrome (Windows 11, in a virtual machine, over the home network)</li>
       <li>The Ubuntu start file (Ubuntu 24.04), started from Files with <em>Run as a Program</em>, and keyboard driving in Firefox (in a virtual machine, over the home network)</li>
@@ -308,7 +314,7 @@ git clone -b claude/multiplayer-shooter-sim-5f688a https://github.com/ultraviole
       <li>A full-length match with six real people</li>
     </ul></div>
   </div>
-  <p style="margin-top:14px">Try a dry run with two or three people before the real night. Known limits: the shooter is tuned for the simulator (the team's real shot table was never fully tuned); close shots miss; balls fired in quick bursts sometimes collide in the air.</p>
+  <p style="margin-top:14px">Try a dry run with two or three people before the real night. Known limits: the shooter is tuned for the simulator (the team's real shot table was never fully tuned); close shots miss; balls fired in quick bursts sometimes collide in the air. Fuel held in the hopper is drawn, not simulated: it does not collide, so feeder jams do not happen here.</p>
 </section>
 
 <footer>
