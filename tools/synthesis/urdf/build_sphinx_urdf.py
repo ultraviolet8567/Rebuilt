@@ -55,7 +55,7 @@ MODULES = [("fl", +BASE / 2, +TRACK / 2), ("fr", +BASE / 2, -TRACK / 2),
 CAD_TO_URDF = np.array([[0, -1, 0], [1, 0, 0], [0, 0, 1]], dtype=float)
 
 # Triangle budgets per link after decimation; parts smaller than MIN_PART_M are dropped.
-BUDGET = {"base_link": 90_000, "intake_arm": 20_000, "hood": 12_000}
+BUDGET = {"base_link": 90_000, "intake_arm": 20_000, "hood": 12_000, "hopper_slider": 4_000}
 MIN_PART_M = 0.02
 DROP = re.compile(r"screw|washer|nut\b|rivet|shaft collar|spacer|bearing|encoder magnet", re.I)
 
@@ -319,12 +319,23 @@ lift = trimesh.transformations.rotation_matrix(-0.3, intake_axis)[:3, :3] @ arm_
 if lift[2] < arm_c[2]:
     intake_axis = -intake_axis
 report["intake_axis_urdf"] = [round(float(v), 3) for v in intake_axis]
-origins = {"base_link": np.zeros(3), "intake_arm": intake_o, "hood": hood_o}
+# The hopper's sliding extension ("Slider 1" in the CAD: front plate, both slider plates and the
+# long/short brackets) runs 0.289 m along x. The CAD shows it fully out; it is modelled as its own
+# link on dof_hopper_slide, 0 = retracted like the intake it follows. Synthesis centres a prismatic
+# joint's range on zero (0..0.289 imported as +-0.1445), so the limits are +-travel and the page only
+# ever commands 0..travel.
+SLIDE_TRAVEL = 0.289
+SLIDER = re.compile(r"^(Hopper Slider Front Plate|Hopper Slider Plate|long bracket|short bracket)$")
+for p in parts:
+    if p["link"] == "base_link" and SLIDER.match(p["name"]) and to_urdf(p["V"])[:, 0].min() > 0.1:
+        p["link"] = "hopper_slider"
+origins = {"base_link": np.zeros(3), "intake_arm": intake_o, "hood": hood_o, "hopper_slider": np.zeros(3)}
 # The robot starts every match with the intake stowed, and the pivot's absolute encoder turns 2.5x
 # per pivot turn, so only the stowed start reads unambiguously. Bake the arm into the stowed pose
 # (the CAD shows it deployed, 1.9 rad away) so joint 0 is stowed, like the real robot at boot.
 STOW_FROM_CAD = -1.9
-pose = {"intake_arm": trimesh.transformations.rotation_matrix(STOW_FROM_CAD, intake_axis)}
+pose = {"intake_arm": trimesh.transformations.rotation_matrix(STOW_FROM_CAD, intake_axis),
+        "hopper_slider": trimesh.transformations.translation_matrix([-SLIDE_TRAVEL, 0, 0])}
 
 # ------------------------------------------------------------------ hollow hopper
 # Synthesis gives each link one convex hull, so a link that spans the hopper fills it solid and
@@ -382,7 +393,9 @@ for link, o in origins.items():
     for p in ps:
         p["U"] = (M[:3, :3] @ p["U"].T).T + M[:3, 3]
     to_base = lambda U, o=o: U + o
-    groups = split_parts(ps, to_base) if link in ("base_link", "intake_arm") else [ps]
+    if link == "hopper_slider":                 # judge the slider where it matters: extended
+        to_base = lambda U: U + np.array([SLIDE_TRAVEL, 0, 0])
+    groups = split_parts(ps, to_base) if link in ("base_link", "intake_arm", "hopper_slider") else [ps]
     total_f = sum(len(p["F"]) for p in ps)
     names = []
     for i, g in enumerate(groups):
@@ -437,6 +450,17 @@ for p in parts:
     lo, hi = P.min(0), P.max(0)
     if np.all(hi > _hmin - 0.02) and np.all(lo < _hmax + 0.02) and p["diag"] >= MIN_PART_M:
         report["hopper_region_parts"].append({"name": p["name"], "link": p["link"], "min": [round(float(v), 3) for v in lo], "max": [round(float(v), 3) for v in hi]})
+# Feed gate: closes the back of the hopper in front of the feeder roller. Fuel reaches the shooter
+# only through the feed zone just ahead of it (the page launches the ball resting there when the
+# kicker feeds), so nothing leaks out through the shooter lanes.
+GATE = {"min": [-0.020, -0.235, 0.10], "max": [-0.008, 0.235, 0.50]}
+gate = trimesh.creation.box(bounds=[GATE["min"], GATE["max"]])
+buf = io.BytesIO(); gate.export(buf, file_type="stl"); files["meshes/hopper_gate.stl"] = buf.getvalue()
+pieces["base_link"].append("hopper_gate")
+hopper_box = dict(hopper_box, live=True,
+                  slide={"joint": "dof_hopper_slide", "travel": SLIDE_TRAVEL},
+                  feedZone={"min": [-0.008, -0.23, 0.10], "max": [0.12, 0.23, 0.32]},
+                  entry={"retracted": [0.18, 0.0, 0.42], "extended": [0.45, 0.0, 0.42]})
 sim_meta = {
     "hopper": hopper_box,
     "intake": {"link": "intake_arm", "point": [round(float(v), 4) for v in pick_link], "diameter": 0.45,
@@ -492,10 +516,17 @@ xml = ['<?xml version="1.0"?>\n<robot name="sphinx_8567">\n']
 xml.append(link_xml("base_link", "base_link", 45.0))
 xml.append(link_xml("intake_arm", "intake_arm", 3.0, "0.3 0.3 0.3 1"))
 xml.append(link_xml("hood", "hood", 1.5, "0.3 0.3 0.3 1"))
+xml.append(link_xml("hopper_slider", "hopper_slider", 1.0))
+xml.append(f"""  <joint name="dof_hopper_slide" type="prismatic">
+    <parent link="base_link"/><child link="hopper_slider"/>
+    <origin xyz="0 0 0"/><axis xyz="1 0 0"/>
+    <limit lower="{-SLIDE_TRAVEL}" upper="{SLIDE_TRAVEL}" effort="200" velocity="1"/>
+  </joint>
+""")
 # Hollow-hopper pieces: welded to their link (fixed joint, zero offset, meshes in its frame).
 for link, names in pieces.items():
     for name in names[1:]:
-        rgba = "0.45 0.2 0.6 1" if link == "base_link" else "0.3 0.3 0.3 1"
+        rgba = "0.2 0.2 0.2 1" if name == "hopper_gate" else "0.45 0.2 0.6 1" if link in ("base_link", "hopper_slider") else "0.3 0.3 0.3 1"
         xml.append(link_xml(name, name, 0.05, rgba))
         xml.append(f"""  <joint name="{name}_weld" type="fixed">
     <parent link="{link}"/><child link="{name}"/><origin xyz="0 0 0"/>

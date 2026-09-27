@@ -17,25 +17,9 @@
   ],
   "hollow_hopper": {
     "base_link": {
-      "pieces": 42,
+      "pieces": 53,
       "pieces_still_in_void": 5,
       "in_void": [
-        {
-          "parts": [
-            "fin body"
-          ],
-          "void_points": 2,
-          "min": [
-            -0.075,
-            -0.002,
-            0.135
-          ],
-          "max": [
-            0.175,
-            0.001,
-            0.27
-          ]
-        },
         {
           "parts": [
             "Minimal"
@@ -82,6 +66,22 @@
             0.038,
             -0.213,
             0.494
+          ]
+        },
+        {
+          "parts": [
+            "fin body"
+          ],
+          "void_points": 2,
+          "min": [
+            -0.075,
+            -0.002,
+            0.135
+          ],
+          "max": [
+            0.175,
+            0.001,
+            0.27
           ]
         },
         {
@@ -256,11 +256,16 @@
       "pieces": 1,
       "pieces_still_in_void": 0,
       "in_void": []
+    },
+    "hopper_slider": {
+      "pieces": 3,
+      "pieces_still_in_void": 0,
+      "in_void": []
     }
   },
   "base_link": {
-    "parts": 232,
-    "pieces": 42,
+    "parts": 226,
+    "pieces": 53,
     "origin_m": [
       0.0,
       0.0,
@@ -283,6 +288,15 @@
       -0.075,
       0.0,
       0.39
+    ]
+  },
+  "hopper_slider": {
+    "parts": 6,
+    "pieces": 3,
+    "origin_m": [
+      0.0,
+      0.0,
+      0.0
     ]
   },
   "hopper_parts": {
@@ -2520,7 +2534,7 @@
     },
     {
       "name": "long bracket",
-      "link": "base_link",
+      "link": "hopper_slider",
       "min": [
         0.606,
         -0.346,
@@ -2772,7 +2786,7 @@
     },
     {
       "name": "Hopper Slider Plate",
-      "link": "base_link",
+      "link": "hopper_slider",
       "min": [
         0.11,
         -0.349,
@@ -2968,7 +2982,7 @@
     },
     {
       "name": "short bracket",
-      "link": "base_link",
+      "link": "hopper_slider",
       "min": [
         0.606,
         0.308,
@@ -3360,7 +3374,7 @@
     },
     {
       "name": "Hopper Slider Plate",
-      "link": "base_link",
+      "link": "hopper_slider",
       "min": [
         0.11,
         0.346,
@@ -3766,7 +3780,7 @@
     },
     {
       "name": "Hopper Slider Front Plate",
-      "link": "base_link",
+      "link": "hopper_slider",
       "min": [
         0.63,
         -0.346,
@@ -4046,7 +4060,7 @@
     },
     {
       "name": "long bracket",
-      "link": "base_link",
+      "link": "hopper_slider",
       "min": [
         0.606,
         0.308,
@@ -4462,7 +4476,36 @@
         0.623,
         0.343,
         0.501
-      ]
+      ],
+      "live": true,
+      "slide": {
+        "joint": "dof_hopper_slide",
+        "travel": 0.289
+      },
+      "feedZone": {
+        "min": [
+          -0.008,
+          -0.23,
+          0.1
+        ],
+        "max": [
+          0.12,
+          0.23,
+          0.32
+        ]
+      },
+      "entry": {
+        "retracted": [
+          0.18,
+          0.0,
+          0.42
+        ],
+        "extended": [
+          0.45,
+          0.0,
+          0.42
+        ]
+      }
     },
     "intake": {
       "link": "intake_arm",

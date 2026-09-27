@@ -22,6 +22,8 @@ import type MirabufSceneObject from "@/mirabuf/MirabufSceneObject"
 import WPILibBrain from "@/systems/simulation/wpilib_brain/WPILibBrain"
 import WheelDriver from "@/systems/simulation/driver/WheelDriver"
 import HingeDriver from "@/systems/simulation/driver/HingeDriver"
+import SliderDriver from "@/systems/simulation/driver/SliderDriver"
+import { DriverControlMode } from "@/systems/simulation/driver/Driver"
 import IntakeDriver from "@/systems/simulation/driver/IntakeDriver"
 import type Stimulus from "@/systems/simulation/stimulus/Stimulus"
 import GyroStimulus from "@/systems/simulation/stimulus/GyroStimulus"
@@ -877,7 +879,14 @@ function pov(up: boolean, right: boolean, down: boolean, left: boolean): number 
  * ---------------------------------------------------------------------------------------------- */
 
 export type SphinxMeta = {
-    hopper?: { min: number[]; max: number[] } // robot (URDF) frame, metres
+    hopper?: {
+        min: number[] // robot (URDF) frame, metres
+        max: number[]
+        live?: boolean // fuel stays a physics body inside the hopper (hollow collider build)
+        slide?: { joint: string; travel: number }
+        feedZone?: { min: number[]; max: number[] }
+        entry?: { retracted: number[]; extended: number[] }
+    }
     intake: { link: string; point: number[]; diameter: number; maxPieces: number }
     launcher: {
         link: string
@@ -981,6 +990,24 @@ function interpolate(table: [number, number][], x: number) {
 }
 
 /** Reads the robot code's roller outputs each physics step and runs Synthesis's intake / ejector. */
+/** Floor of Sphinx's hopper ramp (URDF z at URDF x), from the CAD rollers. */
+const RAMP_X = [-0.03, 0.05, 0.13, 0.22, 0.63]
+const RAMP_Z = [0.115, 0.157, 0.203, 0.227, 0.227]
+function rampZ(x: number) {
+    return interpolate(RAMP_X.map((v, i) => [v, RAMP_Z[i]] as [number, number]), x)
+}
+/** Surface speed of the hopper rollers pushing fuel to the feed zone, m/s. */
+const ROLLER_SPEED = 1.2
+
+/** Set a body's velocity through Jolt's body interface, which also wakes a resting body. */
+function setVelocityAwake(id: Jolt.BodyID, v: THREE.Vector3) {
+    // biome-ignore lint/suspicious/noExplicitAny: the body interface is private to PhysicsSystem
+    const bi = (World.physicsSystem as any)._joltBodyInterface as Jolt.BodyInterface
+    const jv = new JOLT.Vec3(v.x, v.y, v.z)
+    bi.SetLinearVelocity(id, jv)
+    JOLT.destroy(jv)
+}
+
 /** Fuel diameter (5.91 in). */
 const FUEL_D = 0.15
 
@@ -1023,6 +1050,124 @@ class GamePieceControl extends SimInput {
     ) {
         super("GamePieceControl")
         if (_meta.hopper) this._hopper = new Hopper(_meta.hopper)
+    }
+
+    // ------------------------------------------------------------ live hopper
+    private _slideSign = 1
+
+    /** World <-> robot (URDF axes) for this robot's chassis. */
+    private chassisMatrix() {
+        return bodyMatrix(this._robot.mechanism.nodeToBody.get(this._robot.rootNodeId)!)
+    }
+    private toRobot(p: THREE.Vector3, inv: THREE.Matrix4) {
+        const l = p.clone().applyMatrix4(inv)
+        return [l.x, -l.z, l.y] // Y-up body frame -> URDF (x forward, y left, z up)
+    }
+    private inBox(u: number[], b: { min: number[]; max: number[] }) {
+        return u.every((v, i) => v >= b.min[i] && v <= b.max[i])
+    }
+    /** Move a loose ball's centre to `at` (world) with velocity `v`. Its origin is the field's. */
+    private placeBall(id: Jolt.BodyID, at: THREE.Vector3, v: THREE.Vector3) {
+        const body = World.physicsSystem.getBody(id)
+        const o = body.GetPosition()
+        const c = body.GetCenterOfMassPosition()
+        const [ox, oy, oz, cx, cy, cz] = [o.GetX(), o.GetY(), o.GetZ(), c.GetX(), c.GetY(), c.GetZ()]
+        World.physicsSystem.setBodyPosition(id, new JOLT.RVec3(ox + at.x - cx, oy + at.y - cy, oz + at.z - cz))
+        setVelocityAwake(id, v)
+        body.SetAngularVelocity(new JOLT.Vec3(0, 0, 0))
+    }
+
+    /**
+     * Fuel as physics bodies: the intake drops what it collects into the hopper, the hopper's shape
+     * and the ramp do the rest, and a shot takes the ball resting in the feed zone at the back of
+     * the hopper. An empty feed zone means no shot. The hopper extension follows the intake.
+     */
+    // biome-ignore lint/suspicious/noExplicitAny: ejectable internals are private to Synthesis
+    private liveHopper(held: any[], feeding: boolean, rpm: number, now: number) {
+        const hop = this._meta.hopper!
+        const layer = World.simulationSystem.getSimulationLayer(this._robot.mechanism)
+        const chassisId = this._robot.mechanism.nodeToBody.get(this._robot.rootNodeId)!
+        const chassisV = World.physicsSystem.getBody(chassisId).GetLinearVelocity()
+        const vRobot = new THREE.Vector3(chassisV.GetX(), chassisV.GetY(), chassisV.GetZ())
+
+        // Extension follows the intake: stowed = retracted, deployed (1.9 rad) = fully out.
+        const pivot = layer?.drivers.find(d => jointName(d) === "dof_intake_pivot") as HingeDriver | undefined
+        const slide = layer?.drivers.find(d => jointName(d) === hop.slide?.joint) as SliderDriver | undefined
+        let frac = 0
+        if (pivot) frac = Math.min(1, Math.max(0, Math.abs(pivot.constraint.GetCurrentAngle()) / 1.9))
+        if (slide && hop.slide) {
+            slide.controlMode = DriverControlMode.POSITION
+            slide.targetPosition = this._slideSign * hop.slide.travel * frac
+            // Synthesis has imported joint senses both ways; learn which way is out.
+            const cur = slide.constraint.GetCurrentPosition()
+            if (Math.abs(cur) > 0.03) {
+                const node = this._robot.mechanism.nodeToBody.get(nodeForLink(this._robot, "hopper_slider") ?? "")
+                if (node) {
+                    const inv = this.chassisMatrix().invert()
+                    const sp = new THREE.Vector3().setFromMatrixPosition(bodyMatrix(node))
+                    const out = this.toRobot(sp, inv)[0]
+                    if (out < -0.02 && Math.sign(cur) === Math.sign(slide.targetPosition)) this._slideSign *= -1
+                }
+            }
+        }
+
+        // What the intake picks up drops into the hopper as a live ball.
+        const inv = this.chassisMatrix().invert()
+        const chassis = this.chassisMatrix()
+        while (held.length > 0) {
+            const e = held[0]
+            const id = e.gamePieceBodyId as Jolt.BodyID | undefined
+            e._ejectVelocity = 0.001
+            this._robot.eject()
+            if (!id || !hop.entry) continue
+            const ent = frac > 0.5 ? hop.entry.extended : hop.entry.retracted
+            const at = yup([ent[0], ent[1] + (Math.random() - 0.5) * 0.3, ent[2]]).applyMatrix4(chassis)
+            this.placeBall(id, at, vRobot)
+        }
+
+        if (!feeding || !hop.feedZone) return
+        const field = World.sceneRenderer.mirabufSceneObjects.getField()
+        if (!field) return
+        // The rollers under the hopper: while feeding, fuel lying on the ramp is driven toward the
+        // feed zone at the back (the ramp alone let it settle and stall after a few shots).
+        const back = yup([-1, 0, 0]).transformDirection(chassis)
+        for (const [node, id] of field.mechanism.nodeToBody) {
+            if (!String(node).endsWith("_gp") || !World.physicsSystem.isBodyAdded(id)) continue
+            const b = World.physicsSystem.getBody(id)
+            const c = b.GetCenterOfMassPosition()
+            const u = this.toRobot(new THREE.Vector3(c.GetX(), c.GetY(), c.GetZ()), inv)
+            if (!this.inBox(u, hop) || u[2] > rampZ(u[0]) + 0.16) continue
+            const v = b.GetLinearVelocity()
+            const vel = new THREE.Vector3(v.GetX(), v.GetY(), v.GetZ())
+            const along = vel.clone().sub(vRobot).dot(back)
+            const push = back.clone().multiplyScalar((ROLLER_SPEED - along) * 0.2)
+            vel.add(push)
+            setVelocityAwake(id, vel)
+        }
+        // Feed: the ball resting in the feed zone goes out of the shooter.
+        if (!(rpm > 500 && now - this._lastShot >= 100)) return
+        let pick: Jolt.BodyID | undefined
+        let pickX = 1e9
+        for (const [node, id] of field.mechanism.nodeToBody) {
+            if (!String(node).endsWith("_gp") || !World.physicsSystem.isBodyAdded(id)) continue
+            const c = World.physicsSystem.getBody(id).GetCenterOfMassPosition()
+            const u = this.toRobot(new THREE.Vector3(c.GetX(), c.GetY(), c.GetZ()), inv)
+            if (this.inBox(u, hop.feedZone) && u[0] < pickX) {
+                pickX = u[0]
+                pick = id
+            }
+        }
+        if (!pick) return
+        const prefs = this._robot.ejectorPreferences!
+        const launcher = bodyMatrix(this._robot.mechanism.nodeToBody.get(prefs.parentNode ?? this._robot.rootNodeId)!).multiply(
+            new THREE.Matrix4().fromArray(prefs.deltaTransformation)
+        )
+        const at = new THREE.Vector3().setFromMatrixPosition(launcher)
+        const dir = new THREE.Vector3().setFromMatrixColumn(launcher, 2).normalize()
+        const surface = ((rpm * 2 * Math.PI) / 60) * this._meta.launcher.flywheelRadius
+        const speed = surface * interpolate(this._meta.launcher.efficiencyByRpm, rpm) * shotTuning.gain
+        this.placeBall(pick, at, dir.multiplyScalar(speed).add(vRobot))
+        this._lastShot = now
     }
 
     /** Re-aim a held piece at a new spot, moving there over `seconds`. */
@@ -1105,6 +1250,10 @@ class GamePieceControl extends SimInput {
         const now = performance.now()
         // biome-ignore lint/suspicious/noExplicitAny: held pieces are private to the scene object
         const held: any[] = (this._robot as any)._ejectables
+        if (this._meta.hopper?.live) {
+            this.liveHopper(held, feeding, rpm, now)
+            return
+        }
         const ready = this.arrangeHopper(held, now)
         if (feeding && rpm > 500 && held.length > 0 && ready && now - this._lastShot >= 100) {
             this._lastShot = now
