@@ -325,12 +325,80 @@ origins = {"base_link": np.zeros(3), "intake_arm": intake_o, "hood": hood_o}
 # (the CAD shows it deployed, 1.9 rad away) so joint 0 is stowed, like the real robot at boot.
 STOW_FROM_CAD = -1.9
 pose = {"intake_arm": trimesh.transformations.rotation_matrix(STOW_FROM_CAD, intake_axis)}
+
+# ------------------------------------------------------------------ hollow hopper
+# Synthesis gives each link one convex hull, so a link that spans the hopper fills it solid and
+# fuel cannot sit inside. The frame and the intake arm (stowed, it lies in the front of the hopper)
+# are therefore split into pieces whose hulls stay out of the hopper's open space; each piece is
+# its own link on a fixed joint, which Synthesis welds back into one rigid body with one hull per
+# piece.
+_ramp_x = [-0.03, 0.05, 0.13, 0.22, 0.63]          # roller ramp under the hopper (CAD rollers)
+_ramp_z = [0.115, 0.157, 0.203, 0.227, 0.227]
+def _void_points():
+    pts = []
+    for x in np.arange(0.03, 0.59, 0.05):
+        for y in np.arange(-0.30, 0.301, 0.06):
+            for z in np.arange(np.interp(x, _ramp_x, _ramp_z) + 0.07, 0.48, 0.05):
+                pts.append((x, y, z))
+    return np.array(pts)
+VOID = _void_points()
+
+def _in_hull(V, pts):
+    try:
+        return trimesh.convex.convex_hull(V).contains(pts)
+    except Exception:
+        return np.zeros(len(pts), bool)
+
+def split_parts(ps, to_base):
+    """Split parts (each with vertices already in the link frame) into groups whose convex
+    hulls, placed in the base frame by to_base, contain no hopper void point."""
+    out, stack = [], [ps]
+    while stack:
+        g = stack.pop()
+        Vb = to_base(np.vstack([p["U"] for p in g]))
+        if len(g) == 1 or not _in_hull(Vb, VOID).any():
+            out.append(g); continue
+        C = np.array([to_base(p["U"]).mean(0) for p in g])
+        ax = int(np.argmax(C.max(0) - C.min(0)))
+        order = np.argsort(C[:, ax]); half = len(g) // 2
+        stack += [[g[i] for i in order[:half]], [g[i] for i in order[half:]]]
+    return out
+
+def piece_mesh(g, budget):
+    V, F, off = [], [], 0
+    for p in g:
+        V.append(p["U"]); F.append(p["F"] + off); off += len(p["U"])
+    V, F = np.vstack(V), np.vstack(F)
+    if len(F) > budget:
+        V, F = fast_simplification.simplify(V.astype(np.float32), F.astype(np.int32), 1 - budget / len(F))
+    return trimesh.Trimesh(V, F, process=True)
+
+pieces = {}   # link -> list of piece names (the first is the link itself)
+report["hollow_hopper"] = {}
 for link, o in origins.items():
-    m, n = link_mesh(link, o)
-    if link in pose:
-        m.apply_transform(pose[link])
-    buf = io.BytesIO(); m.export(buf, file_type="stl"); files[f"meshes/{link}.stl"] = buf.getvalue()
-    report[link] = {"parts": n, "triangles": len(m.faces), "origin_m": [round(float(x), 3) for x in o]}
+    ps = [dict(p, U=to_urdf(p["V"]) - o) for p in parts
+          if p["link"] == link and p["diag"] >= MIN_PART_M and not DROP.search(p["name"])]
+    M = pose.get(link, np.eye(4))
+    for p in ps:
+        p["U"] = (M[:3, :3] @ p["U"].T).T + M[:3, 3]
+    to_base = lambda U, o=o: U + o
+    groups = split_parts(ps, to_base) if link in ("base_link", "intake_arm") else [ps]
+    total_f = sum(len(p["F"]) for p in ps)
+    names = []
+    for i, g in enumerate(groups):
+        name = link if i == 0 else f"{link}_p{i}"
+        share = sum(len(p["F"]) for p in g) / max(total_f, 1)
+        m = piece_mesh(g, max(300, int(BUDGET[link] * share)))
+        buf = io.BytesIO(); m.export(buf, file_type="stl"); files[f"meshes/{name}.stl"] = buf.getvalue()
+        names.append(name)
+    pieces[link] = names
+    intruding = sum(bool(_in_hull(to_base(np.vstack([p["U"] for p in g])), VOID).any()) for g in groups)
+    report[link] = {"parts": len(ps), "pieces": len(groups), "origin_m": [round(float(x), 3) for x in o]}
+    report["hollow_hopper"][link] = {"pieces": len(groups), "pieces_still_in_void": intruding,
+        "in_void": [{"parts": [p["name"] for p in g][:4], "void_points": int(_in_hull(to_base(np.vstack([p["U"] for p in g])), VOID).sum()),
+                     "min": [round(float(v), 3) for v in to_base(np.vstack([p["U"] for p in g])).min(0)],
+                     "max": [round(float(v), 3) for v in to_base(np.vstack([p["U"] for p in g])).max(0)]}
+                    for g in groups if _in_hull(to_base(np.vstack([p["U"] for p in g])), VOID).any()]}
 
 # Game-piece handling points for Synthesis, in each link's own frame (URDF axes, metres):
 #  * intake: the pickup zone at the arm's leading roller, located on the deployed CAD arm and
@@ -361,6 +429,14 @@ side = [to_urdf(p["V"]) for p in parts if re.search(r"hopper static", p["name"],
 inner_y = min(abs(S[:, 1]).min() for S in side)                  # inside face of the side plates
 hopper_box = {"min": [round(float(hop[:, 0].min()) + 0.01, 3), round(-inner_y, 3), 0.10],
               "max": [round(float(hop[:, 0].max()) - 0.01, 3), round(inner_y, 3), round(float(hop[:, 2].max()), 3)]}
+# Every part that reaches into the hopper box, for building a hollow hopper collider.
+report["hopper_region_parts"] = []
+_hmin, _hmax = np.array(hopper_box["min"]), np.array(hopper_box["max"])
+for p in parts:
+    P = to_urdf(p["V"])
+    lo, hi = P.min(0), P.max(0)
+    if np.all(hi > _hmin - 0.02) and np.all(lo < _hmax + 0.02) and p["diag"] >= MIN_PART_M:
+        report["hopper_region_parts"].append({"name": p["name"], "link": p["link"], "min": [round(float(v), 3) for v in lo], "max": [round(float(v), 3) for v in hi]})
 sim_meta = {
     "hopper": hopper_box,
     "intake": {"link": "intake_arm", "point": [round(float(v), 4) for v in pick_link], "diameter": 0.45,
@@ -416,6 +492,15 @@ xml = ['<?xml version="1.0"?>\n<robot name="sphinx_8567">\n']
 xml.append(link_xml("base_link", "base_link", 45.0))
 xml.append(link_xml("intake_arm", "intake_arm", 3.0, "0.3 0.3 0.3 1"))
 xml.append(link_xml("hood", "hood", 1.5, "0.3 0.3 0.3 1"))
+# Hollow-hopper pieces: welded to their link (fixed joint, zero offset, meshes in its frame).
+for link, names in pieces.items():
+    for name in names[1:]:
+        rgba = "0.45 0.2 0.6 1" if link == "base_link" else "0.3 0.3 0.3 1"
+        xml.append(link_xml(name, name, 0.05, rgba))
+        xml.append(f"""  <joint name="{name}_weld" type="fixed">
+    <parent link="{link}"/><child link="{name}"/><origin xyz="0 0 0"/>
+  </joint>
+""")
 xml.append(f"""  <joint name="dof_intake_pivot" type="revolute">
     <parent link="base_link"/><child link="intake_arm"/>
     <origin xyz="{xyz(intake_o)}"/><axis xyz="{axis(intake_axis)}"/>

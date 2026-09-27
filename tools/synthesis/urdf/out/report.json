@@ -15,9 +15,252 @@
     1.0,
     0.0
   ],
+  "hollow_hopper": {
+    "base_link": {
+      "pieces": 42,
+      "pieces_still_in_void": 5,
+      "in_void": [
+        {
+          "parts": [
+            "fin body"
+          ],
+          "void_points": 2,
+          "min": [
+            -0.075,
+            -0.002,
+            0.135
+          ],
+          "max": [
+            0.175,
+            0.001,
+            0.27
+          ]
+        },
+        {
+          "parts": [
+            "Minimal"
+          ],
+          "void_points": 2,
+          "min": [
+            0.007,
+            -0.3,
+            0.429
+          ],
+          "max": [
+            0.057,
+            -0.22,
+            0.484
+          ]
+        },
+        {
+          "parts": [
+            "Part 28"
+          ],
+          "void_points": 4,
+          "min": [
+            -0.013,
+            -0.318,
+            0.406
+          ],
+          "max": [
+            0.038,
+            -0.21,
+            0.501
+          ]
+        },
+        {
+          "parts": [
+            "Part 29"
+          ],
+          "void_points": 2,
+          "min": [
+            -0.013,
+            -0.318,
+            0.405
+          ],
+          "max": [
+            0.038,
+            -0.213,
+            0.494
+          ]
+        },
+        {
+          "parts": [
+            "Stationary Plate"
+          ],
+          "void_points": 1,
+          "min": [
+            -0.343,
+            -0.181,
+            0.041
+          ],
+          "max": [
+            0.039,
+            -0.177,
+            0.435
+          ]
+        }
+      ]
+    },
+    "intake_arm": {
+      "pieces": 41,
+      "pieces_still_in_void": 9,
+      "in_void": [
+        {
+          "parts": [
+            "Part 26"
+          ],
+          "void_points": 1,
+          "min": [
+            0.133,
+            0.268,
+            0.382
+          ],
+          "max": [
+            0.23,
+            0.312,
+            0.509
+          ]
+        },
+        {
+          "parts": [
+            "3\" Compliant Wheel (60A, 1\" Wide, 1/2\" Hex Bore)"
+          ],
+          "void_points": 1,
+          "min": [
+            0.147,
+            0.225,
+            0.426
+          ],
+          "max": [
+            0.223,
+            0.25,
+            0.503
+          ]
+        },
+        {
+          "parts": [
+            "24t Aluminum Pulley (HTD 5mm, 18.5mm Wide, 1/2\" Hex Bore)"
+          ],
+          "void_points": 1,
+          "min": [
+            0.153,
+            0.288,
+            0.402
+          ],
+          "max": [
+            0.194,
+            0.313,
+            0.443
+          ]
+        },
+        {
+          "parts": [
+            "131t 5mm Belt"
+          ],
+          "void_points": 3,
+          "min": [
+            0.153,
+            0.293,
+            0.156
+          ],
+          "max": [
+            0.3,
+            0.308,
+            0.444
+          ]
+        },
+        {
+          "parts": [
+            "3\" Compliant Wheel (60A, 1\" Wide, 1/2\" Hex Bore)"
+          ],
+          "void_points": 1,
+          "min": [
+            0.147,
+            0.174,
+            0.426
+          ],
+          "max": [
+            0.223,
+            0.199,
+            0.503
+          ]
+        },
+        {
+          "parts": [
+            "3\" Compliant Wheel (60A, 1\" Wide, 1/2\" Hex Bore)"
+          ],
+          "void_points": 1,
+          "min": [
+            0.147,
+            -0.08,
+            0.426
+          ],
+          "max": [
+            0.223,
+            -0.055,
+            0.503
+          ]
+        },
+        {
+          "parts": [
+            "3\" Compliant Wheel (60A, 1\" Wide, 1/2\" Hex Bore)"
+          ],
+          "void_points": 1,
+          "min": [
+            0.147,
+            -0.131,
+            0.426
+          ],
+          "max": [
+            0.223,
+            -0.105,
+            0.503
+          ]
+        },
+        {
+          "parts": [
+            "3\" Compliant Wheel (60A, 1\" Wide, 1/2\" Hex Bore)"
+          ],
+          "void_points": 1,
+          "min": [
+            0.147,
+            -0.182,
+            0.426
+          ],
+          "max": [
+            0.223,
+            -0.156,
+            0.503
+          ]
+        },
+        {
+          "parts": [
+            "80t 5mm Belt"
+          ],
+          "void_points": 2,
+          "min": [
+            0.086,
+            -0.305,
+            0.328
+          ],
+          "max": [
+            0.206,
+            -0.29,
+            0.485
+          ]
+        }
+      ]
+    },
+    "hood": {
+      "pieces": 1,
+      "pieces_still_in_void": 0,
+      "in_void": []
+    }
+  },
   "base_link": {
     "parts": 232,
-    "triangles": 94129,
+    "pieces": 42,
     "origin_m": [
       0.0,
       0.0,
@@ -26,7 +269,7 @@
   },
   "intake_arm": {
     "parts": 62,
-    "triangles": 69189,
+    "pieces": 41,
     "origin_m": [
       0.279,
       0.327,
@@ -35,7 +278,7 @@
   },
   "hood": {
     "parts": 46,
-    "triangles": 12000,
+    "pieces": 1,
     "origin_m": [
       -0.075,
       0.0,
@@ -174,6 +417,4040 @@
       ]
     ]
   },
+  "hopper_region_parts": [
+    {
+      "name": "fin sandwich plates",
+      "link": "base_link",
+      "min": [
+        -0.135,
+        0.001,
+        0.14
+      ],
+      "max": [
+        0.032,
+        0.005,
+        0.27
+      ]
+    },
+    {
+      "name": "Hopper Slider Guide Plate",
+      "link": "base_link",
+      "min": [
+        0.115,
+        -0.351,
+        0.234
+      ],
+      "max": [
+        0.595,
+        -0.349,
+        0.31
+      ]
+    },
+    {
+      "name": "wooden bracket",
+      "link": "base_link",
+      "min": [
+        0.604,
+        -0.346,
+        0.242
+      ],
+      "max": [
+        0.63,
+        -0.321,
+        0.501
+      ]
+    },
+    {
+      "name": "Hopper Slider Guide Plate",
+      "link": "base_link",
+      "min": [
+        0.115,
+        0.349,
+        0.387
+      ],
+      "max": [
+        0.595,
+        0.351,
+        0.463
+      ]
+    },
+    {
+      "name": "Hopper Slider Guide Plate",
+      "link": "base_link",
+      "min": [
+        0.115,
+        -0.351,
+        0.387
+      ],
+      "max": [
+        0.595,
+        -0.349,
+        0.463
+      ]
+    },
+    {
+      "name": "Part 32",
+      "link": "base_link",
+      "min": [
+        -0.016,
+        -0.339,
+        0.106
+      ],
+      "max": [
+        -0.013,
+        -0.23,
+        0.501
+      ]
+    },
+    {
+      "name": "Hopper Slider Guide Plate",
+      "link": "base_link",
+      "min": [
+        0.115,
+        0.349,
+        0.234
+      ],
+      "max": [
+        0.595,
+        0.351,
+        0.31
+      ]
+    },
+    {
+      "name": "Part 29",
+      "link": "base_link",
+      "min": [
+        -0.013,
+        -0.318,
+        0.405
+      ],
+      "max": [
+        0.038,
+        -0.213,
+        0.494
+      ]
+    },
+    {
+      "name": "mirrored wooden bracket",
+      "link": "base_link",
+      "min": [
+        0.604,
+        0.321,
+        0.242
+      ],
+      "max": [
+        0.63,
+        0.346,
+        0.501
+      ]
+    },
+    {
+      "name": "silicone cover",
+      "link": "base_link",
+      "min": [
+        -0.051,
+        -0.189,
+        0.096
+      ],
+      "max": [
+        -0.013,
+        0.189,
+        0.135
+      ]
+    },
+    {
+      "name": "1/2\" Hex Clamping Shaft Collar (Heavy Duty, Split)",
+      "link": "base_link",
+      "min": [
+        -0.048,
+        -0.243,
+        0.1
+      ],
+      "max": [
+        -0.016,
+        -0.23,
+        0.131
+      ]
+    },
+    {
+      "name": "1/2\" Rounded Hex (26\" L, 13.75mm OD, 7075)",
+      "link": "base_link",
+      "min": [
+        -0.039,
+        -0.341,
+        0.109
+      ],
+      "max": [
+        -0.025,
+        0.319,
+        0.122
+      ]
+    },
+    {
+      "name": "Aluminum Thrifty Metahub - 24 Tooth HTD 5mm Pulley",
+      "link": "base_link",
+      "min": [
+        0.03,
+        -0.218,
+        0.137
+      ],
+      "max": [
+        0.071,
+        -0.173,
+        0.178
+      ]
+    },
+    {
+      "name": "1/2\" Hex Bore Bearing (1.125\" OD, 0.312\" WD, Shielded, Flanged)",
+      "link": "base_link",
+      "min": [
+        0.035,
+        -0.218,
+        0.142
+      ],
+      "max": [
+        0.066,
+        -0.21,
+        0.173
+      ]
+    },
+    {
+      "name": "Part 36",
+      "link": "base_link",
+      "min": [
+        0.007,
+        -0.225,
+        0.102
+      ],
+      "max": [
+        0.035,
+        -0.21,
+        0.126
+      ]
+    },
+    {
+      "name": "#10-32 x 0.5\" L Shaft End Screw (V2, Steel, Black Oxide)",
+      "link": "base_link",
+      "min": [
+        0.211,
+        0.216,
+        0.219
+      ],
+      "max": [
+        0.228,
+        0.232,
+        0.236
+      ]
+    },
+    {
+      "name": "Part 36",
+      "link": "base_link",
+      "min": [
+        0.077,
+        -0.225,
+        0.139
+      ],
+      "max": [
+        0.104,
+        -0.21,
+        0.163
+      ]
+    },
+    {
+      "name": "1/2\" Hex Bore Round Roller Hub (1-1/8\" OD, 3/4\" WD)",
+      "link": "base_link",
+      "min": [
+        -0.048,
+        0.179,
+        0.1
+      ],
+      "max": [
+        -0.016,
+        0.198,
+        0.131
+      ]
+    },
+    {
+      "name": "roller plate",
+      "link": "base_link",
+      "min": [
+        -0.064,
+        0.225,
+        0.084
+      ],
+      "max": [
+        0.252,
+        0.229,
+        0.259
+      ]
+    },
+    {
+      "name": "roller",
+      "link": "base_link",
+      "min": [
+        0.204,
+        -0.195,
+        0.211
+      ],
+      "max": [
+        0.236,
+        0.195,
+        0.243
+      ]
+    },
+    {
+      "name": "Aluminum Thrifty Metahub - 24 Tooth HTD 5mm Pulley",
+      "link": "base_link",
+      "min": [
+        0.199,
+        0.173,
+        0.207
+      ],
+      "max": [
+        0.24,
+        0.218,
+        0.248
+      ]
+    },
+    {
+      "name": "1/2\" Hex Bore Bearing (1.125\" OD, 0.312\" WD, Shielded, Flanged)",
+      "link": "base_link",
+      "min": [
+        0.204,
+        0.21,
+        0.212
+      ],
+      "max": [
+        0.235,
+        0.218,
+        0.243
+      ]
+    },
+    {
+      "name": "1/2\" Hex Clamping Shaft Collar (Heavy Duty, Split)",
+      "link": "base_link",
+      "min": [
+        -0.048,
+        -0.222,
+        0.1
+      ],
+      "max": [
+        -0.016,
+        -0.21,
+        0.131
+      ]
+    },
+    {
+      "name": "18t Aluminum Pulley (HTD 5mm, 15mm Wide, 1/2\" Hex Bore)",
+      "link": "base_link",
+      "min": [
+        -0.048,
+        -0.341,
+        0.1
+      ],
+      "max": [
+        -0.016,
+        -0.319,
+        0.132
+      ]
+    },
+    {
+      "name": "#10-32 x 0.5\" L Shaft End Screw (V2, Steel, Black Oxide)",
+      "link": "base_link",
+      "min": [
+        0.122,
+        -0.232,
+        0.194
+      ],
+      "max": [
+        0.139,
+        -0.216,
+        0.211
+      ]
+    },
+    {
+      "name": "Aluminum Thrifty Metahub - 24 Tooth HTD 5mm Pulley",
+      "link": "base_link",
+      "min": [
+        0.11,
+        -0.218,
+        0.182
+      ],
+      "max": [
+        0.151,
+        -0.173,
+        0.223
+      ]
+    },
+    {
+      "name": "1/2\" Hex Bore Bearing (1.125\" OD, 0.312\" WD, Shielded, Flanged)",
+      "link": "base_link",
+      "min": [
+        0.115,
+        -0.218,
+        0.187
+      ],
+      "max": [
+        0.146,
+        -0.21,
+        0.219
+      ]
+    },
+    {
+      "name": "silicone cover",
+      "link": "base_link",
+      "min": [
+        0.112,
+        -0.189,
+        0.184
+      ],
+      "max": [
+        0.15,
+        0.189,
+        0.222
+      ]
+    },
+    {
+      "name": "roller belt 61T 5M",
+      "link": "base_link",
+      "min": [
+        0.03,
+        -0.21,
+        0.137
+      ],
+      "max": [
+        0.151,
+        -0.197,
+        0.223
+      ]
+    },
+    {
+      "name": "24t Aluminum Pulley (HTD 5mm, 18.5mm Wide, 1/2\" Hex Bore)",
+      "link": "base_link",
+      "min": [
+        -0.053,
+        0.194,
+        0.095
+      ],
+      "max": [
+        -0.012,
+        0.219,
+        0.136
+      ]
+    },
+    {
+      "name": "roller belt 61T 5M",
+      "link": "base_link",
+      "min": [
+        -0.053,
+        0.197,
+        0.095
+      ],
+      "max": [
+        0.07,
+        0.21,
+        0.178
+      ]
+    },
+    {
+      "name": "motor belt 47T 5M",
+      "link": "base_link",
+      "min": [
+        -0.118,
+        -0.333,
+        0.1
+      ],
+      "max": [
+        -0.017,
+        -0.321,
+        0.148
+      ]
+    },
+    {
+      "name": "1/2\" Hex Bore Bearing (1.125\" OD, 0.313\" WD, Shielded, Flanged)",
+      "link": "base_link",
+      "min": [
+        -0.048,
+        -0.319,
+        0.1
+      ],
+      "max": [
+        -0.017,
+        -0.311,
+        0.131
+      ]
+    },
+    {
+      "name": "#10-32 x 0.5\" L Shaft End Screw (V2, Steel, Black Oxide)",
+      "link": "base_link",
+      "min": [
+        0.042,
+        0.216,
+        0.149
+      ],
+      "max": [
+        0.059,
+        0.232,
+        0.166
+      ]
+    },
+    {
+      "name": "roller hex shaft",
+      "link": "base_link",
+      "min": [
+        0.213,
+        -0.225,
+        0.221
+      ],
+      "max": [
+        0.227,
+        0.225,
+        0.234
+      ]
+    },
+    {
+      "name": "Middle Plate",
+      "link": "base_link",
+      "min": [
+        -0.344,
+        -0.002,
+        0.044
+      ],
+      "max": [
+        0.037,
+        0.001,
+        0.437
+      ]
+    },
+    {
+      "name": "2\" x 1\" x 0.0625\" Aluminum Box Tube (16\" L, Full Pattern, 0.5\" Pitch)",
+      "link": "base_link",
+      "min": [
+        -0.013,
+        0.318,
+        0.095
+      ],
+      "max": [
+        0.038,
+        0.343,
+        0.501
+      ]
+    },
+    {
+      "name": "Aluminum Thrifty Metahub - 24 Tooth HTD 5mm Pulley",
+      "link": "base_link",
+      "min": [
+        0.199,
+        -0.218,
+        0.207
+      ],
+      "max": [
+        0.24,
+        -0.173,
+        0.248
+      ]
+    },
+    {
+      "name": "1/2\" Hex Bore Bearing (1.125\" OD, 0.312\" WD, Shielded, Flanged)",
+      "link": "base_link",
+      "min": [
+        0.204,
+        -0.218,
+        0.212
+      ],
+      "max": [
+        0.235,
+        -0.21,
+        0.243
+      ]
+    },
+    {
+      "name": "Part 34",
+      "link": "base_link",
+      "min": [
+        -0.018,
+        -0.229,
+        0.084
+      ],
+      "max": [
+        0.066,
+        0.229,
+        0.129
+      ]
+    },
+    {
+      "name": "#10-32 x 0.5\" L Shaft End Screw (V2, Steel, Black Oxide)",
+      "link": "base_link",
+      "min": [
+        0.042,
+        -0.232,
+        0.149
+      ],
+      "max": [
+        0.059,
+        -0.216,
+        0.166
+      ]
+    },
+    {
+      "name": "silicone cover",
+      "link": "base_link",
+      "min": [
+        0.201,
+        -0.189,
+        0.208
+      ],
+      "max": [
+        0.239,
+        0.189,
+        0.246
+      ]
+    },
+    {
+      "name": "roller hex shaft",
+      "link": "base_link",
+      "min": [
+        0.124,
+        -0.225,
+        0.196
+      ],
+      "max": [
+        0.137,
+        0.225,
+        0.21
+      ]
+    },
+    {
+      "name": "roller",
+      "link": "base_link",
+      "min": [
+        0.115,
+        -0.195,
+        0.187
+      ],
+      "max": [
+        0.147,
+        0.195,
+        0.219
+      ]
+    },
+    {
+      "name": "Part 36",
+      "link": "base_link",
+      "min": [
+        0.007,
+        0.21,
+        0.102
+      ],
+      "max": [
+        0.035,
+        0.225,
+        0.126
+      ]
+    },
+    {
+      "name": "1/2\" Hex Bore Bearing (1.125\" OD, 0.313\" WD, Shielded, Flanged)",
+      "link": "base_link",
+      "min": [
+        -0.048,
+        0.222,
+        0.1
+      ],
+      "max": [
+        -0.017,
+        0.23,
+        0.131
+      ]
+    },
+    {
+      "name": "#10-32 x 0.5\" L Shaft End Screw (V2, Steel, Black Oxide)",
+      "link": "base_link",
+      "min": [
+        0.122,
+        0.216,
+        0.194
+      ],
+      "max": [
+        0.139,
+        0.232,
+        0.211
+      ]
+    },
+    {
+      "name": "Hopper Static Left Side Plate",
+      "link": "base_link",
+      "min": [
+        -0.017,
+        0.343,
+        0.044
+      ],
+      "max": [
+        0.313,
+        0.346,
+        0.501
+      ]
+    },
+    {
+      "name": "silicone cover",
+      "link": "base_link",
+      "min": [
+        0.031,
+        -0.189,
+        0.138
+      ],
+      "max": [
+        0.069,
+        0.189,
+        0.177
+      ]
+    },
+    {
+      "name": "roller belt 61T 5M",
+      "link": "base_link",
+      "min": [
+        0.11,
+        0.197,
+        0.183
+      ],
+      "max": [
+        0.24,
+        0.21,
+        0.248
+      ]
+    },
+    {
+      "name": "1/2\" Hex Bore Bearing (1.125\" OD, 0.313\" WD, Shielded, Flanged)",
+      "link": "base_link",
+      "min": [
+        -0.048,
+        -0.23,
+        0.1
+      ],
+      "max": [
+        -0.017,
+        -0.222,
+        0.131
+      ]
+    },
+    {
+      "name": "Part 35",
+      "link": "base_link",
+      "min": [
+        0.147,
+        -0.229,
+        0.171
+      ],
+      "max": [
+        0.232,
+        0.229,
+        0.198
+      ]
+    },
+    {
+      "name": "Part 36",
+      "link": "base_link",
+      "min": [
+        0.191,
+        0.21,
+        0.187
+      ],
+      "max": [
+        0.218,
+        0.225,
+        0.208
+      ]
+    },
+    {
+      "name": "roller plate",
+      "link": "base_link",
+      "min": [
+        -0.064,
+        -0.229,
+        0.084
+      ],
+      "max": [
+        0.252,
+        -0.225,
+        0.259
+      ]
+    },
+    {
+      "name": "1/2\" Hex Bore Custom Spacer (0.75\" OD,2.687\" L)",
+      "link": "base_link",
+      "min": [
+        -0.042,
+        -0.311,
+        0.106
+      ],
+      "max": [
+        -0.023,
+        -0.243,
+        0.125
+      ]
+    },
+    {
+      "name": "roller hex shaft",
+      "link": "base_link",
+      "min": [
+        0.043,
+        -0.225,
+        0.151
+      ],
+      "max": [
+        0.057,
+        0.225,
+        0.164
+      ]
+    },
+    {
+      "name": "Part 36",
+      "link": "base_link",
+      "min": [
+        0.077,
+        0.21,
+        0.139
+      ],
+      "max": [
+        0.104,
+        0.225,
+        0.163
+      ]
+    },
+    {
+      "name": "motor pivot plate",
+      "link": "base_link",
+      "min": [
+        -0.141,
+        -0.317,
+        0.044
+      ],
+      "max": [
+        0.038,
+        -0.311,
+        0.171
+      ]
+    },
+    {
+      "name": "rotation stopper",
+      "link": "base_link",
+      "min": [
+        0.187,
+        -0.21,
+        0.044
+      ],
+      "max": [
+        0.262,
+        -0.185,
+        0.154
+      ]
+    },
+    {
+      "name": "roller",
+      "link": "base_link",
+      "min": [
+        -0.048,
+        -0.195,
+        0.1
+      ],
+      "max": [
+        -0.016,
+        0.195,
+        0.131
+      ]
+    },
+    {
+      "name": "Part 36",
+      "link": "base_link",
+      "min": [
+        0.191,
+        -0.225,
+        0.187
+      ],
+      "max": [
+        0.218,
+        -0.21,
+        0.208
+      ]
+    },
+    {
+      "name": "1/2\" Rounded Hex (0.5\" L, 13.75mm OD, 7075)",
+      "link": "base_link",
+      "min": [
+        0.218,
+        -0.204,
+        0.109
+      ],
+      "max": [
+        0.231,
+        -0.191,
+        0.123
+      ]
+    },
+    {
+      "name": "fin sandwich plates",
+      "link": "base_link",
+      "min": [
+        -0.135,
+        -0.005,
+        0.14
+      ],
+      "max": [
+        0.032,
+        -0.002,
+        0.27
+      ]
+    },
+    {
+      "name": "fin body",
+      "link": "base_link",
+      "min": [
+        -0.075,
+        -0.002,
+        0.135
+      ],
+      "max": [
+        0.175,
+        0.001,
+        0.27
+      ]
+    },
+    {
+      "name": "#10-32 x 0.5\" L Shaft End Screw (V2, Steel, Black Oxide)",
+      "link": "base_link",
+      "min": [
+        0.211,
+        -0.232,
+        0.219
+      ],
+      "max": [
+        0.228,
+        -0.216,
+        0.236
+      ]
+    },
+    {
+      "name": "Robot Frame",
+      "link": "base_link",
+      "min": [
+        -0.343,
+        -0.343,
+        -0.001
+      ],
+      "max": [
+        0.343,
+        0.343,
+        0.156
+      ]
+    },
+    {
+      "name": "1/2\" Hex Bore Custom Spacer (0.75\" OD,3.125\" L)",
+      "link": "base_link",
+      "min": [
+        -0.042,
+        0.23,
+        0.106
+      ],
+      "max": [
+        -0.023,
+        0.31,
+        0.125
+      ]
+    },
+    {
+      "name": "1/2\" Hex Bore Bearing (1.125\" OD, 0.313\" WD, Shielded, Flanged)",
+      "link": "base_link",
+      "min": [
+        -0.048,
+        0.31,
+        0.1
+      ],
+      "max": [
+        -0.017,
+        0.317,
+        0.131
+      ]
+    },
+    {
+      "name": "roller",
+      "link": "base_link",
+      "min": [
+        0.034,
+        -0.195,
+        0.142
+      ],
+      "max": [
+        0.066,
+        0.195,
+        0.173
+      ]
+    },
+    {
+      "name": "pivot plate",
+      "link": "base_link",
+      "min": [
+        -0.064,
+        0.311,
+        0.044
+      ],
+      "max": [
+        0.038,
+        0.317,
+        0.154
+      ]
+    },
+    {
+      "name": "1/2\" Hex Bore Round Roller Hub (1-1/8\" OD, 3/4\" WD)",
+      "link": "base_link",
+      "min": [
+        -0.048,
+        -0.198,
+        0.1
+      ],
+      "max": [
+        -0.016,
+        -0.179,
+        0.131
+      ]
+    },
+    {
+      "name": "Aluminum Thrifty Metahub - 24 Tooth HTD 5mm Pulley",
+      "link": "base_link",
+      "min": [
+        0.03,
+        0.173,
+        0.137
+      ],
+      "max": [
+        0.071,
+        0.218,
+        0.178
+      ]
+    },
+    {
+      "name": "1/2\" Hex Bore Bearing (1.125\" OD, 0.312\" WD, Shielded, Flanged)",
+      "link": "base_link",
+      "min": [
+        0.035,
+        0.21,
+        0.142
+      ],
+      "max": [
+        0.066,
+        0.218,
+        0.173
+      ]
+    },
+    {
+      "name": "Part 33",
+      "link": "base_link",
+      "min": [
+        0.063,
+        -0.229,
+        0.126
+      ],
+      "max": [
+        0.141,
+        0.229,
+        0.171
+      ]
+    },
+    {
+      "name": "Part 32",
+      "link": "base_link",
+      "min": [
+        -0.016,
+        0.232,
+        0.106
+      ],
+      "max": [
+        -0.013,
+        0.342,
+        0.501
+      ]
+    },
+    {
+      "name": "1/2\" Hex Bore Bearing (1.125\" OD, 0.312\" WD, Shielded, Flanged)",
+      "link": "base_link",
+      "min": [
+        0.115,
+        0.21,
+        0.187
+      ],
+      "max": [
+        0.146,
+        0.218,
+        0.218
+      ]
+    },
+    {
+      "name": "Aluminum Thrifty Metahub - 24 Tooth HTD 5mm Pulley",
+      "link": "base_link",
+      "min": [
+        0.11,
+        0.173,
+        0.182
+      ],
+      "max": [
+        0.151,
+        0.218,
+        0.223
+      ]
+    },
+    {
+      "name": "L Gusset (#10, 0.098\" Thick)",
+      "link": "base_link",
+      "min": [
+        -0.089,
+        -0.343,
+        0.095
+      ],
+      "max": [
+        -0.019,
+        -0.273,
+        0.097
+      ]
+    },
+    {
+      "name": "Length Tube",
+      "link": "base_link",
+      "min": [
+        -0.235,
+        0.317,
+        0.044
+      ],
+      "max": [
+        0.235,
+        0.343,
+        0.095
+      ]
+    },
+    {
+      "name": "Bumper",
+      "link": "base_link",
+      "min": [
+        -0.425,
+        -0.427,
+        0.03
+      ],
+      "max": [
+        0.425,
+        0.427,
+        0.151
+      ]
+    },
+    {
+      "name": "Width Tube",
+      "link": "base_link",
+      "min": [
+        0.317,
+        -0.235,
+        0.044
+      ],
+      "max": [
+        0.343,
+        0.235,
+        0.095
+      ]
+    },
+    {
+      "name": "L Gusset (#10, 0.098\" Thick)",
+      "link": "base_link",
+      "min": [
+        -0.089,
+        0.273,
+        0.095
+      ],
+      "max": [
+        -0.019,
+        0.343,
+        0.097
+      ]
+    },
+    {
+      "name": "Simplified PDH",
+      "link": "base_link",
+      "min": [
+        0.027,
+        -0.057,
+        0.044
+      ],
+      "max": [
+        0.254,
+        0.057,
+        0.083
+      ]
+    },
+    {
+      "name": "SDS MK5 Turret Assembly",
+      "link": "module",
+      "min": [
+        0.225,
+        0.225,
+        0.024
+      ],
+      "max": [
+        0.327,
+        0.327,
+        0.108
+      ]
+    },
+    {
+      "name": "#10-32 x 2-1/2\" L SHCS (Steel, Black Oxide)",
+      "link": "module",
+      "min": [
+        0.187,
+        0.326,
+        0.036
+      ],
+      "max": [
+        0.194,
+        0.334,
+        0.104
+      ]
+    },
+    {
+      "name": "#10-32 x 2-1/2\" L SHCS (Steel, Black Oxide)",
+      "link": "module",
+      "min": [
+        0.326,
+        0.326,
+        0.036
+      ],
+      "max": [
+        0.334,
+        0.334,
+        0.104
+      ]
+    },
+    {
+      "name": "SDS MK5 Billet Wheel",
+      "link": "module",
+      "min": [
+        0.221,
+        0.221,
+        0.0
+      ],
+      "max": [
+        0.332,
+        0.332,
+        0.1
+      ]
+    },
+    {
+      "name": "#10 Aluminum Spacer (2\" L, 0.375\" OD)",
+      "link": "module",
+      "min": [
+        0.325,
+        0.325,
+        0.044
+      ],
+      "max": [
+        0.335,
+        0.335,
+        0.095
+      ]
+    },
+    {
+      "name": "#10-32 x 2-1/2\" L SHCS (Steel, Black Oxide)",
+      "link": "module",
+      "min": [
+        0.326,
+        0.225,
+        0.036
+      ],
+      "max": [
+        0.334,
+        0.233,
+        0.104
+      ]
+    },
+    {
+      "name": "#10-32 x 2-1/2\" L SHCS (Steel, Black Oxide)",
+      "link": "module",
+      "min": [
+        0.225,
+        0.326,
+        0.036
+      ],
+      "max": [
+        0.233,
+        0.334,
+        0.104
+      ]
+    },
+    {
+      "name": "#10-32 x 2-1/2\" L SHCS (Steel, Black Oxide)",
+      "link": "module",
+      "min": [
+        0.326,
+        0.187,
+        0.036
+      ],
+      "max": [
+        0.334,
+        0.194,
+        0.104
+      ]
+    },
+    {
+      "name": "NEO Brushless Motor V1.1",
+      "link": "module",
+      "min": [
+        0.145,
+        0.256,
+        0.058
+      ],
+      "max": [
+        0.214,
+        0.316,
+        0.151
+      ]
+    },
+    {
+      "name": "SDS MK5i Top Assembly",
+      "link": "module",
+      "min": [
+        0.154,
+        0.154,
+        0.089
+      ],
+      "max": [
+        0.343,
+        0.343,
+        0.156
+      ]
+    },
+    {
+      "name": "Vortex Shaft (8mm Keyed)",
+      "link": "module",
+      "min": [
+        0.279,
+        0.177,
+        0.044
+      ],
+      "max": [
+        0.294,
+        0.191,
+        0.151
+      ]
+    },
+    {
+      "name": "",
+      "link": "base_link",
+      "min": [
+        0.257,
+        0.154,
+        0.036
+      ],
+      "max": [
+        0.315,
+        0.214,
+        0.103
+      ]
+    },
+    {
+      "name": "SPARK Flex Brushless Motor Controller",
+      "link": "module",
+      "min": [
+        0.257,
+        0.149,
+        0.088
+      ],
+      "max": [
+        0.315,
+        0.214,
+        0.116
+      ]
+    },
+    {
+      "name": "Length Tube",
+      "link": "base_link",
+      "min": [
+        -0.235,
+        -0.343,
+        0.044
+      ],
+      "max": [
+        0.235,
+        -0.318,
+        0.095
+      ]
+    },
+    {
+      "name": "#10-32 x 2-1/2\" L SHCS (Steel, Black Oxide)",
+      "link": "module",
+      "min": [
+        0.225,
+        -0.334,
+        0.036
+      ],
+      "max": [
+        0.233,
+        -0.326,
+        0.104
+      ]
+    },
+    {
+      "name": "#10-32 x 2-1/2\" L SHCS (Steel, Black Oxide)",
+      "link": "module",
+      "min": [
+        0.326,
+        -0.233,
+        0.036
+      ],
+      "max": [
+        0.334,
+        -0.225,
+        0.104
+      ]
+    },
+    {
+      "name": "#10-32 x 2-1/2\" L SHCS (Steel, Black Oxide)",
+      "link": "module",
+      "min": [
+        0.326,
+        -0.194,
+        0.036
+      ],
+      "max": [
+        0.334,
+        -0.187,
+        0.104
+      ]
+    },
+    {
+      "name": "SDS MK5 Billet Wheel",
+      "link": "module",
+      "min": [
+        0.221,
+        -0.332,
+        0.0
+      ],
+      "max": [
+        0.332,
+        -0.221,
+        0.1
+      ]
+    },
+    {
+      "name": "#10-32 x 2-1/2\" L SHCS (Steel, Black Oxide)",
+      "link": "module",
+      "min": [
+        0.187,
+        -0.334,
+        0.036
+      ],
+      "max": [
+        0.194,
+        -0.326,
+        0.104
+      ]
+    },
+    {
+      "name": "NEO Brushless Motor V1.1",
+      "link": "module",
+      "min": [
+        0.256,
+        -0.214,
+        0.058
+      ],
+      "max": [
+        0.316,
+        -0.145,
+        0.151
+      ]
+    },
+    {
+      "name": "#10-32 x 2-1/2\" L SHCS (Steel, Black Oxide)",
+      "link": "module",
+      "min": [
+        0.326,
+        -0.334,
+        0.036
+      ],
+      "max": [
+        0.334,
+        -0.326,
+        0.104
+      ]
+    },
+    {
+      "name": "SDS MK5 Turret Assembly",
+      "link": "module",
+      "min": [
+        0.225,
+        -0.327,
+        0.024
+      ],
+      "max": [
+        0.327,
+        -0.225,
+        0.108
+      ]
+    },
+    {
+      "name": "#10 Aluminum Spacer (2\" L, 0.375\" OD)",
+      "link": "module",
+      "min": [
+        0.325,
+        -0.335,
+        0.044
+      ],
+      "max": [
+        0.335,
+        -0.325,
+        0.095
+      ]
+    },
+    {
+      "name": "",
+      "link": "base_link",
+      "min": [
+        0.154,
+        -0.315,
+        0.036
+      ],
+      "max": [
+        0.214,
+        -0.257,
+        0.103
+      ]
+    },
+    {
+      "name": "Vortex Shaft (8mm Keyed)",
+      "link": "module",
+      "min": [
+        0.177,
+        -0.294,
+        0.044
+      ],
+      "max": [
+        0.191,
+        -0.279,
+        0.151
+      ]
+    },
+    {
+      "name": "SPARK Flex Brushless Motor Controller",
+      "link": "module",
+      "min": [
+        0.149,
+        -0.315,
+        0.088
+      ],
+      "max": [
+        0.214,
+        -0.257,
+        0.116
+      ]
+    },
+    {
+      "name": "SDS MK5i Top Assembly",
+      "link": "module",
+      "min": [
+        0.154,
+        -0.343,
+        0.089
+      ],
+      "max": [
+        0.343,
+        -0.154,
+        0.156
+      ]
+    },
+    {
+      "name": "4\" Stealth Wheel (40A, 1/2\" Hex Bore)",
+      "link": "base_link",
+      "min": [
+        -0.126,
+        0.055,
+        0.34
+      ],
+      "max": [
+        -0.024,
+        0.08,
+        0.441
+      ]
+    },
+    {
+      "name": "36t Aluminum Pulley (HTD 5mm, 15mm Wide, 1/2\" Hex Bore)",
+      "link": "base_link",
+      "min": [
+        -0.029,
+        -0.023,
+        0.322
+      ],
+      "max": [
+        0.031,
+        -0.001,
+        0.382
+      ]
+    },
+    {
+      "name": "Stationary Plate",
+      "link": "base_link",
+      "min": [
+        -0.344,
+        0.177,
+        0.041
+      ],
+      "max": [
+        0.039,
+        0.181,
+        0.435
+      ]
+    },
+    {
+      "name": "1/2\" Hex Clamping Shaft Collar (Heavy Duty)",
+      "link": "base_link",
+      "min": [
+        -0.015,
+        -0.032,
+        0.336
+      ],
+      "max": [
+        0.017,
+        -0.019,
+        0.368
+      ]
+    },
+    {
+      "name": "4\" Stealth Wheel (40A, 1/2\" Hex Bore)",
+      "link": "base_link",
+      "min": [
+        -0.126,
+        0.106,
+        0.34
+      ],
+      "max": [
+        -0.024,
+        0.131,
+        0.441
+      ]
+    },
+    {
+      "name": "Stationary Plate",
+      "link": "base_link",
+      "min": [
+        -0.343,
+        -0.181,
+        0.041
+      ],
+      "max": [
+        0.039,
+        -0.177,
+        0.435
+      ]
+    },
+    {
+      "name": "36t Aluminum Pulley (HTD 5mm, 15mm Wide, 1/2\" Hex Bore)",
+      "link": "base_link",
+      "min": [
+        -0.029,
+        -0.214,
+        0.322
+      ],
+      "max": [
+        0.031,
+        -0.192,
+        0.382
+      ]
+    },
+    {
+      "name": "SPARK Flex Brushless Motor Controller",
+      "link": "base_link",
+      "min": [
+        -0.024,
+        -0.177,
+        0.317
+      ],
+      "max": [
+        0.027,
+        -0.149,
+        0.382
+      ]
+    },
+    {
+      "name": "",
+      "link": "base_link",
+      "min": [
+        -0.024,
+        -0.164,
+        0.322
+      ],
+      "max": [
+        0.027,
+        -0.098,
+        0.382
+      ]
+    },
+    {
+      "name": "4\" Stealth Wheel (40A, 1/2\" Hex Bore)",
+      "link": "base_link",
+      "min": [
+        -0.126,
+        -0.055,
+        0.34
+      ],
+      "max": [
+        -0.024,
+        -0.029,
+        0.441
+      ]
+    },
+    {
+      "name": "#10-32 x 0.5\" L Shaft End Screw (V2, Steel, Black Oxide)",
+      "link": "base_link",
+      "min": [
+        -0.007,
+        -0.114,
+        0.344
+      ],
+      "max": [
+        0.01,
+        -0.098,
+        0.361
+      ]
+    },
+    {
+      "name": "Part 22",
+      "link": "hood",
+      "min": [
+        -0.032,
+        0.181,
+        0.324
+      ],
+      "max": [
+        0.032,
+        0.251,
+        0.387
+      ]
+    },
+    {
+      "name": "1/2\" Hex Bore Custom Spacer (0.75\" OD,0.625\" L)",
+      "link": "base_link",
+      "min": [
+        -0.008,
+        -0.192,
+        0.343
+      ],
+      "max": [
+        0.011,
+        -0.176,
+        0.362
+      ]
+    },
+    {
+      "name": "1/2\" Rounded Hex (4.375\" L, 13.75mm OD)",
+      "link": "base_link",
+      "min": [
+        -0.006,
+        -0.032,
+        0.346
+      ],
+      "max": [
+        0.008,
+        0.079,
+        0.359
+      ]
+    },
+    {
+      "name": "4\" Stealth Wheel (40A, 1/2\" Hex Bore)",
+      "link": "base_link",
+      "min": [
+        -0.126,
+        0.08,
+        0.34
+      ],
+      "max": [
+        -0.024,
+        0.106,
+        0.441
+      ]
+    },
+    {
+      "name": "Middle Plate",
+      "link": "base_link",
+      "min": [
+        -0.342,
+        -0.0,
+        0.041
+      ],
+      "max": [
+        0.039,
+        0.004,
+        0.435
+      ]
+    },
+    {
+      "name": "70T 5M 15mm Wide Belt",
+      "link": "base_link",
+      "min": [
+        -0.104,
+        -0.211,
+        0.322
+      ],
+      "max": [
+        0.031,
+        -0.195,
+        0.42
+      ]
+    },
+    {
+      "name": "4\" Stealth Wheel (40A, 1/2\" Hex Bore)",
+      "link": "base_link",
+      "min": [
+        -0.126,
+        -0.105,
+        0.34
+      ],
+      "max": [
+        -0.024,
+        -0.08,
+        0.441
+      ]
+    },
+    {
+      "name": "1/2\" Hex Bore Custom Spacer (0.75\" OD,0.25\" L)",
+      "link": "base_link",
+      "min": [
+        -0.009,
+        -0.001,
+        0.343
+      ],
+      "max": [
+        0.01,
+        0.005,
+        0.362
+      ]
+    },
+    {
+      "name": "#10-32 x 0.5\" L Shaft End Screw (V2, Steel, Black Oxide)",
+      "link": "base_link",
+      "min": [
+        -0.008,
+        0.067,
+        0.344
+      ],
+      "max": [
+        0.009,
+        0.083,
+        0.361
+      ]
+    },
+    {
+      "name": "1/2\" Hex Clamping Shaft Collar (Heavy Duty)",
+      "link": "base_link",
+      "min": [
+        -0.014,
+        -0.227,
+        0.336
+      ],
+      "max": [
+        0.017,
+        -0.214,
+        0.368
+      ]
+    },
+    {
+      "name": "1/2\" Rounded Hex (5\" L, 13.75mm OD)",
+      "link": "base_link",
+      "min": [
+        -0.006,
+        -0.229,
+        0.346
+      ],
+      "max": [
+        0.008,
+        -0.102,
+        0.359
+      ]
+    },
+    {
+      "name": "Robot Signal Light (RSL) (Allen Bradley)",
+      "link": "hood",
+      "min": [
+        -0.022,
+        0.198,
+        0.329
+      ],
+      "max": [
+        0.022,
+        0.243,
+        0.403
+      ]
+    },
+    {
+      "name": "4\" Stealth Wheel (40A, 1/2\" Hex Bore)",
+      "link": "base_link",
+      "min": [
+        -0.126,
+        -0.08,
+        0.34
+      ],
+      "max": [
+        -0.024,
+        -0.054,
+        0.441
+      ]
+    },
+    {
+      "name": "4\" Stealth Wheel (40A, 1/2\" Hex Bore)",
+      "link": "base_link",
+      "min": [
+        -0.126,
+        0.029,
+        0.34
+      ],
+      "max": [
+        -0.024,
+        0.055,
+        0.441
+      ]
+    },
+    {
+      "name": "4\" Stealth Wheel (40A, 1/2\" Hex Bore)",
+      "link": "hood",
+      "min": [
+        -0.126,
+        0.131,
+        0.34
+      ],
+      "max": [
+        -0.025,
+        0.157,
+        0.441
+      ]
+    },
+    {
+      "name": "4\" Stealth Wheel (40A, 1/2\" Hex Bore)",
+      "link": "base_link",
+      "min": [
+        -0.126,
+        -0.156,
+        0.34
+      ],
+      "max": [
+        -0.024,
+        -0.131,
+        0.441
+      ]
+    },
+    {
+      "name": "4\" Stealth Wheel (40A, 1/2\" Hex Bore)",
+      "link": "base_link",
+      "min": [
+        -0.126,
+        -0.131,
+        0.34
+      ],
+      "max": [
+        -0.024,
+        -0.105,
+        0.441
+      ]
+    },
+    {
+      "name": "70T 5M 15mm Wide Belt",
+      "link": "base_link",
+      "min": [
+        -0.105,
+        -0.02,
+        0.322
+      ],
+      "max": [
+        0.031,
+        -0.005,
+        0.42
+      ]
+    },
+    {
+      "name": "",
+      "link": "base_link",
+      "min": [
+        -0.025,
+        0.017,
+        0.322
+      ],
+      "max": [
+        0.026,
+        0.083,
+        0.382
+      ]
+    },
+    {
+      "name": "SPARK Flex Brushless Motor Controller",
+      "link": "base_link",
+      "min": [
+        -0.025,
+        0.003,
+        0.317
+      ],
+      "max": [
+        0.026,
+        0.032,
+        0.382
+      ]
+    },
+    {
+      "name": "1/2\" Rounded Hex (2\" L, 13.75mm OD)",
+      "link": "intake_arm",
+      "min": [
+        0.54,
+        0.27,
+        0.191
+      ],
+      "max": [
+        0.553,
+        0.321,
+        0.204
+      ]
+    },
+    {
+      "name": "Intake Right Side Polycarb Plate",
+      "link": "intake_arm",
+      "min": [
+        0.245,
+        0.313,
+        0.049
+      ],
+      "max": [
+        0.626,
+        0.319,
+        0.323
+      ]
+    },
+    {
+      "name": "1/2\" Hex Bore Bearing (1.125\" OD, 0.313\" WD, Shielded, Flanged)",
+      "link": "intake_arm",
+      "min": [
+        0.482,
+        0.313,
+        0.269
+      ],
+      "max": [
+        0.513,
+        0.321,
+        0.3
+      ]
+    },
+    {
+      "name": "1/2\" Hex Bore Custom Spacer (0.75\" OD,0.281\" L)",
+      "link": "intake_arm",
+      "min": [
+        0.27,
+        0.336,
+        0.168
+      ],
+      "max": [
+        0.289,
+        0.343,
+        0.187
+      ]
+    },
+    {
+      "name": "2\" x 1\" x 0.0625\" Aluminum Box Tube (16\" L, Full Pattern, 0.5\" Pitch)",
+      "link": "base_link",
+      "min": [
+        -0.013,
+        -0.343,
+        0.095
+      ],
+      "max": [
+        0.038,
+        -0.318,
+        0.501
+      ]
+    },
+    {
+      "name": "1/2\" Hex Bore Bearing (1.125\" OD, 0.313\" WD, Shielded, Flanged)",
+      "link": "base_link",
+      "min": [
+        0.073,
+        0.341,
+        0.155
+      ],
+      "max": [
+        0.105,
+        0.349,
+        0.186
+      ]
+    },
+    {
+      "name": "1/2\" Hex Bore Bearing (1.125\" OD, 0.313\" WD, Shielded, Flanged)",
+      "link": "base_link",
+      "min": [
+        0.073,
+        0.311,
+        0.155
+      ],
+      "max": [
+        0.105,
+        0.319,
+        0.186
+      ]
+    },
+    {
+      "name": "Type B wide flat washer 3/8",
+      "link": "base_link",
+      "min": [
+        0.258,
+        0.34,
+        0.256
+      ],
+      "max": [
+        0.29,
+        0.343,
+        0.288
+      ]
+    },
+    {
+      "name": "Robot Frame",
+      "link": "base_link",
+      "min": [
+        -0.343,
+        -0.343,
+        -0.001
+      ],
+      "max": [
+        0.343,
+        0.343,
+        0.156
+      ]
+    },
+    {
+      "name": "long bracket",
+      "link": "base_link",
+      "min": [
+        0.606,
+        -0.346,
+        0.349
+      ],
+      "max": [
+        0.63,
+        -0.308,
+        0.501
+      ]
+    },
+    {
+      "name": "MAX 90 Degree Gearbox (REV)",
+      "link": "base_link",
+      "min": [
+        0.159,
+        -0.343,
+        0.158
+      ],
+      "max": [
+        0.222,
+        -0.292,
+        0.222
+      ]
+    },
+    {
+      "name": "Hopper Static Right Side Plate",
+      "link": "base_link",
+      "min": [
+        -0.017,
+        0.343,
+        0.044
+      ],
+      "max": [
+        0.313,
+        0.346,
+        0.501
+      ]
+    },
+    {
+      "name": "1/2\" Hex Bore Bearing (1.125\" OD, 0.313\" WD, Shielded, Flanged)",
+      "link": "intake_arm",
+      "min": [
+        0.531,
+        0.267,
+        0.182
+      ],
+      "max": [
+        0.562,
+        0.275,
+        0.213
+      ]
+    },
+    {
+      "name": "Type B wide flat washer 3/8",
+      "link": "base_link",
+      "min": [
+        0.258,
+        -0.343,
+        0.256
+      ],
+      "max": [
+        0.29,
+        -0.34,
+        0.288
+      ]
+    },
+    {
+      "name": "2\" Compliant Wheel (60A, 3/4\" Wide, 1/2\" Hex Stretch Bore)",
+      "link": "intake_arm",
+      "min": [
+        0.472,
+        0.071,
+        0.259
+      ],
+      "max": [
+        0.523,
+        0.083,
+        0.31
+      ]
+    },
+    {
+      "name": "2\" Compliant Wheel (60A, 3/4\" Wide, 1/2\" Hex Stretch Bore)",
+      "link": "intake_arm",
+      "min": [
+        0.472,
+        -0.018,
+        0.259
+      ],
+      "max": [
+        0.523,
+        -0.005,
+        0.31
+      ]
+    },
+    {
+      "name": "2\" Compliant Wheel (60A, 3/4\" Wide, 1/2\" Hex Stretch Bore)",
+      "link": "intake_arm",
+      "min": [
+        0.472,
+        -0.221,
+        0.259
+      ],
+      "max": [
+        0.523,
+        -0.209,
+        0.31
+      ]
+    },
+    {
+      "name": "1.125\" OD Bearing Retention Plate (Centered, 2\" C-C)",
+      "link": "intake_arm",
+      "min": [
+        0.468,
+        -0.322,
+        0.267
+      ],
+      "max": [
+        0.527,
+        -0.319,
+        0.302
+      ]
+    },
+    {
+      "name": "2\" Compliant Wheel (60A, 3/4\" Wide, 1/2\" Hex Stretch Bore)",
+      "link": "intake_arm",
+      "min": [
+        0.472,
+        0.122,
+        0.259
+      ],
+      "max": [
+        0.523,
+        0.134,
+        0.31
+      ]
+    },
+    {
+      "name": "1/2\" Hex Bore Bearing (1.125\" OD, 0.313\" WD, Shielded, Flanged)",
+      "link": "intake_arm",
+      "min": [
+        0.264,
+        0.343,
+        0.162
+      ],
+      "max": [
+        0.295,
+        0.351,
+        0.193
+      ]
+    },
+    {
+      "name": "2\" Compliant Wheel (60A, 3/4\" Wide, 1/2\" Hex Stretch Bore)",
+      "link": "intake_arm",
+      "min": [
+        0.472,
+        -0.183,
+        0.259
+      ],
+      "max": [
+        0.523,
+        -0.171,
+        0.31
+      ]
+    },
+    {
+      "name": "2\" Compliant Wheel (60A, 3/4\" Wide, 1/2\" Hex Stretch Bore)",
+      "link": "intake_arm",
+      "min": [
+        0.472,
+        -0.234,
+        0.259
+      ],
+      "max": [
+        0.523,
+        -0.221,
+        0.31
+      ]
+    },
+    {
+      "name": "Type B wide flat washer 3/8",
+      "link": "base_link",
+      "min": [
+        0.258,
+        -0.352,
+        0.256
+      ],
+      "max": [
+        0.29,
+        -0.35,
+        0.288
+      ]
+    },
+    {
+      "name": "Hopper Static Left Side Plate",
+      "link": "base_link",
+      "min": [
+        -0.017,
+        -0.346,
+        0.044
+      ],
+      "max": [
+        0.313,
+        -0.343,
+        0.501
+      ]
+    },
+    {
+      "name": "1/2\" Hex Bore Bearing (1.125\" OD, 0.313\" WD, Shielded, Flanged)",
+      "link": "intake_arm",
+      "min": [
+        0.482,
+        -0.321,
+        0.269
+      ],
+      "max": [
+        0.513,
+        -0.313,
+        0.3
+      ]
+    },
+    {
+      "name": "3\" Compliant Wheel (60A, 1\" Wide, 1/2\" Hex Bore)",
+      "link": "intake_arm",
+      "min": [
+        0.544,
+        -0.232,
+        0.135
+      ],
+      "max": [
+        0.62,
+        -0.207,
+        0.211
+      ]
+    },
+    {
+      "name": "Socket head shoulder screw 0.3730 x 0.375 - 5/16-18",
+      "link": "base_link",
+      "min": [
+        0.134,
+        -0.363,
+        0.265
+      ],
+      "max": [
+        0.148,
+        -0.334,
+        0.279
+      ]
+    },
+    {
+      "name": "Hopper Slider Plate",
+      "link": "base_link",
+      "min": [
+        0.11,
+        -0.349,
+        0.174
+      ],
+      "max": [
+        0.633,
+        -0.346,
+        0.501
+      ]
+    },
+    {
+      "name": "Type B wide flat washer 3/8",
+      "link": "base_link",
+      "min": [
+        0.125,
+        0.35,
+        0.409
+      ],
+      "max": [
+        0.157,
+        0.352,
+        0.441
+      ]
+    },
+    {
+      "name": "Type B wide flat washer 3/8",
+      "link": "base_link",
+      "min": [
+        0.258,
+        0.35,
+        0.256
+      ],
+      "max": [
+        0.29,
+        0.352,
+        0.288
+      ]
+    },
+    {
+      "name": "34t Aluminum Spur Gear (20 DP, 1/2\" Hex Bore)",
+      "link": "intake_arm",
+      "min": [
+        0.523,
+        0.275,
+        0.175
+      ],
+      "max": [
+        0.569,
+        0.288,
+        0.22
+      ]
+    },
+    {
+      "name": "2\" x 1\" x 0.0625\" Aluminum Box Tube (16\" L, Full Pattern, 0.5\" Pitch)",
+      "link": "base_link",
+      "min": [
+        -0.013,
+        0.318,
+        0.095
+      ],
+      "max": [
+        0.038,
+        0.343,
+        0.501
+      ]
+    },
+    {
+      "name": "3\" Compliant Wheel (60A, 1\" Wide, 1/2\" Hex Bore)",
+      "link": "intake_arm",
+      "min": [
+        0.544,
+        0.022,
+        0.135
+      ],
+      "max": [
+        0.62,
+        0.047,
+        0.211
+      ]
+    },
+    {
+      "name": "1/2\" Hex Bore Bearing (1.125\" OD, 0.313\" WD, Shielded, Flanged)",
+      "link": "intake_arm",
+      "min": [
+        0.566,
+        0.313,
+        0.158
+      ],
+      "max": [
+        0.597,
+        0.321,
+        0.189
+      ]
+    },
+    {
+      "name": "2\" Compliant Wheel (60A, 3/4\" Wide, 1/2\" Hex Stretch Bore)",
+      "link": "intake_arm",
+      "min": [
+        0.472,
+        0.185,
+        0.259
+      ],
+      "max": [
+        0.523,
+        0.198,
+        0.31
+      ]
+    },
+    {
+      "name": "24t Aluminum Pulley (HTD 5mm, 18.5mm Wide, 1/2\" Hex Bore)",
+      "link": "intake_arm",
+      "min": [
+        0.477,
+        -0.31,
+        0.264
+      ],
+      "max": [
+        0.518,
+        -0.285,
+        0.305
+      ]
+    },
+    {
+      "name": "Type B wide flat washer 3/8",
+      "link": "base_link",
+      "min": [
+        0.258,
+        0.34,
+        0.409
+      ],
+      "max": [
+        0.29,
+        0.343,
+        0.441
+      ]
+    },
+    {
+      "name": "Part 28",
+      "link": "base_link",
+      "min": [
+        -0.013,
+        -0.318,
+        0.406
+      ],
+      "max": [
+        0.038,
+        -0.21,
+        0.501
+      ]
+    },
+    {
+      "name": "2\" Compliant Wheel (60A, 3/4\" Wide, 1/2\" Hex Stretch Bore)",
+      "link": "intake_arm",
+      "min": [
+        0.472,
+        0.287,
+        0.259
+      ],
+      "max": [
+        0.523,
+        0.299,
+        0.31
+      ]
+    },
+    {
+      "name": "2\" Compliant Wheel (60A, 3/4\" Wide, 1/2\" Hex Stretch Bore)",
+      "link": "intake_arm",
+      "min": [
+        0.472,
+        -0.082,
+        0.259
+      ],
+      "max": [
+        0.523,
+        -0.069,
+        0.31
+      ]
+    },
+    {
+      "name": "3\" Compliant Wheel (60A, 1\" Wide, 1/2\" Hex Bore)",
+      "link": "intake_arm",
+      "min": [
+        0.544,
+        -0.182,
+        0.135
+      ],
+      "max": [
+        0.62,
+        -0.156,
+        0.211
+      ]
+    },
+    {
+      "name": "short bracket",
+      "link": "base_link",
+      "min": [
+        0.606,
+        0.308,
+        0.222
+      ],
+      "max": [
+        0.63,
+        0.346,
+        0.298
+      ]
+    },
+    {
+      "name": "1.125\" OD Bearing Retention Plate (Centered, 2\" C-C)",
+      "link": "intake_arm",
+      "min": [
+        0.529,
+        0.319,
+        0.169
+      ],
+      "max": [
+        0.564,
+        0.322,
+        0.226
+      ]
+    },
+    {
+      "name": "1/2\" Hex Bore Bearing (1.125\" OD, 0.313\" WD, Shielded, Flanged)",
+      "link": "intake_arm",
+      "min": [
+        0.531,
+        0.313,
+        0.182
+      ],
+      "max": [
+        0.562,
+        0.321,
+        0.213
+      ]
+    },
+    {
+      "name": "Type B wide flat washer 3/8",
+      "link": "base_link",
+      "min": [
+        0.125,
+        -0.352,
+        0.409
+      ],
+      "max": [
+        0.157,
+        -0.35,
+        0.441
+      ]
+    },
+    {
+      "name": "80t 5mm Belt",
+      "link": "intake_arm",
+      "min": [
+        0.476,
+        -0.305,
+        0.153
+      ],
+      "max": [
+        0.603,
+        -0.29,
+        0.306
+      ]
+    },
+    {
+      "name": "Type B wide flat washer 3/8",
+      "link": "base_link",
+      "min": [
+        0.125,
+        -0.352,
+        0.256
+      ],
+      "max": [
+        0.157,
+        -0.35,
+        0.288
+      ]
+    },
+    {
+      "name": "3\" Compliant Wheel (60A, 1\" Wide, 1/2\" Hex Bore)",
+      "link": "intake_arm",
+      "min": [
+        0.544,
+        0.072,
+        0.135
+      ],
+      "max": [
+        0.62,
+        0.098,
+        0.211
+      ]
+    },
+    {
+      "name": "1/2\" Hex Bore Custom Spacer (0.75\" OD,0.062\" L)",
+      "link": "base_link",
+      "min": [
+        0.079,
+        0.237,
+        0.161
+      ],
+      "max": [
+        0.099,
+        0.239,
+        0.18
+      ]
+    },
+    {
+      "name": "silicone",
+      "link": "intake_arm",
+      "min": [
+        0.26,
+        -0.252,
+        0.158
+      ],
+      "max": [
+        0.298,
+        0.273,
+        0.196
+      ]
+    },
+    {
+      "name": "60t 5mm Belt",
+      "link": "intake_arm",
+      "min": [
+        0.176,
+        -0.281,
+        0.156
+      ],
+      "max": [
+        0.3,
+        -0.266,
+        0.234
+      ]
+    },
+    {
+      "name": "roller",
+      "link": "intake_arm",
+      "min": [
+        0.264,
+        -0.268,
+        0.161
+      ],
+      "max": [
+        0.295,
+        0.289,
+        0.193
+      ]
+    },
+    {
+      "name": "2\" Compliant Wheel (60A, 3/4\" Wide, 1/2\" Hex Stretch Bore)",
+      "link": "intake_arm",
+      "min": [
+        0.472,
+        -0.171,
+        0.259
+      ],
+      "max": [
+        0.523,
+        -0.158,
+        0.31
+      ]
+    },
+    {
+      "name": "24t Aluminum Pulley (HTD 5mm, 18.5mm Wide, 1/2\" Hex Bore)",
+      "link": "intake_arm",
+      "min": [
+        0.526,
+        0.288,
+        0.177
+      ],
+      "max": [
+        0.567,
+        0.313,
+        0.218
+      ]
+    },
+    {
+      "name": "1/2\" Hex Bore Custom Spacer (0.425\" OD,1.5\" L)",
+      "link": "intake_arm",
+      "min": [
+        0.587,
+        0.275,
+        0.138
+      ],
+      "max": [
+        0.598,
+        0.313,
+        0.149
+      ]
+    },
+    {
+      "name": "Socket head shoulder screw 0.3730 x 0.375 - 5/16-18",
+      "link": "base_link",
+      "min": [
+        0.267,
+        0.334,
+        0.418
+      ],
+      "max": [
+        0.281,
+        0.363,
+        0.432
+      ]
+    },
+    {
+      "name": "Intake Right Side Plate",
+      "link": "base_link",
+      "min": [
+        0.06,
+        0.343,
+        0.044
+      ],
+      "max": [
+        0.311,
+        0.349,
+        0.209
+      ]
+    },
+    {
+      "name": "Intake Right Side Motor Mount",
+      "link": "base_link",
+      "min": [
+        0.038,
+        0.311,
+        0.044
+      ],
+      "max": [
+        0.152,
+        0.317,
+        0.206
+      ]
+    },
+    {
+      "name": "Type B wide flat washer 3/8",
+      "link": "base_link",
+      "min": [
+        0.125,
+        0.34,
+        0.409
+      ],
+      "max": [
+        0.157,
+        0.343,
+        0.441
+      ]
+    },
+    {
+      "name": "3\" Compliant Wheel (60A, 1\" Wide, 1/2\" Hex Bore)",
+      "link": "intake_arm",
+      "min": [
+        0.544,
+        0.123,
+        0.135
+      ],
+      "max": [
+        0.62,
+        0.149,
+        0.211
+      ]
+    },
+    {
+      "name": "24t Aluminum Pulley (HTD 5mm, 18.5mm Wide, 1/2\" Hex Bore)",
+      "link": "intake_arm",
+      "min": [
+        0.561,
+        -0.308,
+        0.153
+      ],
+      "max": [
+        0.602,
+        -0.283,
+        0.194
+      ]
+    },
+    {
+      "name": "1/2\" Rounded Hex (24.625\" L, 13.75mm OD)",
+      "link": "intake_arm",
+      "min": [
+        0.343,
+        -0.313,
+        0.176
+      ],
+      "max": [
+        0.357,
+        0.313,
+        0.189
+      ]
+    },
+    {
+      "name": "1/2\" Rounded Hex (25.25\" L, 13.75mm OD)",
+      "link": "intake_arm",
+      "min": [
+        0.491,
+        -0.321,
+        0.278
+      ],
+      "max": [
+        0.504,
+        0.32,
+        0.292
+      ]
+    },
+    {
+      "name": "40t Aluminum Billet Sprocket (#25, MAXSpline Bore)",
+      "link": "intake_arm",
+      "min": [
+        0.237,
+        0.321,
+        0.135
+      ],
+      "max": [
+        0.322,
+        0.333,
+        0.219
+      ]
+    },
+    {
+      "name": "2\" Compliant Wheel (60A, 3/4\" Wide, 1/2\" Hex Stretch Bore)",
+      "link": "intake_arm",
+      "min": [
+        0.472,
+        -0.285,
+        0.259
+      ],
+      "max": [
+        0.523,
+        -0.272,
+        0.31
+      ]
+    },
+    {
+      "name": "3\" Compliant Wheel (60A, 1\" Wide, 1/2\" Hex Bore)",
+      "link": "intake_arm",
+      "min": [
+        0.544,
+        0.225,
+        0.135
+      ],
+      "max": [
+        0.62,
+        0.25,
+        0.211
+      ]
+    },
+    {
+      "name": "1/2\" Hex Bore Custom Spacer (0.75\" OD,0.125\" L)",
+      "link": "intake_arm",
+      "min": [
+        0.572,
+        -0.311,
+        0.164
+      ],
+      "max": [
+        0.591,
+        -0.308,
+        0.183
+      ]
+    },
+    {
+      "name": "Socket head shoulder screw 0.3730 x 0.375 - 5/16-18",
+      "link": "base_link",
+      "min": [
+        0.134,
+        0.334,
+        0.265
+      ],
+      "max": [
+        0.148,
+        0.363,
+        0.279
+      ]
+    },
+    {
+      "name": "1/2\" Hex Bore Custom Spacer (0.75\" OD,0.25\" L)",
+      "link": "intake_arm",
+      "min": [
+        0.27,
+        0.312,
+        0.167
+      ],
+      "max": [
+        0.289,
+        0.318,
+        0.187
+      ]
+    },
+    {
+      "name": "Hopper Slider Plate",
+      "link": "base_link",
+      "min": [
+        0.11,
+        0.346,
+        0.174
+      ],
+      "max": [
+        0.633,
+        0.349,
+        0.501
+      ]
+    },
+    {
+      "name": "MAX 90 Degree Gearbox (REV)",
+      "link": "base_link",
+      "min": [
+        0.053,
+        0.254,
+        0.135
+      ],
+      "max": [
+        0.128,
+        0.305,
+        0.21
+      ]
+    },
+    {
+      "name": "1/2\" Rounded Hex (27.5\" L, 13.75mm OD)",
+      "link": "intake_arm",
+      "min": [
+        0.273,
+        -0.348,
+        0.17
+      ],
+      "max": [
+        0.286,
+        0.351,
+        0.184
+      ]
+    },
+    {
+      "name": "2\" Compliant Wheel (60A, 3/4\" Wide, 1/2\" Hex Stretch Bore)",
+      "link": "intake_arm",
+      "min": [
+        0.472,
+        0.172,
+        0.259
+      ],
+      "max": [
+        0.523,
+        0.185,
+        0.31
+      ]
+    },
+    {
+      "name": "3\" Compliant Wheel (60A, 1\" Wide, 1/2\" Hex Bore)",
+      "link": "intake_arm",
+      "min": [
+        0.544,
+        -0.283,
+        0.135
+      ],
+      "max": [
+        0.62,
+        -0.258,
+        0.211
+      ]
+    },
+    {
+      "name": "2\" Compliant Wheel (60A, 3/4\" Wide, 1/2\" Hex Stretch Bore)",
+      "link": "intake_arm",
+      "min": [
+        0.472,
+        0.236,
+        0.259
+      ],
+      "max": [
+        0.523,
+        0.249,
+        0.31
+      ]
+    },
+    {
+      "name": "1/2\" Hex Bore Custom Spacer (0.75\" OD,0.133\" L)",
+      "link": "base_link",
+      "min": [
+        0.079,
+        0.319,
+        0.161
+      ],
+      "max": [
+        0.099,
+        0.322,
+        0.18
+      ]
+    },
+    {
+      "name": "Intake Right Side Polycarb Plate",
+      "link": "intake_arm",
+      "min": [
+        0.245,
+        -0.319,
+        0.049
+      ],
+      "max": [
+        0.626,
+        -0.313,
+        0.323
+      ]
+    },
+    {
+      "name": "1.125\" OD Bearing Retention Plate (Centered, 2\" C-C)",
+      "link": "intake_arm",
+      "min": [
+        0.562,
+        -0.322,
+        0.147
+      ],
+      "max": [
+        0.602,
+        -0.319,
+        0.2
+      ]
+    },
+    {
+      "name": "1/2\" Hex Bore MAXHub (Aluminum)",
+      "link": "intake_arm",
+      "min": [
+        0.262,
+        0.318,
+        0.16
+      ],
+      "max": [
+        0.297,
+        0.327,
+        0.195
+      ]
+    },
+    {
+      "name": "Intake Sandwich Plate",
+      "link": "intake_arm",
+      "min": [
+        0.521,
+        0.271,
+        0.138
+      ],
+      "max": [
+        0.619,
+        0.274,
+        0.223
+      ]
+    },
+    {
+      "name": "Type B wide flat washer 3/8",
+      "link": "base_link",
+      "min": [
+        0.125,
+        -0.343,
+        0.409
+      ],
+      "max": [
+        0.157,
+        -0.34,
+        0.441
+      ]
+    },
+    {
+      "name": "short bracket",
+      "link": "intake_arm",
+      "min": [
+        0.606,
+        -0.346,
+        0.222
+      ],
+      "max": [
+        0.63,
+        -0.308,
+        0.298
+      ]
+    },
+    {
+      "name": "2\" Compliant Wheel (60A, 3/4\" Wide, 1/2\" Hex Stretch Bore)",
+      "link": "intake_arm",
+      "min": [
+        0.472,
+        0.223,
+        0.259
+      ],
+      "max": [
+        0.523,
+        0.236,
+        0.31
+      ]
+    },
+    {
+      "name": "2\" Compliant Wheel (60A, 3/4\" Wide, 1/2\" Hex Stretch Bore)",
+      "link": "intake_arm",
+      "min": [
+        0.472,
+        -0.272,
+        0.259
+      ],
+      "max": [
+        0.523,
+        -0.259,
+        0.31
+      ]
+    },
+    {
+      "name": "2\" Compliant Wheel (60A, 3/4\" Wide, 1/2\" Hex Stretch Bore)",
+      "link": "intake_arm",
+      "min": [
+        0.472,
+        0.083,
+        0.259
+      ],
+      "max": [
+        0.523,
+        0.096,
+        0.31
+      ]
+    },
+    {
+      "name": "24t Aluminum Pulley (HTD 5mm, 18.5mm Wide, 1/2\" Hex Bore)",
+      "link": "base_link",
+      "min": [
+        0.17,
+        -0.292,
+        0.169
+      ],
+      "max": [
+        0.211,
+        -0.267,
+        0.21
+      ]
+    },
+    {
+      "name": "1/2\" Hex Bore Custom Spacer (0.75\" OD,0.125\" L)",
+      "link": "intake_arm",
+      "min": [
+        0.488,
+        -0.313,
+        0.275
+      ],
+      "max": [
+        0.507,
+        -0.31,
+        0.294
+      ]
+    },
+    {
+      "name": "2\" Compliant Wheel (60A, 3/4\" Wide, 1/2\" Hex Stretch Bore)",
+      "link": "intake_arm",
+      "min": [
+        0.472,
+        0.274,
+        0.259
+      ],
+      "max": [
+        0.523,
+        0.287,
+        0.31
+      ]
+    },
+    {
+      "name": "Socket head shoulder screw 0.3730 x 0.375 - 5/16-18",
+      "link": "base_link",
+      "min": [
+        0.134,
+        -0.363,
+        0.418
+      ],
+      "max": [
+        0.148,
+        -0.334,
+        0.432
+      ]
+    },
+    {
+      "name": "Minimal",
+      "link": "base_link",
+      "min": [
+        0.007,
+        -0.3,
+        0.429
+      ],
+      "max": [
+        0.057,
+        -0.22,
+        0.484
+      ]
+    },
+    {
+      "name": "3\" Compliant Wheel (60A, 1\" Wide, 1/2\" Hex Bore)",
+      "link": "intake_arm",
+      "min": [
+        0.544,
+        -0.08,
+        0.135
+      ],
+      "max": [
+        0.62,
+        -0.055,
+        0.211
+      ]
+    },
+    {
+      "name": "2\" Compliant Wheel (60A, 3/4\" Wide, 1/2\" Hex Stretch Bore)",
+      "link": "intake_arm",
+      "min": [
+        0.472,
+        -0.132,
+        0.259
+      ],
+      "max": [
+        0.523,
+        -0.12,
+        0.31
+      ]
+    },
+    {
+      "name": "Bumper",
+      "link": "base_link",
+      "min": [
+        -0.427,
+        -0.425,
+        0.028
+      ],
+      "max": [
+        0.427,
+        0.425,
+        0.149
+      ]
+    },
+    {
+      "name": "Type B wide flat washer 3/8",
+      "link": "base_link",
+      "min": [
+        0.125,
+        0.34,
+        0.256
+      ],
+      "max": [
+        0.157,
+        0.343,
+        0.288
+      ]
+    },
+    {
+      "name": "2\" Compliant Wheel (60A, 3/4\" Wide, 1/2\" Hex Stretch Bore)",
+      "link": "intake_arm",
+      "min": [
+        0.472,
+        -0.12,
+        0.259
+      ],
+      "max": [
+        0.523,
+        -0.107,
+        0.31
+      ]
+    },
+    {
+      "name": "2\" Compliant Wheel (60A, 3/4\" Wide, 1/2\" Hex Stretch Bore)",
+      "link": "intake_arm",
+      "min": [
+        0.472,
+        0.02,
+        0.259
+      ],
+      "max": [
+        0.523,
+        0.033,
+        0.31
+      ]
+    },
+    {
+      "name": "88 links #25 chain",
+      "link": "base_link",
+      "min": [
+        0.07,
+        0.323,
+        0.134
+      ],
+      "max": [
+        0.323,
+        0.331,
+        0.22
+      ]
+    },
+    {
+      "name": "1/2\" Hex Hub (1.125\" OD, #10 Clearance, 0.375\" WD)",
+      "link": "intake_arm",
+      "min": [
+        0.249,
+        -0.322,
+        0.147
+      ],
+      "max": [
+        0.31,
+        -0.313,
+        0.207
+      ]
+    },
+    {
+      "name": "Hopper Slider Front Plate",
+      "link": "base_link",
+      "min": [
+        0.63,
+        -0.346,
+        0.174
+      ],
+      "max": [
+        0.633,
+        0.346,
+        0.501
+      ]
+    },
+    {
+      "name": "Type B wide flat washer 3/8",
+      "link": "base_link",
+      "min": [
+        0.125,
+        -0.343,
+        0.256
+      ],
+      "max": [
+        0.157,
+        -0.34,
+        0.288
+      ]
+    },
+    {
+      "name": "1/2\" Hex Bore MAXHub (Aluminum)",
+      "link": "intake_arm",
+      "min": [
+        0.262,
+        0.327,
+        0.16
+      ],
+      "max": [
+        0.297,
+        0.336,
+        0.195
+      ]
+    },
+    {
+      "name": "Type B wide flat washer 3/8",
+      "link": "base_link",
+      "min": [
+        0.258,
+        -0.352,
+        0.409
+      ],
+      "max": [
+        0.29,
+        -0.35,
+        0.441
+      ]
+    },
+    {
+      "name": "3\" Compliant Wheel (60A, 1\" Wide, 1/2\" Hex Bore)",
+      "link": "intake_arm",
+      "min": [
+        0.544,
+        0.174,
+        0.135
+      ],
+      "max": [
+        0.62,
+        0.199,
+        0.211
+      ]
+    },
+    {
+      "name": "1/2\" Hex Bore Custom Spacer (0.75\" OD,0.875\" L)",
+      "link": "intake_arm",
+      "min": [
+        0.27,
+        -0.313,
+        0.168
+      ],
+      "max": [
+        0.289,
+        -0.291,
+        0.187
+      ]
+    },
+    {
+      "name": "1/2\" Hex Bore Bearing (1.125\" OD, 0.313\" WD, Shielded, Flanged)",
+      "link": "intake_arm",
+      "min": [
+        0.566,
+        0.268,
+        0.158
+      ],
+      "max": [
+        0.597,
+        0.275,
+        0.189
+      ]
+    },
+    {
+      "name": "1/2\" Hex Bore Custom Spacer (0.75\" OD,0.969\" L)",
+      "link": "intake_arm",
+      "min": [
+        0.572,
+        0.288,
+        0.164
+      ],
+      "max": [
+        0.591,
+        0.313,
+        0.183
+      ]
+    },
+    {
+      "name": "Type B wide flat washer 3/8",
+      "link": "base_link",
+      "min": [
+        0.125,
+        0.35,
+        0.256
+      ],
+      "max": [
+        0.157,
+        0.352,
+        0.288
+      ]
+    },
+    {
+      "name": "131t 5mm Belt",
+      "link": "intake_arm",
+      "min": [
+        0.259,
+        0.293,
+        0.156
+      ],
+      "max": [
+        0.567,
+        0.308,
+        0.218
+      ]
+    },
+    {
+      "name": "1/2\" Hex Bore Custom Spacer (0.75\" OD,0.375\" L)",
+      "link": "base_link",
+      "min": [
+        0.079,
+        0.332,
+        0.161
+      ],
+      "max": [
+        0.099,
+        0.341,
+        0.18
+      ]
+    },
+    {
+      "name": "",
+      "link": "base_link",
+      "min": [
+        0.075,
+        0.239,
+        0.141
+      ],
+      "max": [
+        0.126,
+        0.254,
+        0.2
+      ]
+    },
+    {
+      "name": "Socket head shoulder screw 0.3730 x 0.375 - 5/16-18",
+      "link": "base_link",
+      "min": [
+        0.267,
+        -0.363,
+        0.265
+      ],
+      "max": [
+        0.281,
+        -0.334,
+        0.279
+      ]
+    },
+    {
+      "name": "2\" Compliant Wheel (60A, 3/4\" Wide, 1/2\" Hex Stretch Bore)",
+      "link": "intake_arm",
+      "min": [
+        0.472,
+        -0.069,
+        0.259
+      ],
+      "max": [
+        0.523,
+        -0.056,
+        0.31
+      ]
+    },
+    {
+      "name": "Part 26",
+      "link": "intake_arm",
+      "min": [
+        0.505,
+        0.268,
+        0.129
+      ],
+      "max": [
+        0.626,
+        0.312,
+        0.239
+      ]
+    },
+    {
+      "name": "2\" Compliant Wheel (60A, 3/4\" Wide, 1/2\" Hex Stretch Bore)",
+      "link": "intake_arm",
+      "min": [
+        0.472,
+        0.033,
+        0.259
+      ],
+      "max": [
+        0.523,
+        0.045,
+        0.31
+      ]
+    },
+    {
+      "name": "Intake Left Side Plate",
+      "link": "base_link",
+      "min": [
+        0.114,
+        -0.349,
+        0.044
+      ],
+      "max": [
+        0.311,
+        -0.343,
+        0.225
+      ]
+    },
+    {
+      "name": "",
+      "link": "base_link",
+      "min": [
+        0.079,
+        -0.343,
+        0.16
+      ],
+      "max": [
+        0.145,
+        -0.292,
+        0.22
+      ]
+    },
+    {
+      "name": "SPARK Flex Brushless Motor Controller",
+      "link": "base_link",
+      "min": [
+        0.13,
+        -0.343,
+        0.155
+      ],
+      "max": [
+        0.159,
+        -0.292,
+        0.22
+      ]
+    },
+    {
+      "name": "Type B wide flat washer 3/8",
+      "link": "base_link",
+      "min": [
+        0.258,
+        -0.343,
+        0.409
+      ],
+      "max": [
+        0.29,
+        -0.34,
+        0.441
+      ]
+    },
+    {
+      "name": "long bracket",
+      "link": "base_link",
+      "min": [
+        0.606,
+        0.308,
+        0.349
+      ],
+      "max": [
+        0.63,
+        0.346,
+        0.501
+      ]
+    },
+    {
+      "name": "2\" Compliant Wheel (60A, 3/4\" Wide, 1/2\" Hex Stretch Bore)",
+      "link": "intake_arm",
+      "min": [
+        0.472,
+        -0.031,
+        0.259
+      ],
+      "max": [
+        0.523,
+        -0.018,
+        0.31
+      ]
+    },
+    {
+      "name": "Aluminum Thrifty Metahub - 24 Tooth HTD 5mm Pulley",
+      "link": "intake_arm",
+      "min": [
+        0.259,
+        -0.291,
+        0.157
+      ],
+      "max": [
+        0.3,
+        -0.246,
+        0.198
+      ]
+    },
+    {
+      "name": "1/2\" Hex Bore Bearing (1.125\" OD, 0.312\" WD, Shielded, Flanged)",
+      "link": "intake_arm",
+      "min": [
+        0.264,
+        -0.29,
+        0.162
+      ],
+      "max": [
+        0.295,
+        -0.282,
+        0.193
+      ]
+    },
+    {
+      "name": "1/2\" Rounded Hex (25.25\" L, 13.75mm OD)",
+      "link": "intake_arm",
+      "min": [
+        0.575,
+        -0.319,
+        0.166
+      ],
+      "max": [
+        0.588,
+        0.322,
+        0.18
+      ]
+    },
+    {
+      "name": "Aluminum Thrifty Metahub - 24 Tooth HTD 5mm Pulley",
+      "link": "intake_arm",
+      "min": [
+        0.259,
+        0.267,
+        0.157
+      ],
+      "max": [
+        0.3,
+        0.312,
+        0.198
+      ]
+    },
+    {
+      "name": "1/2\" Hex Bore Bearing (1.125\" OD, 0.312\" WD, Shielded, Flanged)",
+      "link": "intake_arm",
+      "min": [
+        0.264,
+        0.304,
+        0.161
+      ],
+      "max": [
+        0.295,
+        0.312,
+        0.193
+      ]
+    },
+    {
+      "name": "Type B wide flat washer 3/8",
+      "link": "base_link",
+      "min": [
+        0.258,
+        0.35,
+        0.409
+      ],
+      "max": [
+        0.29,
+        0.352,
+        0.441
+      ]
+    },
+    {
+      "name": "Socket head shoulder screw 0.3730 x 0.375 - 5/16-18",
+      "link": "base_link",
+      "min": [
+        0.267,
+        -0.363,
+        0.418
+      ],
+      "max": [
+        0.281,
+        -0.334,
+        0.432
+      ]
+    },
+    {
+      "name": "16t Aluminum Sprocket (#25, 1/2\" Hex Bore, Double Hub)",
+      "link": "base_link",
+      "min": [
+        0.071,
+        0.322,
+        0.153
+      ],
+      "max": [
+        0.107,
+        0.332,
+        0.189
+      ]
+    },
+    {
+      "name": "1/2\" Hex Bore Custom Spacer (0.75\" OD,0.875\" L)",
+      "link": "intake_arm",
+      "min": [
+        0.27,
+        -0.344,
+        0.168
+      ],
+      "max": [
+        0.289,
+        -0.322,
+        0.187
+      ]
+    },
+    {
+      "name": "1/2\" Hex Bore Bearing (1.125\" OD, 0.313\" WD, Shielded, Flanged)",
+      "link": "base_link",
+      "min": [
+        0.264,
+        -0.349,
+        0.162
+      ],
+      "max": [
+        0.295,
+        -0.341,
+        0.193
+      ]
+    },
+    {
+      "name": "Socket head shoulder screw 0.3730 x 0.375 - 5/16-18",
+      "link": "base_link",
+      "min": [
+        0.267,
+        0.334,
+        0.265
+      ],
+      "max": [
+        0.281,
+        0.363,
+        0.279
+      ]
+    },
+    {
+      "name": "2\" Compliant Wheel (60A, 3/4\" Wide, 1/2\" Hex Stretch Bore)",
+      "link": "intake_arm",
+      "min": [
+        0.472,
+        0.134,
+        0.259
+      ],
+      "max": [
+        0.523,
+        0.147,
+        0.31
+      ]
+    },
+    {
+      "name": "3\" Compliant Wheel (60A, 1\" Wide, 1/2\" Hex Bore)",
+      "link": "intake_arm",
+      "min": [
+        0.544,
+        -0.029,
+        0.135
+      ],
+      "max": [
+        0.62,
+        -0.004,
+        0.211
+      ]
+    },
+    {
+      "name": "1/2\" Hex Bore Bearing (1.125\" OD, 0.313\" WD, Shielded, Flanged)",
+      "link": "intake_arm",
+      "min": [
+        0.566,
+        -0.319,
+        0.158
+      ],
+      "max": [
+        0.597,
+        -0.311,
+        0.189
+      ]
+    },
+    {
+      "name": "3\" Compliant Wheel (60A, 1\" Wide, 1/2\" Hex Bore)",
+      "link": "intake_arm",
+      "min": [
+        0.544,
+        -0.131,
+        0.135
+      ],
+      "max": [
+        0.62,
+        -0.105,
+        0.211
+      ]
+    },
+    {
+      "name": "1.125\" OD Bearing Retention Plate (Centered, 2\" C-C)",
+      "link": "intake_arm",
+      "min": [
+        0.468,
+        0.319,
+        0.267
+      ],
+      "max": [
+        0.527,
+        0.322,
+        0.302
+      ]
+    },
+    {
+      "name": "NEO Brushless Motor V1.1",
+      "link": "base_link",
+      "min": [
+        0.122,
+        0.246,
+        0.16
+      ],
+      "max": [
+        0.221,
+        0.309,
+        0.232
+      ]
+    },
+    {
+      "name": "Socket head shoulder screw 0.3730 x 0.375 - 5/16-18",
+      "link": "base_link",
+      "min": [
+        0.134,
+        0.334,
+        0.418
+      ],
+      "max": [
+        0.148,
+        0.363,
+        0.432
+      ]
+    },
+    {
+      "name": "34t Aluminum Spur Gear (20 DP, 1/2\" Hex Bore)",
+      "link": "intake_arm",
+      "min": [
+        0.559,
+        0.275,
+        0.15
+      ],
+      "max": [
+        0.605,
+        0.288,
+        0.196
+      ]
+    },
+    {
+      "name": "Fuel",
+      "link": "base_link",
+      "min": [
+        0.346,
+        -0.096,
+        0.143
+      ],
+      "max": [
+        0.496,
+        0.054,
+        0.293
+      ]
+    },
+    {
+      "name": "#10-32 x 1\" L SHCS (Steel, Black Oxide)",
+      "link": "base_link",
+      "min": [
+        0.121,
+        0.297,
+        0.205
+      ],
+      "max": [
+        0.152,
+        0.305,
+        0.219
+      ]
+    },
+    {
+      "name": "MAXPlanetary Output Slice",
+      "link": "base_link",
+      "min": [
+        0.112,
+        0.254,
+        0.15
+      ],
+      "max": [
+        0.146,
+        0.305,
+        0.214
+      ]
+    },
+    {
+      "name": "#10-32 x 0.5\" L BHCS (Steel, Black Oxide)",
+      "link": "base_link",
+      "min": [
+        0.119,
+        0.275,
+        0.177
+      ],
+      "max": [
+        0.135,
+        0.284,
+        0.187
+      ]
+    },
+    {
+      "name": "MAXPlanetary Vortex Input Plate",
+      "link": "base_link",
+      "min": [
+        0.142,
+        0.254,
+        0.157
+      ],
+      "max": [
+        0.164,
+        0.305,
+        0.218
+      ]
+    },
+    {
+      "name": "#10-32 x 1\" L SHCS (Steel, Black Oxide)",
+      "link": "base_link",
+      "min": [
+        0.135,
+        0.254,
+        0.153
+      ],
+      "max": [
+        0.166,
+        0.262,
+        0.167
+      ]
+    },
+    {
+      "name": "MAXPlanetary 4:1 Slice",
+      "link": "base_link",
+      "min": [
+        0.13,
+        0.254,
+        0.154
+      ],
+      "max": [
+        0.158,
+        0.305,
+        0.217
+      ]
+    },
+    {
+      "name": "1.125\" OD Bearing Retention Plate (Centered, 2\" C-C)",
+      "link": "intake_arm",
+      "min": [
+        0.562,
+        0.319,
+        0.147
+      ],
+      "max": [
+        0.602,
+        0.322,
+        0.2
+      ]
+    }
+  ],
   "sim": {
     "hopper": {
       "min": [

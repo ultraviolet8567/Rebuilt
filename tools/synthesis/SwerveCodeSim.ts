@@ -404,6 +404,57 @@ export async function feedIntakeForTest(target: number, timeoutMs = 20000) {
     return held()
 }
 
+/**
+ * Hopper test: drop `n` loose floor balls into this robot's hopper spots as live physics bodies
+ * (not held pieces), so they rest, roll and collide inside the robot. Returns how many it placed.
+ */
+export function fillHopperLiveForTest(n: number) {
+    const robot = myRobot()!
+    const field = World.sceneRenderer.mirabufSceneObjects.getField()!
+    if (!sphinxMeta?.hopper) return 0
+    const hopper = new Hopper(sphinxMeta.hopper)
+    const chassis = bodyMatrix(robot.mechanism.nodeToBody.get(robot.rootNodeId)!)
+    const free: Jolt.BodyID[] = []
+    for (const [node, id] of field.mechanism.nodeToBody) {
+        if (!String(node).endsWith("_gp") || !World.physicsSystem.isBodyAdded(id)) continue
+        const c = World.physicsSystem.getBody(id).GetCenterOfMassPosition()
+        if (c.GetY() < 0.2 && Math.hypot(Math.abs(c.GetX()) - HUB_X, c.GetZ()) > 1.0) free.push(id)
+    }
+    let placed = 0
+    for (let i = 0; i < Math.min(n, hopper.slots.length, free.length); i++) {
+        const at = hopper.slots[i].clone().applyMatrix4(chassis)
+        const body = World.physicsSystem.getBody(free[i])
+        const o = body.GetPosition()
+        const c = body.GetCenterOfMassPosition()
+        const [ox, oy, oz, cx, cy, cz] = [o.GetX(), o.GetY(), o.GetZ(), c.GetX(), c.GetY(), c.GetZ()]
+        World.physicsSystem.setBodyPosition(free[i], new JOLT.RVec3(ox + at.x - cx, oy + at.y + 0.02 - cy, oz + at.z - cz))
+        body.SetLinearVelocity(new JOLT.Vec3(0, 0, 0))
+        body.SetAngularVelocity(new JOLT.Vec3(0, 0, 0))
+        placed++
+    }
+    return placed
+}
+
+/** Hopper test: how many loose balls are inside this robot's hopper box right now. */
+export function countInHopperForTest() {
+    const robot = myRobot()!
+    const field = World.sceneRenderer.mirabufSceneObjects.getField()!
+    const box = sphinxMeta?.hopper
+    if (!box) return 0
+    const toRobot = bodyMatrix(robot.mechanism.nodeToBody.get(robot.rootNodeId)!).invert()
+    let n = 0
+    for (const [node, id] of field.mechanism.nodeToBody) {
+        if (!String(node).endsWith("_gp") || !World.physicsSystem.isBodyAdded(id)) continue
+        const c = World.physicsSystem.getBody(id).GetCenterOfMassPosition()
+        const p = new THREE.Vector3(c.GetX(), c.GetY(), c.GetZ()).applyMatrix4(toRobot)
+        // Robot body frame is Y-up: URDF (x, y, z) -> (x, z, -y).
+        const [x, y, z] = [p.x, -p.z, p.y]
+        const m = 0.05
+        if (x > box.min[0] - m && x < box.max[0] + m && y > box.min[1] - m && y < box.max[1] + m && z > box.min[2] - m && z < box.max[2] + 0.15) n++
+    }
+    return n
+}
+
 /** Multiplies every shot's exit speed; for calibrating the efficiency table (1 = as measured). */
 export const shotTuning = { gain: 1 }
 
