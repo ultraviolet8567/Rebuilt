@@ -1,0 +1,22 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  // Ask before running shell commands; allow the read-only and build commands used every day.
+  "permissions": [
+    { "action": "shell", "resource": "*", "effect": "ask" },
+    { "action": "shell", "resource": "git status *", "effect": "allow" },
+    { "action": "shell", "resource": "git diff *", "effect": "allow" },
+    { "action": "shell", "resource": "git log *", "effect": "allow" },
+    { "action": "shell", "resource": "git show *", "effect": "allow" },
+    { "action": "shell", "resource": "git branch *", "effect": "allow" },
+    { "action": "shell", "resource": "gradlew.bat *", "effect": "allow" },
+    { "action": "shell", "resource": ".\\gradlew.bat *", "effect": "allow" },
+    { "action": "shell", "resource": "./gradlew *", "effect": "allow" },
+    { "action": "shell", "resource": "git push *", "effect": "ask" },
+    { "action": "shell", "resource": "git push --force *", "effect": "deny" },
+    { "action": "shell", "resource": "git reset --hard *", "effect": "ask" }
+  ],
+  // Build output and caches must not trigger file events.
+  "watcher": {
+    "ignore": ["build/**", "bin/**", ".gradle/**", ".wpilib/**", ".DataLogTool/**", "logs/**"]
+  }
+}
