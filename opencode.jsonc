@@ -8,12 +8,34 @@
     { "action": "shell", "resource": "git log *", "effect": "allow" },
     { "action": "shell", "resource": "git show *", "effect": "allow" },
     { "action": "shell", "resource": "git branch *", "effect": "allow" },
-    { "action": "shell", "resource": "gradlew.bat *", "effect": "allow" },
-    { "action": "shell", "resource": ".\\gradlew.bat *", "effect": "allow" },
-    { "action": "shell", "resource": "./gradlew *", "effect": "allow" },
+    // Read-only and local build tasks only. Deploy stays blocked below.
+    { "action": "shell", "resource": "gradlew.bat compileJava*", "effect": "allow" },
+    { "action": "shell", "resource": "gradlew.bat build*", "effect": "allow" },
+    { "action": "shell", "resource": "gradlew.bat test*", "effect": "allow" },
+    { "action": "shell", "resource": "gradlew.bat spotlessApply*", "effect": "allow" },
+    { "action": "shell", "resource": "gradlew.bat spotlessCheck*", "effect": "allow" },
+    { "action": "shell", "resource": "gradlew.bat simulateJava*", "effect": "allow" },
+    { "action": "shell", "resource": "gradlew.bat --stop", "effect": "allow" },
+    { "action": "shell", "resource": ".\\gradlew.bat compileJava*", "effect": "allow" },
+    { "action": "shell", "resource": ".\\gradlew.bat build*", "effect": "allow" },
+    { "action": "shell", "resource": ".\\gradlew.bat test*", "effect": "allow" },
+    { "action": "shell", "resource": ".\\gradlew.bat spotlessApply*", "effect": "allow" },
+    { "action": "shell", "resource": ".\\gradlew.bat spotlessCheck*", "effect": "allow" },
+    { "action": "shell", "resource": ".\\gradlew.bat simulateJava*", "effect": "allow" },
+    { "action": "shell", "resource": ".\\gradlew.bat --stop", "effect": "allow" },
+    { "action": "shell", "resource": "./gradlew compileJava*", "effect": "allow" },
+    { "action": "shell", "resource": "./gradlew build*", "effect": "allow" },
+    { "action": "shell", "resource": "./gradlew test*", "effect": "allow" },
+    { "action": "shell", "resource": "./gradlew spotlessApply*", "effect": "allow" },
+    { "action": "shell", "resource": "./gradlew spotlessCheck*", "effect": "allow" },
+    { "action": "shell", "resource": "./gradlew simulateJava*", "effect": "allow" },
     { "action": "shell", "resource": "git push *", "effect": "ask" },
     { "action": "shell", "resource": "git push --force *", "effect": "deny" },
-    { "action": "shell", "resource": "git reset --hard *", "effect": "ask" }
+    { "action": "shell", "resource": "git reset --hard *", "effect": "ask" },
+    // Never deploy or touch the robot from an agent session.
+    { "action": "shell", "resource": "gradlew.bat deploy*", "effect": "deny" },
+    { "action": "shell", "resource": ".\\gradlew.bat deploy*", "effect": "deny" },
+    { "action": "shell", "resource": "./gradlew deploy*", "effect": "deny" }
   ],
   // Build output and caches must not trigger file events.
   "watcher": {
