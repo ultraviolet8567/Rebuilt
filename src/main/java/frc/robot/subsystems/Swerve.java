@@ -116,7 +116,6 @@ public class Swerve extends SubsystemBase {
         Logger.recordOutput("Swerve/BackLeft/DriveVoltage", Math.abs(backLeft.getDriveVoltage()));
         Logger.recordOutput("Swerve/BackRight/DriveVoltage", Math.abs(backRight.getDriveVoltage()));
         Logger.recordOutput("SwerveMaxSpeed", getMaxSpeed());
-        
     }
 
     public double getDriveGearRatio() {
@@ -165,11 +164,11 @@ public class Swerve extends SubsystemBase {
         Logger.recordOutput("TargetState", moduleStates);
         setModuleStates(moduleStates);
     }
+
     public double getMaxSpeed() {
-        if( Lights.getInstance().isDemo) {
+        if (Lights.getInstance().isDemo) {
             return DriveConstants.kDemoTeleDriveMaxSpeedMetersPerSecond;
-        }
-        else {
+        } else {
             return DriveConstants.kTeleDriveMaxSpeedMetersPerSecond;
         }
     }
@@ -178,7 +177,7 @@ public class Swerve extends SubsystemBase {
         // double maxSpeed = Lights.getInstance().isDemo
         // ? DriveConstants.kDemoTeleDriveMaxSpeedMetersPerSecond
         // : DriveConstants.kTeleDriveMaxSpeedMetersPerSecond;
-        /* 
+        /*
         double maxSpeed =
                 Lights.getInstance().isDemo
                         ? DriveConstants.kDemoTeleDriveMaxSpeedMetersPerSecond
@@ -192,7 +191,6 @@ public class Swerve extends SubsystemBase {
         backLeft.setDesiredState(desiredStates[2], throttle);
         backRight.setDesiredState(desiredStates[3], throttle);
     }
-
 
     public void setModuleRotations(SwerveModuleState[] desiredStates) {
         frontLeft.setModuleRotation(desiredStates[0]);

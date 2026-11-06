@@ -10,11 +10,11 @@ import com.revrobotics.spark.config.SparkFlexConfig;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
-import edu.wpi.first.units.measure.Velocity;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.CAN;
 import frc.robot.Constants.ShooterConstants;
 import frc.robot.subsystems.Lights;
+import frc.robot.util.ShooterMath;
 import org.littletonrobotics.junction.Logger;
 
 public class Flywheel extends SubsystemBase {
@@ -70,10 +70,8 @@ public class Flywheel extends SubsystemBase {
                         ShooterConstants.kFollowerV.get(),
                         ShooterConstants.kFollowerA.get());
 
-        
-            targetVelocity = ShooterConstants.kFlywheelMaxVelocity;
-        
-    
+        targetVelocity = ShooterConstants.kFlywheelMaxVelocity;
+
         running = false;
     }
 
@@ -120,8 +118,6 @@ public class Flywheel extends SubsystemBase {
     public double getVelocity(SparkFlex motor) {
         return motor.getEncoder().getVelocity();
     }
-
-   
 
     public void setFlywheelRadsPerSec(double targetVelocity) {
         double pidVoltage, ffVoltage;
@@ -182,15 +178,7 @@ public class Flywheel extends SubsystemBase {
     }
 
     public double calculateTargetVelocity(double dist) {
-        /*return Math.sqrt(
-                (FieldConstants.kG * dist * dist)
-                        / (2
-                                * Math.pow(Math.cos(ShooterConstants.kShooterAngle), 2)
-                                * (Math.tan(ShooterConstants.kShooterAngle) * dist
-                                        - FieldConstants.kHubHeightDiff)));
-        */
-        return 1310.13 + 1270.33 * dist - 128.09 * dist * dist;
-        // return 3429.57 * Math.log10(dist) + 2315.54;
+        return ShooterMath.targetVelocityForDistance(dist);
     }
 
     public SparkFlex getLeadMotor() {
@@ -202,13 +190,8 @@ public class Flywheel extends SubsystemBase {
     }
 
     public double getTargetVelocity() {
-      /*  if (Lights.getInstance().isDemo) {
-            targetVelocity = targetVelocity * ShooterConstants.shooterDemoScaleFactor;
-        } 
-        else {
-            
-        }
-        */
-       return Lights.getInstance().isDemo ? targetVelocity * ShooterConstants.shooterDemoScaleFactor : targetVelocity;
+        return Lights.getInstance().isDemo
+                ? ShooterMath.scaleForDemo(targetVelocity, ShooterConstants.shooterDemoScaleFactor)
+                : targetVelocity;
     }
 }
