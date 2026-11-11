@@ -70,6 +70,40 @@ with `count_test.mjs` (1, 2, 3 and 5 robots; 6 was checked 2026-09-25): every cl
 robot, each camera sat at its own station, and all robots went auto -> teleop -> endgame ->
 ended together.
 
+## Fixed host address (optional)
+
+`./start-host.sh --internet` uses a Cloudflare quick tunnel: no account, but a new random
+address each session, so the links change and Chrome asks every player for permission again.
+A named tunnel keeps one address:
+
+```bash
+./start-host.sh --hostname match.example.org --tunnel sphinx
+# or: SIM_HOSTNAME=match.example.org SIM_TUNNEL=sphinx ./start-host.sh
+```
+
+The script runs `cloudflared tunnel run --url http://localhost:4000 sphinx` and prints the six
+links with `https://match.example.org`. Both values are required. `--internet` and the no-flag
+home-network mode work as before; `--internet` as the first argument always means the quick tunnel.
+
+One-time set-up, on the host computer. It needs a Cloudflare account (the free plan is enough)
+with a domain in it, meaning the domain's DNS is run by Cloudflare; `match.example.org` stands for
+a name under that domain.
+
+```bash
+brew install cloudflared                                  # if not installed
+cloudflared tunnel login                                  # opens a browser: sign in, pick the domain
+cloudflared tunnel create sphinx                          # makes the tunnel and its credentials file
+cloudflared tunnel route dns sphinx match.example.org     # points the name at the tunnel
+```
+
+`login` and `create` save their files in `~/.cloudflared/`; they stay on that computer, so the
+same computer must host (or copy the folder, and treat it like a password). No `config.yml` is
+needed: `--url` sends everything to the match server. If `~/.cloudflared/config.yml` exists and
+has `ingress` rules, check that they do not send this hostname somewhere else.
+
+Written from the Cloudflare documentation and checked on 2026-11-11 only with a stand-in
+`cloudflared`; not yet run against a real named tunnel.
+
 ## Known gaps
 
 - Keep the browser tab landscape. In portrait Synthesis shows an overlay, and a drive test run

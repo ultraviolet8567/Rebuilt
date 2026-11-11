@@ -3,12 +3,41 @@
 #   ./start-host.sh --internet      opens a free Cloudflare quick tunnel (https) -- use this
 #   ./start-host.sh                 home network only, plain http: browsers may block game
 #                                   controllers there (keyboard still works)
+#   ./start-host.sh --hostname match.example.org --tunnel NAME
+#                                   optional: a named Cloudflare tunnel, so the address and the
+#                                   player links are the same every session. Needs the one-time
+#                                   set-up in ../README.md ("Fixed host address"). The two values
+#                                   can also come from SIM_HOSTNAME and SIM_TUNNEL.
 # Room code: 6 characters, digits and capital letters. Change it with ROOM=ABC123 ./start-host.sh
 set -euo pipefail
 HERE="$(cd "$(dirname "$0")" && pwd)"
 ROOM="${ROOM:-SPHINX}"
 PORT="${PORT:-4000}"
 [ -x "$HERE/bin/glueball" ] && [ -d "$HERE/site" ] || { echo "Run ./build-site.sh first."; exit 1; }
+
+# Fixed address (optional). Both values are needed; flags win over SIM_HOSTNAME / SIM_TUNNEL.
+FIXED_HOST="${SIM_HOSTNAME:-}"
+FIXED_TUNNEL="${SIM_TUNNEL:-}"
+prev=""
+for a; do
+    case "$prev" in
+        --hostname) FIXED_HOST="$a" ;;
+        --tunnel) FIXED_TUNNEL="$a" ;;
+    esac
+    case "$a" in
+        --hostname=*) FIXED_HOST="${a#--hostname=}" ;;
+        --tunnel=*) FIXED_TUNNEL="${a#--tunnel=}" ;;
+    esac
+    prev="$a"
+done
+# --internet, as before, asks for the quick tunnel and takes precedence.
+[ "${1:-}" = "--internet" ] && { FIXED_HOST=""; FIXED_TUNNEL=""; }
+if [ -n "$FIXED_HOST$FIXED_TUNNEL" ]; then
+    [ -n "$FIXED_HOST" ] && [ -n "$FIXED_TUNNEL" ] || { echo "A fixed address needs both --hostname and --tunnel (see ../README.md, \"Fixed host address\")."; exit 1; }
+    FIXED_HOST="${FIXED_HOST#https://}"; FIXED_HOST="${FIXED_HOST%/}"
+    [[ "$FIXED_HOST" =~ ^[A-Za-z0-9]([A-Za-z0-9.-]*[A-Za-z0-9])?$ ]] || { echo "--hostname must be a name like match.example.org, not '$FIXED_HOST'."; exit 1; }
+    command -v cloudflared >/dev/null || { echo "Install cloudflared first (brew install cloudflared)."; exit 1; }
+fi
 
 cleanup() { kill $(jobs -p) 2>/dev/null || true; }
 trap cleanup EXIT
@@ -26,6 +55,17 @@ if [ "${1:-}" = "--internet" ]; then
         BASE="$(grep -o 'https://[a-z0-9-]*\.trycloudflare\.com' "$HERE/tunnel.log" | head -1 || true)"; [ -n "$BASE" ] && break; sleep 1
     done
     [ -n "$BASE" ] && [[ "$BASE" == https://* ]] || { echo "The Cloudflare tunnel did not start; see $HERE/tunnel.log."; exit 1; }
+elif [ -n "$FIXED_HOST" ]; then
+    # --url sends everything arriving on the tunnel to this server, so no config.yml is needed.
+    cloudflared tunnel run --url "http://localhost:$PORT" "$FIXED_TUNNEL" > "$HERE/tunnel.log" 2>&1 &
+    TUNNEL_PID=$!
+    for _ in $(seq 1 30); do
+        grep -q 'Registered tunnel connection' "$HERE/tunnel.log" && break
+        kill -0 "$TUNNEL_PID" 2>/dev/null || { echo "The Cloudflare tunnel '$FIXED_TUNNEL' did not start; see $HERE/tunnel.log and ../README.md (\"Fixed host address\")."; exit 1; }
+        sleep 1
+    done
+    grep -q 'Registered tunnel connection' "$HERE/tunnel.log" || echo "The tunnel has not reported a connection yet; if the links fail, see $HERE/tunnel.log."
+    BASE="https://$FIXED_HOST"
 fi
 RELAY="${BASE/http/ws}"
 
