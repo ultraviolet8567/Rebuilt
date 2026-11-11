@@ -104,3 +104,31 @@ collision pushed player 2's robot 0.29 m, identically in both views.
 
 Known gaps: strafing yaws the robot (-36 deg over 0.6 m); deploying the intake shoves the chassis;
 Synthesis imports a URDF hinge's direction inconsistently between loads (hence calibration).
+
+## Choosing an autonomous routine from the link or the page (`auto=`)
+
+No dashboard is needed to pick the routine a robot runs in the autonomous period.
+
+| Parameter | Meaning |
+|---|---|
+| `auto=Shoot Left` | routine for this player's robot. Spelling is forgiving: `auto=shoot_left`, `auto=ShootLeft` and `auto=Shoot%20Left` are the same. Without it the page changes nothing (the robot program's own default, `None`, does nothing) |
+| `nt=ws://localhost:5811` | where the robot program's NetworkTables server is, if not the default. The default follows `codesim`: simulation port 3300 -> 5810, 3301 -> 5811, ... (the `-PsimPort=3301 -PntPort=5811` pairing above) |
+
+The page also shows an "Auto routine" list at the top left with the routines the robot program
+really has; picking one there does the same as the link. The list follows the robot program, so a
+choice made in AdvantageScope or Glass shows up in it too.
+
+How it works: the robot code's chooser (`AutoSelector`, "Auto Routine") is a NetworkTables
+`SendableChooser`, and NetworkTables 4 is a websocket. `SwerveCodeSim.ts` connects to
+`ws://localhost:5810/nt/...` from the page, reads `/SmartDashboard/Auto Routine/options` and
+`active`, and writes `selected`. No robot code changed. On an https page this is the same Chrome
+"local network" permission the simulation connection already needs.
+
+- A name that is not in the list: an error toast, a note under the list that stays, and the page
+  selects `Do Nothing` (so a routine left over from an earlier link does not run).
+- The robot program remembers the choice until it is restarted; a link without `auto=` does not
+  reset it. The list always shows what the robot will run.
+- If the robot program is restarted while the page is open, the page reconnects (every 2 s) and
+  sends its choice again.
+- `window.__X.autoRoutineStatus()` and `window.__X.chooseAutoRoutine(name)` are there for scripted
+  players and tests; `player.mjs` takes `EXTRA='&auto=shoot_left'`.
