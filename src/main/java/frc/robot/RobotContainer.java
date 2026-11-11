@@ -248,7 +248,15 @@ public class RobotContainer {
         shooter.getKicker()
                 .setDefaultCommand(shooter.getKicker().feedWhen(shooter.getFlywheel()::atSpeed));
 
-        driver.back().onTrue(Commands.runOnce(drive::resetHeading).ignoringDisable(true));
+        // Back/View declares the robot to be facing away from our wall. In a Synthesis match the
+        // heading comes from where Synthesis placed the robot, and resetting it by hand leaves
+        // field-relative driving rotated, so the button does nothing there.
+        boolean synthesis =
+                Constants.currentMode == Constants.Mode.SIM
+                        && Constants.simBackend == Constants.SimBackend.SYNTHESIS;
+        if (!synthesis) {
+            driver.back().onTrue(Commands.runOnce(drive::resetHeading).ignoringDisable(true));
+        }
         driver.rightTrigger()
                 .whileTrue(
                         DriveCommands.joystickDriveAtAngle(
