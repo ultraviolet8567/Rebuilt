@@ -1,17 +1,31 @@
-# Rebuilt (2026) — branch `sim/shooter-seperate-sim`
+# Rebuilt (2026) — branch `sim/match-night` (Sphinx Match Night)
 
-This branch starts from the team's most recent competition code (`shooter-seperate`),
+## Match Night
+
+Sphinx Match Night is a multi-player simulation: each player runs this robot code on their own
+computer and drives Sphinx on a shared field in a Chrome tab.
+
+**Players: start with [docs/multiplayer-sim-guide.html](docs/multiplayer-sim-guide.html).** It
+covers the set-up, the start files in the `sim` folder, and the controls. No programming is
+needed. Hosts use the same guide; the technical notes are in
+[tools/synthesis/README.md](tools/synthesis/README.md).
+
+## About this branch
+
+This branch builds on `sim/shooter-seperate-sim`, which starts from the team's most recent
+competition code (`shooter-seperate`),
 merges the review fixes from `bugfix/shooter-seperate-fixes`, fixes several more
 problems, and adds full **desktop simulation** so the robot program can be run,
-driven and watched in AdvantageScope on a laptop with no robot present.
+driven and watched in AdvantageScope on a laptop with no robot present. Match Night is
+added on top of that.
 
 ## Documents
 
 - **[docs/simulator-guide.html](docs/simulator-guide.html)** — how to install, run and
-  use the simulator. Written for non-programmers; includes tooltips and links to
-  learning resources.
+  use the desktop simulator (one robot, on your own computer). Written for
+  non-programmers; includes tooltips and links to learning resources.
 - **[docs/sim-branch-changes.html](docs/sim-branch-changes.html)** — every change on
-  this branch and why, the simulation architecture, what the tests prove, and what
+  `sim/shooter-seperate-sim` and why, the simulation architecture, what the tests prove, and what
   to verify on the real robot.
 
 (Open the HTML files in a browser; GitHub shows them as source.)
@@ -19,7 +33,8 @@ driven and watched in AdvantageScope on a laptop with no robot present.
 ## Quick start
 
 ```
-./gradlew simulateJava     # run the simulator (needs Java 17; WPILib VS Code has it)
+./gradlew simulateJava     # run the desktop simulator (needs Java 17; WPILib VS Code has it)
+./gradlew simulateJava -Psynthesis   # run for Match Night (the files in sim/ do this for you)
 ./gradlew test             # boot the simulated robot headless and check it behaves
 ./gradlew build            # compile, format-check and test
 ./gradlew deploy           # deploy to the roboRIO, exactly as before
