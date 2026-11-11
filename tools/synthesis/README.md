@@ -56,7 +56,7 @@ indexer, hood trim, both shots with the kicker interlock, pivot positions, shake
 | `autojoin=ROOM` | relay room (must already exist: glueball `-r ROOM`) |
 | `sphinx=red2` | station; spawns Sphinx there and runs the whole setup |
 | `relay=ws(s)://host:port` | relay address (sets the Synthesis multiplayer preferences) |
-| `field=1` | spawn the field if nobody has; the first player in keeps score |
+| `field=1` | spawn the field if nobody has; the first player in holds the field and keeps score (if that player leaves, the field is removed for everyone until a player reloads) |
 | `codesim=ws://localhost:3300/wpilibws` | this player's robot program (default port 3300) |
 | `view=driver\|station\|follow` | starting camera (default `driver`); V cycles it in play |
 | `hopper=live` | practice mode: loads `sphinx_live_urdf.zip` (hollow hopper, `dof_hopper_slide` extension following the intake, feed gate), so fuel stays a physics body inside the robot and fires from the feed zone; about half the frame rate with a full hopper |
