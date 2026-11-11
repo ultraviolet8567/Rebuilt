@@ -28,7 +28,7 @@ for j in "$HOME/wpilib/2026/jdk" "$HOME/wpilib/2027/jdk" /usr/lib/jvm/java-17-op
     fi
 done
 if [ -z "$JAVA_HOME" ]; then
-    echo "Could not find Java 17. Install WPILib 2026 (see the simulation guide), then try again."
+    echo "Could not find Java 17. Install Java 17 (Temurin 17) or WPILib 2026 (see the simulation guide), then try again."
     read -r -p "Press Return to close."; exit 1
 fi
 
