@@ -694,12 +694,15 @@ export async function followMatchMode() {
 }
 
 /**
- * One-step start for players: ?autojoin=ROOM&sphinx=red2[&field=1][&codesim=ws://...].
+ * One-step start for players: ?autojoin=ROOM&sphinx=red2[&field=1][&codesim=ws://...][&auto=Shoot Left].
  * `field=1` only for the host, who brings the field; everyone else receives it.
  */
 export async function autoStart(params: URLSearchParams) {
     const station = (params.get("sphinx") ?? "blue1") as Station
     if (params.get("hopper") === "live") sphinxZip = SPHINX_LIVE_URDF_ZIP
+    // The autonomous routine (?auto=...) is between the page and the robot program only, so it
+    // does not wait for the field or the room.
+    startAutoRoutineChooser(params)
     const { globalAddToast } = await import("@/components/GlobalUIControls")
     globalAddToast(
         "info",
@@ -733,6 +736,306 @@ export async function autoStart(params: URLSearchParams) {
         ;(window as any).__sphinx = { ready: false, error: String(e) }
         throw e
     }
+}
+
+/* ------------------------------------------------------------------------------------------------
+ * Autonomous routine choice without a dashboard: ?auto=<routine name> and a small on-page list
+ * ---------------------------------------------------------------------------------------------- */
+
+/**
+ * The robot code publishes its routines as a chooser on NetworkTables ("Auto Routine", see
+ * AutoSelector.java), which is what AdvantageScope and Glass show. NetworkTables 4 is itself a
+ * websocket (ws://localhost:5810/nt/<client name>), so the page talks to the chooser directly, the
+ * same way it already reaches the robot program for the simulation: it reads `options` and
+ * `active`, and writes `selected`. No robot code is involved, so the list is always the routines
+ * that robot program really has.
+ *
+ * Nothing is written unless the link names a routine or the player picks one from the list. A name
+ * that is not in the list selects "Do Nothing" and says so.
+ */
+const AUTO_CHOOSER = "/SmartDashboard/Auto Routine/"
+const AUTO_NOTHING = "Do Nothing"
+const NT_STRING = 4 // NetworkTables 4 type codes
+const NT_INT = 2
+
+type AutoStatus = {
+    url: string
+    connected: boolean
+    options: string[]
+    active?: string // what the robot program says is selected
+    wanted?: string // what this page asked for (re-sent if the robot program restarts)
+    asked?: string // the link's auto= value, as typed
+    unknown?: boolean // the link's value matched no routine
+}
+const auto: AutoStatus = { url: "", connected: false, options: [] }
+let autoSocket: WebSocket | undefined
+let autoTimeOffsetUs: number | undefined // server clock minus this page's clock, microseconds
+let autoRetry: ReturnType<typeof setTimeout> | undefined
+let autoConfirm: ReturnType<typeof setTimeout> | undefined
+let autoList: HTMLSelectElement | undefined
+let autoNote: HTMLElement | undefined
+let autoResolved = false // the link's auto= value has been matched against the list
+
+/** What the page knows about the chooser; for the on-page list, scripted players and tests. */
+export function autoRoutineStatus(): AutoStatus {
+    return { ...auto, options: [...auto.options] }
+}
+
+/** "shoot_left", "Shoot%20Left" and "ShootLeft" all mean "Shoot Left". */
+const autoKey = (name: string) => name.toLowerCase().replace(/[^a-z0-9]/g, "")
+
+/**
+ * Where the robot program's NetworkTables server is: `nt=ws://host:port` if the link says, else
+ * the same computer as `codesim`, on 5810 for simulation port 3300, 5811 for 3301 and so on (the
+ * pairing `-PsimPort=3301 -PntPort=5811` in the README).
+ */
+function autoChooserUrl(params: URLSearchParams) {
+    let host = "localhost"
+    let port = 5810
+    try {
+        const nt = params.get("nt")
+        const u = new URL(nt ?? params.get("codesim") ?? "ws://localhost:3300/wpilibws")
+        host = u.hostname
+        if (nt) port = Number(u.port || 5810)
+        else if (+u.port >= 3300 && +u.port < 3400) port = 5810 + (+u.port - 3300)
+    } catch (e) {
+        console.error("Bad nt/codesim parameter", e)
+    }
+    return `ws://${host}:${port}/nt/8567-sim-page`
+}
+
+// The few MessagePack types NetworkTables values use. 64-bit integers go through two 32-bit halves:
+// timestamps are microseconds and stay far below 2^53.
+function ntDecode(buf: ArrayBuffer): unknown[] {
+    const dv = new DataView(buf)
+    const text = new TextDecoder()
+    let o = 0
+    const take = (n: number) => {
+        o += n
+        return o - n
+    }
+    const str = (n: number) => text.decode(new Uint8Array(buf, take(n), n))
+    const arr = (n: number): unknown[] => Array.from({ length: n }, read)
+    function read(): unknown {
+        const b = dv.getUint8(take(1))
+        if (b < 0x80) return b
+        if (b >= 0xe0) return b - 256
+        if ((b & 0xf0) === 0x90) return arr(b & 15)
+        if ((b & 0xe0) === 0xa0) return str(b & 31)
+        switch (b) {
+            case 0xc0: return null
+            case 0xc2: return false
+            case 0xc3: return true
+            case 0xc4: return void take(dv.getUint8(take(1))) // raw bytes: skipped
+            case 0xc5: return void take(dv.getUint16(take(2)))
+            case 0xc6: return void take(dv.getUint32(take(4)))
+            case 0xca: return dv.getFloat32(take(4))
+            case 0xcb: return dv.getFloat64(take(8))
+            case 0xcc: return dv.getUint8(take(1))
+            case 0xcd: return dv.getUint16(take(2))
+            case 0xce: return dv.getUint32(take(4))
+            case 0xcf: return dv.getUint32(take(4)) * 2 ** 32 + dv.getUint32(take(4))
+            case 0xd0: return dv.getInt8(take(1))
+            case 0xd1: return dv.getInt16(take(2))
+            case 0xd2: return dv.getInt32(take(4))
+            case 0xd3: return dv.getInt32(take(4)) * 2 ** 32 + dv.getUint32(take(4))
+            case 0xd9: return str(dv.getUint8(take(1)))
+            case 0xda: return str(dv.getUint16(take(2)))
+            case 0xdb: return str(dv.getUint32(take(4)))
+            case 0xdc: return arr(dv.getUint16(take(2)))
+            case 0xdd: return arr(dv.getUint32(take(4)))
+        }
+        throw new Error(`NetworkTables value type 0x${b.toString(16)} not handled`)
+    }
+    const out: unknown[] = []
+    while (o < buf.byteLength) out.push(read())
+    return out
+}
+
+/** One NetworkTables value frame: [topic or -1, time in microseconds, type, value]. */
+function ntEncode(id: number, timeUs: number, type: number, value: string | number) {
+    const u64 = (v: number) => [0xcf, ...[2 ** 56, 2 ** 48, 2 ** 40, 2 ** 32, 2 ** 24, 2 ** 16, 2 ** 8, 1].map(d => Math.floor(v / d) % 256)]
+    const bytes = [0x94, id < 0 ? 0xff : id, ...u64(Math.max(0, Math.round(timeUs))), type]
+    if (typeof value === "number") bytes.push(...u64(Math.max(0, Math.round(value))))
+    else {
+        const utf8 = new TextEncoder().encode(value)
+        bytes.push(0xda, utf8.length >> 8, utf8.length & 255, ...utf8)
+    }
+    return new Uint8Array(bytes)
+}
+
+const pageTimeUs = () => Math.round(performance.now() * 1000)
+
+async function autoToast(kind: "info" | "warning" | "error", text: string) {
+    const { globalAddToast } = await import("@/components/GlobalUIControls")
+    globalAddToast(kind, "Autonomous", text)
+}
+
+/** Ask the robot program for a routine by its exact name, and check that it took it. */
+function sendAutoChoice(name: string) {
+    auto.wanted = name
+    if (!autoSocket || autoSocket.readyState !== WebSocket.OPEN || autoTimeOffsetUs === undefined) return
+    autoSocket.send(ntEncode(1, pageTimeUs() + autoTimeOffsetUs, NT_STRING, name))
+    if (autoConfirm) clearTimeout(autoConfirm)
+    autoConfirm = setTimeout(() => {
+        if (auto.wanted === name && auto.active !== name)
+            autoToast("warning", `The robot program did not confirm "${name}". It is set to "${auto.active ?? "?"}".`)
+    }, 3000)
+}
+
+/**
+ * Choose the routine for the next autonomous period. Any spelling of a listed name works
+ * ("shoot_left"); a name that is not listed selects "Do Nothing" and returns false.
+ */
+export function chooseAutoRoutine(name: string): boolean {
+    const match = auto.options.find(o => autoKey(o) === autoKey(name))
+    if (match) {
+        auto.unknown = false
+        sendAutoChoice(match)
+        return true
+    }
+    auto.unknown = true
+    autoToast(
+        "error",
+        `There is no routine called "${name}", so your robot will do nothing in autonomous. Routines: ${auto.options.join(", ")}.`
+    )
+    // Not just "leave it": the robot program may still hold a routine chosen earlier.
+    const nothing = auto.options.find(o => o === AUTO_NOTHING)
+    if (nothing) sendAutoChoice(nothing)
+    return false
+}
+
+/** The on-page list, top left under the toolbar. Follows what the robot program reports, whoever changed it. */
+function showAutoList() {
+    if (!autoList) {
+        const box = document.createElement("label")
+        box.id = "sphinx-auto"
+        box.textContent = "Auto routine "
+        box.style.cssText =
+            "position:fixed;left:8px;top:68px;z-index:1000;padding:4px 8px;border-radius:6px;" +
+            "background:rgba(0,0,0,0.65);color:#fff;font:13px sans-serif"
+        autoList = document.createElement("select")
+        autoList.style.cssText = "font:13px sans-serif;max-width:16em"
+        const list = autoList
+        list.addEventListener("change", () => {
+            chooseAutoRoutine(list.value)
+            list.blur() // or the driving keys would go on changing the choice
+        })
+        // A list that still has the focus picks entries by their first letter: W, A, S, D...
+        list.addEventListener("keydown", e => {
+            if (e.key.length === 1) e.preventDefault()
+        })
+        box.appendChild(list)
+        autoNote = document.createElement("div")
+        autoNote.style.cssText = "color:#ff8a80;max-width:22em"
+        box.appendChild(autoNote)
+        document.body.appendChild(box)
+    }
+    // A toast is gone in seconds; this stays until the player picks a routine that exists.
+    if (autoNote) autoNote.textContent = auto.unknown ? `The link asked for "${auto.asked}", which is not a routine.` : ""
+    const names = auto.active && !auto.options.includes(auto.active) ? [auto.active, ...auto.options] : auto.options
+    if ([...autoList.options].map(o => o.value).join("\n") !== names.join("\n")) {
+        autoList.replaceChildren(...names.map(n => new Option(n, n)))
+    }
+    if (auto.active !== undefined) autoList.value = auto.active
+    autoList.disabled = !auto.connected
+    autoList.title = auto.connected ? "What your robot runs in the 15 seconds of autonomous" : "Robot program not connected"
+}
+
+/**
+ * Connect to the robot program's chooser and keep the connection (the robot program may be started
+ * late or restarted). `asked` is the link's auto= value, if any.
+ */
+export function startAutoRoutineChooser(params: URLSearchParams) {
+    auto.url = autoChooserUrl(params)
+    auto.asked = params.get("auto")?.trim() || undefined
+    autoResolved = false
+    let everConnected = false
+    const startedAt = performance.now()
+    let warned = false
+    const topicNames = new Map<number, string>()
+
+    const connect = () => {
+        autoRetry = undefined
+        let ws: WebSocket
+        try {
+            ws = new WebSocket(auto.url, ["v4.1.networktables.first.wpi.edu", "networktables.first.wpi.edu"])
+        } catch (e) {
+            console.error("Auto routine chooser", e)
+            return
+        }
+        autoSocket = ws
+        ws.binaryType = "arraybuffer"
+        let synced = false // this connection has the list and the server's clock
+        ws.onopen = () => {
+            auto.connected = everConnected = true
+            autoTimeOffsetUs = undefined
+            auto.active = undefined // a restarted robot program starts from its default again
+            topicNames.clear()
+            ws.send(
+                JSON.stringify([
+                    { method: "publish", params: { name: `${AUTO_CHOOSER}selected`, pubuid: 1, type: "string", properties: {} } },
+                    { method: "subscribe", params: { topics: [`${AUTO_CHOOSER}options`, `${AUTO_CHOOSER}active`], subuid: 1, options: {} } },
+                ])
+            )
+            ws.send(ntEncode(-1, 0, NT_INT, pageTimeUs())) // clock question; values need server time
+        }
+        ws.onmessage = e => {
+            if (typeof e.data === "string") {
+                for (const m of JSON.parse(e.data)) if (m.method === "announce") topicNames.set(m.params.id, m.params.name)
+                return
+            }
+            let changed = false
+            for (const frame of ntDecode(e.data as ArrayBuffer)) {
+                const [id, time, , value] = frame as [number, number, number, unknown]
+                if (id === -1) {
+                    // Answer to the clock question: our send time comes back with the server's time.
+                    const now = pageTimeUs()
+                    autoTimeOffsetUs = time + (now - (value as number)) / 2 - now
+                    changed = true
+                    continue
+                }
+                const name = topicNames.get(id)
+                if (name === `${AUTO_CHOOSER}options` && Array.isArray(value)) {
+                    auto.options = value.map(String)
+                    changed = true
+                } else if (name === `${AUTO_CHOOSER}active`) {
+                    auto.active = String(value)
+                    changed = true
+                }
+            }
+            if (!changed || auto.options.length === 0) return
+            if (!synced && autoTimeOffsetUs !== undefined) {
+                synced = true
+                if (!autoResolved) {
+                    autoResolved = true
+                    if (auto.asked && chooseAutoRoutine(auto.asked)) autoToast("info", `Your robot will run "${auto.wanted}" in autonomous.`)
+                } else if (auto.wanted && auto.active !== auto.wanted) {
+                    sendAutoChoice(auto.wanted) // a restarted robot program has forgotten the choice
+                }
+            }
+            showAutoList()
+        }
+        ws.onclose = () => {
+            if (ws !== autoSocket) return
+            auto.connected = false
+            autoTimeOffsetUs = undefined
+            if (autoList) showAutoList()
+            if (auto.asked && !everConnected && !warned && performance.now() - startedAt > 15000) {
+                warned = true
+                autoToast(
+                    "warning",
+                    `Could not reach the robot program to choose "${auto.asked}" (${auto.url.replace(/\/nt\/.*/, "")}). Autonomous stays as the robot program has it.`
+                )
+            }
+            autoRetry = setTimeout(connect, 2000)
+        }
+    }
+    if (autoRetry) clearTimeout(autoRetry)
+    const old = autoSocket
+    autoSocket = undefined
+    old?.close()
+    connect()
 }
 
 /**
