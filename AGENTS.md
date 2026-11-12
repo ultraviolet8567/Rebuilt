@@ -23,11 +23,32 @@ $env:JAVA_HOME = 'C:\Users\Public\wpilib\2026\jdk'
 | Simulation (GUI + driver station) | `.\gradlew.bat simulateJava` |
 | Deploy to the roboRIO | `.\gradlew.bat deploy` |
 
-`build` runs `spotlessCheck`, so formatting failures break the build. Run `spotlessApply` after
-edits rather than hand-formatting.
+`build` runs `spotlessCheck` **and** the unit tests, so formatting failures and broken tests break
+the build. Run `spotlessApply` after edits rather than hand-formatting.
 
-There is no `src/test` directory yet. JUnit 5 is already on the test classpath (`test` uses
-`useJUnitPlatform()`), so new tests belong in `src/test/java` under the same package.
+`src/test/java` holds hardware-free JUnit 5 tests. Keep new logic testable by putting pure math in a
+`frc.robot.util` helper instead of an instance method on a subsystem that constructs motors:
+
+- `ShooterMathTest` pins the distance-to-velocity calibration curve. If you re-fit the shooter,
+  update the expected values in the test in the same commit.
+- `ConstantsTest` reflects over `Constants.CAN` and fails on a duplicate or out-of-range CAN ID, a
+  reversed mechanism limit, or a demo scale factor outside 0-1. Encoder channels (`*EncoderPort`)
+  are excluded because they are roboRIO DIO pins, not CAN devices.
+
+Agent commands live in `.opencode/commands`:
+
+- `/verify` runs `compileJava spotlessCheck test`.
+- `/review` launches the read-only `reviewer` subagent (`.opencode/agents/reviewer.md`) on the
+  working tree diff.
+
+CI: `.github/workflows/build.yml` runs `./gradlew build` on every push and pull request. GradleRIO
+resolves WPILib and vendor artifacts from `frcmaven.wpi.edu`, so the runner needs no WPILib install.
+
+Docs that must be updated when behavior changes:
+
+- `docs/controls.md` - every controller binding and named command; generated from
+  `RobotContainer`.
+- `docs/can-map.md` - every device ID and controller type; generated from `Constants.CAN`.
 
 Never run `deploy` unless the user explicitly asks and the robot is safe to enable.
 
