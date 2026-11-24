@@ -145,17 +145,18 @@ pause</code></pre>
 <p>This was done on <code>MSI</code> on 2026-11-23, with internet and then with <code>--offline</code>. Both gave PASS.</p>
 <p>In VS Code with the WPILib extension, "Deploy Robot Code" runs the same <code>gradlew deploy</code>. That path is not yet tested on Windows.</p>
 
-<h2>8. Driver Station (open item)</h2>
-<p>The Driver Station on the Windows laptop did not connect on 2026-11-23. The cause is not known. Items to check, in this sequence:</p>
+<h2>8. Driver Station</h2>
+<p>The Driver Station on the Windows laptop did not connect on 2026-11-23. On 2026-11-24 the cause was found: the NI 2026 Driver Station was open at the same time. It held the Driver Station network ports and the connection to the Pi. After the NI Driver Station was closed, the 2027 Driver Station connected, and it enabled a motor test program (<code>systemcore-kraken-test</code>).</p>
+<p>Items to check when the Driver Station does not connect, in this sequence:</p>
 <ol>
+<li>Close the NI 2026 Driver Station. Only the FIRST Driver Station 2027 can be open. This was the cause on this laptop.</li>
 <li>Only one Driver Station can be connected. Quit the Driver Station on all other computers.</li>
 <li>Press the spacebar one time at the start-up screen. The Driver Station does not connect before this emergency-stop check. On the Mac, this was the cause of "not connected".</li>
-<li>Put <code>172.30.0.1</code> in the team number field. The Pi has no team number, and a team number of 0 points the Driver Station at a simulator on the same computer.</li>
-<li>Windows Firewall: when Windows asks about the Driver Station, permit it on public networks. Windows identifies <code>SYSTEMCORE</code> as a public network.</li>
+<li>If it still does not connect, put <code>172.30.0.1</code> in the team number field. On the Mac, a team number of 0 pointed the Driver Station at a simulator on the same computer.</li>
 <li>Make sure that the version is 2027.0.0-alpha-6 (shown in the window title).</li>
-<li>The NI 2026 Driver Station is also on the laptop. It does not operate with Systemcore. Make sure that it is not open.</li>
 </ol>
-<p>The Driver Station is not necessary for a deploy. It is necessary to enable the robot.</p>
+<p>Windows Firewall was off on this laptop, so it was not a cause here. On a laptop with the firewall on, permit the Driver Station on public networks. Windows identifies <code>SYSTEMCORE</code> as a public network.</p>
+<p>The Driver Station is not necessary for a deploy. It is necessary to enable the robot. When it is connected, <code>gradlew deploy</code> gets the robot address from it.</p>
 
 <h2>9. Problems and corrections</h2>
 <div class="scroll">
@@ -166,6 +167,8 @@ pause</code></pre>
 <tr><td>Deploy completes, <code>ntProbe</code> finds no server, the service log shows <code>MRC API version mismatch</code></td><td>The WPILib version does not agree with the Pi image</td><td>Use alpha-6 with image 11 (section 2)</td></tr>
 <tr><td>"Cannot add a DeployLocation with name '172.30.0.1'"</td><td>An old <code>build.gradle</code> and <code>-ProbotAddress=172.30.0.1</code> on <code>deploy</code></td><td>Remove the property from <code>deploy</code>, or use the current <code>build.gradle</code></td></tr>
 <tr><td><code>ntProbe</code>: <code>/DeployTest is not on the controller</code> immediately after a deploy</td><td>The program has not started yet</td><td>Wait 25 seconds, then run <code>ntProbe</code> again</td></tr>
+<tr><td>The 2027 Driver Station shows no communication</td><td>The NI 2026 Driver Station is open</td><td>Close the NI Driver Station (section 8)</td></tr>
+<tr><td>Build of a project with a vendor library: "No cached version of ... available for offline mode"</td><td>The vendor library was not downloaded</td><td>Do one build and one <code>ntProbe</code> without <code>--offline</code> on the school Wi-Fi</td></tr>
 <tr><td>The page at <code>172.30.0.1</code> does not load</td><td>The laptop is on the school Wi-Fi, or the Pi has no power</td><td>Join <code>SYSTEMCORE</code>. Check the Pi supply</td></tr>
 <tr><td><code>Add-WindowsCapability</code> fails (0x800f0950)</td><td>Windows Update is restricted on this laptop</td><td>Not necessary for this procedure. It is only for remote access by SSH</td></tr>
 </table>
@@ -176,12 +179,13 @@ pause</code></pre>
 <h2>10. State of the laptop MSI</h2>
 <div class="scroll">
 <table>
-<tr><th>Item</th><th>State on 2026-11-23</th></tr>
+<tr><th>Item</th><th>State on 2026-11-24</th></tr>
 <tr><td>WPILib 2027 alpha-6 build tools</td><td><span class="ok">Done</span>, unpacked by hand to <code>C:\Users\Public\wpilib\2027_alpha5</code></td></tr>
 <tr><td>Project and <code>deploy.cmd</code></td><td><span class="ok">Done</span>, in <code>C:\frc2027\systemcore-deploy-test</code></td></tr>
 <tr><td>Build and deploy to the Pi</td><td><span class="ok">Done</span>, PASS online and offline</td></tr>
-<tr><td>Driver Station alpha-6</td><td><span class="q">Did not connect</span>. See section 8</td></tr>
-<tr><td>VS Code with the 2027 WPILib extension</td><td><span class="no">Not done</span>. Run <code>WPILibInstaller.exe</code> (section 4)</td></tr>
+<tr><td>Driver Station alpha-6</td><td><span class="ok">Done</span>. Connects when the NI 2026 Driver Station is closed (section 8)</td></tr>
+<tr><td>Kraken motor test project and <code>deploy.cmd</code></td><td><span class="ok">Done</span>, in <code>C:\frc2027\systemcore-kraken-test</code>. Deploy and <code>ntProbe</code> PASS offline</td></tr>
+<tr><td>VS Code with the 2027 WPILib extension</td><td><span class="ok">Done</span> by hand over SSH, not with <code>WPILibInstaller.exe</code>: VS Code 1.116.0 in <code>C:\Users\Public\wpilib\2027_alpha5\vscode</code>, the five extensions from <code>vsCodeExtensions</code>, settings for JDK 25, <code>ToolsUpdater.exe</code>, and the desktop shortcut "2027 WPILib VS Code". The laptop copies of the projects have <code>projectYear</code> <code>2027_alpha5</code> in <code>.wpilib\wpilib_preferences.json</code>. The Kraken project opened in it without errors (2026-11-24). Deploy from this VS Code is <span class="q">not yet tested</span></td></tr>
 <tr><td>OpenSSH server with the Mac's key</td><td>Installed for remote setup. Not necessary for this procedure. To stop it: <code>Stop-Service sshd; Set-Service sshd -StartupType Disabled</code></td></tr>
 </table>
 </div>

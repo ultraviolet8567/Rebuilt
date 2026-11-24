@@ -40,6 +40,10 @@ To change the voltage, change `/KrakenTest/commandVolts` from a NetworkTables cl
 
 The first build needs a connection to the internet to get Phoenix 6 from the CTRE server.
 
+## On the Windows laptop
+
+The project is in `C:\frc2027\systemcore-kraken-test` on the team laptop `MSI`, with the same three changed files as the deploy test (`settings.gradle`, the Gradle wrapper, `gradle.properties`) and a `deploy.cmd`. Phoenix 6 was downloaded with one online `deploy` and one online `ntProbe`. After that, `deploy --offline` and `ntProbe --offline` gave PASS on the `SYSTEMCORE` Wi-Fi (2026-11-24).
+
 ## Result on 2026-11-24
 
 Deployed from the Mac on the direct ethernet cable. `ntProbe` gave PASS. With the robot disabled, the program reported: connected = true, supply 12.4 V, current limit configuration OK, 0 rpm. The CAN bus also has a REV PDH with ID 1.
