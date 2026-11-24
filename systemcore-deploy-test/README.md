@@ -26,6 +26,36 @@ The last line is `RESULT: PASS` when the controller runs this build and the coun
 
 `-ProbotAddress` is optional on this setup. Without it, GradleRIO found the Pi through its default host name and `ntProbe` connected to `robot.local` (both tested 2026-11-23 on a direct ethernet cable where both ends have link-local 169.254.x.x addresses). Give the address when the name does not resolve. To see what is on a controller before a deploy, add `-Pexpect=false` to the `ntProbe` command.
 
+## From VS Code
+
+Open this folder in VS Code. `.vscode/tasks.json` has four tasks (Terminal > Run Task):
+
+- `Systemcore: deploy, then probe` is the default build task. Cmd+Shift+B runs it.
+- `Systemcore: deploy` and `Systemcore: probe` run the two steps separately.
+- `Systemcore: robot service log` shows the last lines of the program's output on the controller.
+
+The tasks run the same Gradle commands as above. The WPILib VS Code extension is not installed on this Mac. Its "Deploy Robot Code" command also runs `./gradlew deploy`, so the result is the same. The extension comes with the WPILib installer; use the 2027 alpha-6 installer while the controller has image 11.
+
+## With the FIRST Driver Station
+
+The Driver Station does not deploy code. During a deploy, GradleRIO asks the Driver Station on `localhost:6770` for the address of the robot it is connected to, and uses that address. With the Driver Station connected, `./gradlew deploy` needs no address and no name lookup.
+
+- Use Driver Station 2027.0.0-alpha-6 with image 11. The WPILib alpha-7 release note says Driver Station alpha-7 is necessary for alpha-7.
+- After the Driver Station starts, press the spacebar once. It does not connect until that emergency-stop check is done.
+- The team number field accepts an IP address. On the direct ethernet cable it is set to `169.254.99.210`, because the controller has no team number and no 10.TE.AM.2 address.
+- Tested 2026-11-23: the deploy log showed `FIRST Driver Station reported IP: 169.254.99.210`, and `ntProbe` gave PASS.
+
+## On a Windows laptop
+
+Set up on 2026-11-23 on the team laptop `MSI`, connected to the controller's own Wi-Fi network `SYSTEMCORE` (controller at `172.30.0.1`).
+
+- Tools: the WPILib 2027.0.0-alpha-6 Windows installer. Its files go to `C:\Users\Public\wpilib\2027_alpha5` (the installer for alpha-6 uses the year name `2027_alpha5`), with JDK 25 in the `jdk` folder and Gradle 9.4.1.
+- Three project files are different on that laptop: `settings.gradle` has `wpilibYear = '2027_alpha5'`, the Gradle wrapper is 9.4.1, and `gradle.properties` gives the Windows JDK path.
+- The first build needs a connection to the internet. The installer's offline library store does not have some parent POM files (for example for `gson`). After one online build, `--offline` builds work.
+- `deploy.cmd` in the project folder on the laptop sets `JAVA_HOME`, deploys with `--offline`, waits, then runs `ntProbe`. Double-click it.
+- Do not give `-ProbotAddress=172.30.0.1` to `deploy` with an older copy of `build.gradle`. That address is a GradleRIO default, and a second entry stopped the build. The current `build.gradle` ignores the duplicate.
+- Result: deploy from the laptop completed and `ntProbe` gave PASS, also with `--offline` and no internet.
+
 ## WPILib version and OS image
 
 The GradleRIO version in `build.gradle` must agree with the Systemcore OS image on the controller.

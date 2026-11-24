@@ -26,7 +26,11 @@ deploy {
             // Must come after team is set.
             useDefaultSystemcoreHostName()
             if (robotAddress != null) {
-                addAddress(robotAddress.toString())
+                try {
+                    addAddress(robotAddress.toString())
+                } catch (Exception e) {
+                    // The address is already one of the defaults (for example 172.30.0.1).
+                }
             }
             debug = project.wpilib.getDebugOrDefault(false)
 

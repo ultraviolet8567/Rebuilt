@@ -1,0 +1,198 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Windows laptop setup for the DIY Systemcore</title>
+<style>
+  :root { --ink:#1c2430; --mute:#5b6675; --line:#d5dbe3; --bg:#ffffff; --panel:#f4f6f9; --accent:#5b2a86; --ok:#1d6b3a; --warn:#8a5a00; --bad:#9b1c1c; }
+  @media (prefers-color-scheme: dark) {
+    :root { --ink:#e6e9ee; --mute:#9aa5b4; --line:#343c48; --bg:#14181e; --panel:#1c222b; --accent:#c9a3ee; --ok:#7fd29b; --warn:#e6b85c; --bad:#f08a8a; }
+  }
+  body { font: 16px/1.5 -apple-system, "Segoe UI", Helvetica, Arial, sans-serif; color: var(--ink); background: var(--bg); margin: 0; }
+  main { max-width: 860px; margin: 0 auto; padding: 24px 16px 56px; }
+  h1 { font-size: 1.7rem; margin: 0 0 4px; }
+  h2 { font-size: 1.2rem; margin: 34px 0 8px; padding-top: 14px; border-top: 1px solid var(--line); }
+  .sub { color: var(--mute); margin: 0 0 16px; }
+  .note { background: var(--panel); border-left: 4px solid var(--accent); padding: 10px 14px; margin: 14px 0; }
+  .warn { border-left-color: var(--warn); }
+  table { border-collapse: collapse; width: 100%; margin: 10px 0; font-size: 0.95rem; }
+  th, td { text-align: left; vertical-align: top; padding: 7px 9px; border-bottom: 1px solid var(--line); }
+  th { color: var(--mute); font-weight: 600; }
+  .scroll { overflow-x: auto; }
+  code, pre { font: 0.9em/1.45 ui-monospace, Consolas, Menlo, monospace; }
+  code { background: var(--panel); padding: 1px 4px; border-radius: 3px; }
+  pre { background: var(--panel); padding: 10px 12px; border-radius: 6px; overflow-x: auto; margin: 8px 0; }
+  pre code { background: none; padding: 0; }
+  ol li, ul li { margin: 5px 0; }
+  .t { font-weight: 600; }
+  .ok { color: var(--ok); font-weight: 600; } .no { color: var(--bad); font-weight: 600; } .q { color: var(--warn); font-weight: 600; }
+  svg { max-width: 100%; height: auto; display: block; margin: 8px 0; }
+  svg text { font: 13px -apple-system, "Segoe UI", Helvetica, Arial, sans-serif; fill: var(--ink); }
+  svg .m { fill: var(--mute); font-size: 12px; }
+  svg .box { fill: var(--panel); stroke: var(--line); stroke-width: 1.5; }
+  svg .ln { stroke: var(--accent); stroke-width: 2; fill: none; }
+  svg .dash { stroke-dasharray: 5 4; }
+</style>
+</head>
+<body>
+<main>
+<h1>Windows laptop setup for the DIY Systemcore</h1>
+<p class="sub">Team 8567 · Version 1, 2026-11-23 · Made from the setup of the laptop <code>MSI</code> on that date</p>
+
+<div class="note">
+This procedure sets up a Windows 11 laptop to build robot code and deploy it to the DIY Systemcore (Raspberry Pi 5 clone) without help from a second computer. The Driver Station step is not yet proven on Windows. See section 8.
+</div>
+
+<h2>1. What the laptop connects to</h2>
+<svg viewBox="0 0 760 170" role="img" aria-label="The laptop joins the Wi-Fi network SYSTEMCORE made by the Pi. The Pi is at 172.30.0.1. The laptop has no internet on that network.">
+  <rect class="box" x="10" y="45" width="210" height="80" rx="8"/>
+  <text x="115" y="78" text-anchor="middle" class="t">Windows laptop</text>
+  <text x="115" y="98" text-anchor="middle" class="m">gets 172.30.0.x from the Pi</text>
+  <rect class="box" x="540" y="45" width="210" height="80" rx="8"/>
+  <text x="645" y="78" text-anchor="middle" class="t">DIY Systemcore (Pi 5)</text>
+  <text x="645" y="98" text-anchor="middle" class="m">172.30.0.1 · image 11</text>
+  <path class="ln" d="M220 85 H540"/>
+  <text x="380" y="72" text-anchor="middle">Wi-Fi network SYSTEMCORE</text>
+  <text x="380" y="106" text-anchor="middle" class="m">deploy (SSH, port 22) · NetworkTables (5810)</text>
+  <path class="ln dash" d="M115 45 V18 H300"/>
+  <text x="308" y="22" class="m">Internet: only on the school Wi-Fi. Not available on SYSTEMCORE.</text>
+</svg>
+<p>The laptop uses one Wi-Fi network at a time. Do all downloads and the first build on the school Wi-Fi (sections 3 to 5). Then change to <code>SYSTEMCORE</code> to deploy (section 6).</p>
+
+<h2>2. Versions that must agree</h2>
+<div class="scroll">
+<table>
+<tr><th>Item</th><th>Version</th><th>Basis</th></tr>
+<tr><td>Systemcore OS image on the Pi</td><td><code>limelightosr-beta-11</code> (image 11)</td><td>Read from the Pi on 2026-11-23</td></tr>
+<tr><td>WPILib / GradleRIO</td><td>2027.0.0-alpha-6</td><td>Tested: alpha-6 runs on image 11. An alpha-7 build stops with <code>MRC API version mismatch</code></td></tr>
+<tr><td>FIRST Driver Station</td><td>2027.0.0-alpha-6</td><td>alpha-6 connected from the Mac. Not yet connected from Windows</td></tr>
+<tr><td>JDK</td><td>25 (in the WPILib installer)</td><td>Tested</td></tr>
+<tr><td>Gradle</td><td>9.4.1 (in the WPILib installer)</td><td>Tested on Windows</td></tr>
+</table>
+</div>
+<p>If the Pi image is changed to 14 or later, all of these change to alpha-7 or later. The WPILib alpha-7 release note says "Systemcore image 14 is required for this release."</p>
+
+<h2>3. Downloads (school Wi-Fi)</h2>
+<div class="scroll">
+<table>
+<tr><th>File</th><th>Size</th><th>Source</th></tr>
+<tr><td><code>WPILib_Windows-2027.0.0-alpha-6.iso</code></td><td>2.78 GB</td><td>Link "Windows" in the WPILib release <code>v2027.0.0-alpha-6</code> at <code>github.com/wpilibsuite/allwpilib/releases</code></td></tr>
+<tr><td><code>FirstDriverStation-win-x64-2027.0.0-alpha-6.exe</code></td><td>27 MB</td><td>Release <code>v2027.0.0-alpha-6</code> at <code>github.com/wpilibsuite/FirstDriverStation-Public/releases</code></td></tr>
+</table>
+</div>
+<p>SHA-256 of the WPILib file, from the release note: <code>3f1c9f921c3747d8bbc3d36da6603c750ed2e04a27a1f4a6ae87c529d4f3144e</code>. To check it in PowerShell:</p>
+<pre><code>Get-FileHash .\WPILib_Windows-2027.0.0-alpha-6.iso -Algorithm SHA256</code></pre>
+<p>On the laptop <code>MSI</code>, these files and a VS Code package are already in <code>C:\frc2027</code>.</p>
+
+<h2>4. Install the tools (school Wi-Fi)</h2>
+<ol>
+<li>Double-click the <code>.iso</code> file. Windows opens it as a drive.</li>
+<li>Run <code>WPILibInstaller.exe</code> from that drive. Select "Everything" and install for all users.</li>
+<li>At the VS Code step, select the download for this computer. The installer gets VS Code 1.116.0 from the internet. If there is no internet, select the existing file <code>VSCode-1.116.0-Windows.zip</code>.</li>
+<li>Let the installer complete. The tools go to <code>C:\Users\Public\wpilib\2027_alpha5</code>. The folder name is correct: the alpha-6 installer uses the year name <code>2027_alpha5</code>.</li>
+<li>Run <code>FirstDriverStation-win-x64-2027.0.0-alpha-6.exe</code>. Approve the administrator prompt.</li>
+</ol>
+<div class="note warn">
+The WPILib 2026 tools in <code>C:\Users\Public\wpilib\2026</code> stay as they are. Do not set a system-wide <code>JAVA_HOME</code> to JDK 25. The 2026 projects need JDK 17.
+</div>
+<p>On <code>MSI</code>, steps 2 to 4 were not done with the installer window. The files were unpacked to the same folder by hand. That gives the build tools but not VS Code or the shortcuts. Run the installer there to get them.</p>
+
+<h2>5. Get the project and do the first build (school Wi-Fi)</h2>
+<ol>
+<li>Copy the folder <code>systemcore-deploy-test</code> to the laptop, for example to <code>C:\frc2027</code>. At this time the project is on the branch <code>claude/systemcore-diy-discovery-722480</code>, which is not yet on GitHub. Use a USB drive, or push the branch first.</li>
+<li>Make sure that these three files agree with the Windows tools:
+<div class="scroll">
+<table>
+<tr><th>File</th><th>Necessary text</th></tr>
+<tr><td><code>settings.gradle</code></td><td><code>String wpilibYear = '2027_alpha5'</code></td></tr>
+<tr><td><code>gradle\wrapper\gradle-wrapper.properties</code></td><td><code>gradle-9.4.1-bin.zip</code> in the <code>distributionUrl</code> line</td></tr>
+<tr><td><code>gradle.properties</code></td><td><code>org.gradle.java.home=C:/Users/Public/wpilib/2027_alpha5/jdk</code></td></tr>
+</table>
+</div>
+The copy in the repository has the macOS values. The copy on <code>MSI</code> has the Windows values.</li>
+<li>Open a command window in the project folder and build one time with internet:
+<pre><code>set JAVA_HOME=C:\Users\Public\wpilib\2027_alpha5\jdk
+gradlew.bat build</code></pre>
+The last lines must include <code>BUILD SUCCESSFUL</code>.</li>
+</ol>
+<p>The first build must have internet. The installer's offline library store does not have some files that Gradle needs (for example a parent file for <code>gson</code>), and a build with <code>--offline</code> stopped with "Could not resolve" before the online build was done. After one online build, <code>--offline</code> builds work.</p>
+
+<h2>6. Connect to the Systemcore</h2>
+<ol>
+<li>Supply power to the Pi. Wait approximately one minute.</li>
+<li>On the laptop, join the Wi-Fi network <code>SYSTEMCORE</code>. The default password is <code>PASSWORD</code> (from the 8567 bench guide). Windows shows "No internet". That is correct.</li>
+<li>Open <code>http://172.30.0.1</code> in a browser other than Brave. The SYSTEMCORE page must load.</li>
+</ol>
+<p>Other checks: <code>ping 172.30.0.1</code> gives replies of a few milliseconds.</p>
+
+<h2>7. Deploy and verify</h2>
+<p>Double-click <code>deploy.cmd</code> in the project folder. If the file is not there, make it with this text:</p>
+<pre><code>@echo off
+set JAVA_HOME=C:\Users\Public\wpilib\2027_alpha5\jdk
+cd /d %~dp0
+call gradlew.bat deploy --offline || goto :end
+echo Waiting 24 s for the robot service to start...
+timeout /t 24 /nobreak &gt;nul
+call gradlew.bat ntProbe --offline -ProbotAddress=172.30.0.1
+:end
+pause</code></pre>
+<ul>
+<li>The deploy must end with <code>BUILD SUCCESSFUL</code>.</li>
+<li>The wait is necessary. The <code>robot</code> service on the clone waits approximately 18 seconds for CAN interfaces before it starts the program.</li>
+<li>The last result line must be <code>RESULT: PASS. The controller runs this build and the counter advances.</code></li>
+</ul>
+<p>This was done on <code>MSI</code> on 2026-11-23, with internet and then with <code>--offline</code>. Both gave PASS.</p>
+<p>In VS Code with the WPILib extension, "Deploy Robot Code" runs the same <code>gradlew deploy</code>. That path is not yet tested on Windows.</p>
+
+<h2>8. Driver Station (open item)</h2>
+<p>The Driver Station on the Windows laptop did not connect on 2026-11-23. The cause is not known. Items to check, in this sequence:</p>
+<ol>
+<li>Only one Driver Station can be connected. Quit the Driver Station on all other computers.</li>
+<li>Press the spacebar one time at the start-up screen. The Driver Station does not connect before this emergency-stop check. On the Mac, this was the cause of "not connected".</li>
+<li>Put <code>172.30.0.1</code> in the team number field. The Pi has no team number, and a team number of 0 points the Driver Station at a simulator on the same computer.</li>
+<li>Windows Firewall: when Windows asks about the Driver Station, permit it on public networks. Windows identifies <code>SYSTEMCORE</code> as a public network.</li>
+<li>Make sure that the version is 2027.0.0-alpha-6 (shown in the window title).</li>
+<li>The NI 2026 Driver Station is also on the laptop. It does not operate with Systemcore. Make sure that it is not open.</li>
+</ol>
+<p>The Driver Station is not necessary for a deploy. It is necessary to enable the robot.</p>
+
+<h2>9. Problems and corrections</h2>
+<div class="scroll">
+<table>
+<tr><th>Symptom</th><th>Cause</th><th>Correction</th></tr>
+<tr><td><code>JAVA_HOME is not set</code></td><td>The command window has no JDK</td><td>Use <code>deploy.cmd</code>, or do the <code>set JAVA_HOME=...</code> line first</td></tr>
+<tr><td>Build: "Could not resolve ..." with <code>--offline</code></td><td>The first online build was not done</td><td>Do section 5, step 3 on the school Wi-Fi</td></tr>
+<tr><td>Deploy completes, <code>ntProbe</code> finds no server, the service log shows <code>MRC API version mismatch</code></td><td>The WPILib version does not agree with the Pi image</td><td>Use alpha-6 with image 11 (section 2)</td></tr>
+<tr><td>"Cannot add a DeployLocation with name '172.30.0.1'"</td><td>An old <code>build.gradle</code> and <code>-ProbotAddress=172.30.0.1</code> on <code>deploy</code></td><td>Remove the property from <code>deploy</code>, or use the current <code>build.gradle</code></td></tr>
+<tr><td><code>ntProbe</code>: <code>/DeployTest is not on the controller</code> immediately after a deploy</td><td>The program has not started yet</td><td>Wait 25 seconds, then run <code>ntProbe</code> again</td></tr>
+<tr><td>The page at <code>172.30.0.1</code> does not load</td><td>The laptop is on the school Wi-Fi, or the Pi has no power</td><td>Join <code>SYSTEMCORE</code>. Check the Pi supply</td></tr>
+<tr><td><code>Add-WindowsCapability</code> fails (0x800f0950)</td><td>Windows Update is restricted on this laptop</td><td>Not necessary for this procedure. It is only for remote access by SSH</td></tr>
+</table>
+</div>
+<p>To read the program's log from the laptop, open this address in the browser:</p>
+<pre><code>http://172.30.0.1:4802/api/logs/service/robot?lines=60</code></pre>
+
+<h2>10. State of the laptop MSI</h2>
+<div class="scroll">
+<table>
+<tr><th>Item</th><th>State on 2026-11-23</th></tr>
+<tr><td>WPILib 2027 alpha-6 build tools</td><td><span class="ok">Done</span>, unpacked by hand to <code>C:\Users\Public\wpilib\2027_alpha5</code></td></tr>
+<tr><td>Project and <code>deploy.cmd</code></td><td><span class="ok">Done</span>, in <code>C:\frc2027\systemcore-deploy-test</code></td></tr>
+<tr><td>Build and deploy to the Pi</td><td><span class="ok">Done</span>, PASS online and offline</td></tr>
+<tr><td>Driver Station alpha-6</td><td><span class="q">Did not connect</span>. See section 8</td></tr>
+<tr><td>VS Code with the 2027 WPILib extension</td><td><span class="no">Not done</span>. Run <code>WPILibInstaller.exe</code> (section 4)</td></tr>
+<tr><td>OpenSSH server with the Mac's key</td><td>Installed for remote setup. Not necessary for this procedure. To stop it: <code>Stop-Service sshd; Set-Service sshd -StartupType Disabled</code></td></tr>
+</table>
+</div>
+
+<h2>Sources</h2>
+<ul>
+<li>WPILib release notes <code>v2027.0.0-alpha-6</code> and <code>v2027.0.0-alpha-7</code> (wpilibsuite/allwpilib)</li>
+<li>FIRST Driver Station releases (wpilibsuite/FirstDriverStation-Public)</li>
+<li>Systemcore OS releases (LimelightVision/systemcore-os-public)</li>
+<li>Local: <code>README.md</code> in this folder, <code>8567_DIY_Systemcore_Bench_Guide_2026-11.html</code></li>
+</ul>
+</main>
+</body>
+</html>
