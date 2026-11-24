@@ -1,0 +1,139 @@
+plugins {
+    id "java"
+    // Must agree with the Systemcore OS image on the controller:
+    //   image 11 to 13 -> 2027.0.0-alpha-6
+    //   image 14 or later -> 2027.0.0-alpha-7 (alpha-8 also needs image 14 or later)
+    // A program built with the wrong one stops at start with "MRC API version mismatch".
+    id "org.wpilib.GradleRIO" version "2027.0.0-alpha-6"
+}
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_25
+    targetCompatibility = JavaVersion.VERSION_25
+}
+
+def ROBOT_MAIN_CLASS = "frc.robot.Main"
+
+// Address of the controller for deploy and for the ntProbe task. Give it with
+// -ProbotAddress=<ip or name> when the controller has no team-number address,
+// for example on a direct ethernet cable with link-local addresses.
+def robotAddress = project.findProperty('robotAddress')
+
+deploy {
+    targets {
+        systemcore(getTargetTypeClass('SystemCore')) {
+            team = project.wpilib.getTeamNumber()
+            // Must come after team is set.
+            useDefaultSystemcoreHostName()
+            if (robotAddress != null) {
+                try {
+                    addAddress(robotAddress.toString())
+                } catch (Exception e) {
+                    // The address is already one of the defaults (for example 172.30.0.1).
+                }
+            }
+            debug = project.wpilib.getDebugOrDefault(false)
+
+            artifacts {
+                wpilibJava(getArtifactTypeClass('WPILibJavaArtifact')) {
+                }
+                wpilibStaticFileDeploy(getArtifactTypeClass('FileTreeArtifact')) {
+                    files = project.fileTree('src/main/deploy')
+                    directory = '/home/systemcore/deploy'
+                    deleteOldFiles = false
+                }
+            }
+        }
+    }
+}
+
+def deployArtifact = deploy.targets.systemcore.artifacts.wpilibJava
+
+// Phoenix 6 comes from vendordeps/Phoenix6-26.50.0-alpha-1.json. That version goes with
+// GradleRIO alpha-6; Phoenix 26.70 goes with alpha-7.
+dependencies {
+    annotationProcessor wpi.java.deps.wpilibAnnotations()
+    implementation wpi.java.deps.wpilib()
+    implementation wpi.java.vendor.java()
+
+    systemcoreDebug wpi.java.vendor.jniDebug(wpi.platforms.systemcore)
+    systemcoreRelease wpi.java.vendor.jniRelease(wpi.platforms.systemcore)
+    nativeDebug wpi.java.vendor.jniDebug(wpi.platforms.desktop)
+    nativeRelease wpi.java.vendor.jniRelease(wpi.platforms.desktop)
+
+    systemcoreDebug wpi.java.deps.wpilibJniDebug(wpi.platforms.systemcore)
+    systemcoreRelease wpi.java.deps.wpilibJniRelease(wpi.platforms.systemcore)
+
+    nativeDebug wpi.java.deps.wpilibJniDebug(wpi.platforms.desktop)
+    nativeRelease wpi.java.deps.wpilibJniRelease(wpi.platforms.desktop)
+    simulationDebug wpi.sim.enableDebug()
+    simulationRelease wpi.sim.enableRelease()
+}
+
+// Each build gets a new nonce. The robot program publishes it, and ntProbe
+// compares the published value with this file. A match shows that the program
+// on the controller is this build.
+def buildInfoDir = layout.buildDirectory.dir('generated/buildinfo')
+def writeBuildInfo = tasks.register('writeBuildInfo') {
+    outputs.dir(buildInfoDir)
+    outputs.upToDateWhen { false }
+    doLast {
+        def f = new File(buildInfoDir.get().asFile, 'build-info.properties')
+        f.parentFile.mkdirs()
+        f.text = "nonce=${UUID.randomUUID().toString().substring(0, 8)}\n" +
+                "buildTime=${java.time.Instant.now()}\n" +
+                "gradleRio=2027.0.0-alpha-6\n"
+    }
+}
+sourceSets.main.resources.srcDir(files(buildInfoDir).builtBy(writeBuildInfo))
+
+wpi.sim.addGui().defaultEnabled = false
+wpi.sim.addDriverstation()
+
+// GradleRIO alpha-6 deploys one fat jar. (alpha-7 deploys a Gradle "application":
+// add the "application" plugin and use configureApplication in place of this block.)
+jar {
+    from { configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) } }
+    manifest org.wpilib.gradlerio.GradleRIOPlugin.javaManifest(ROBOT_MAIN_CLASS)
+    duplicatesStrategy = DuplicatesStrategy.INCLUDE
+}
+
+deployArtifact.jarTask = jar
+wpi.java.configureExecutableTasks(jar)
+
+// Each build makes a new nonce, so a successful deploy keeps a copy of the one
+// it sent. ntProbe compares the controller with this copy.
+def deployedInfo = new File(projectDir, 'build/deployed-build-info.properties')
+tasks.named('deploy') {
+    doLast {
+        deployedInfo.text = new File(buildInfoDir.get().asFile, 'build-info.properties').text
+    }
+}
+
+// Laptop-side NetworkTables client. It lists the topics on the controller and
+// reads /DeployTest. Use: ./gradlew ntProbe -ProbotAddress=<ip> [-Pexpect=false]
+tasks.register('ntProbe', JavaExec) {
+    group = 'verification'
+    description = 'Reads /DeployTest from the controller over NetworkTables.'
+    dependsOn 'classes', 'extractReleaseNative'
+    classpath = sourceSets.main.runtimeClasspath
+    mainClass = 'frc.robot.NtProbe'
+    def jniDir = layout.buildDirectory.dir('jni/release').get().asFile
+    systemProperty 'java.library.path', jniDir.absolutePath
+    environment 'DYLD_LIBRARY_PATH', jniDir.absolutePath
+    environment 'LD_LIBRARY_PATH', jniDir.absolutePath
+    args = [
+        (robotAddress ?: 'robot.local').toString(),
+        deployedInfo.absolutePath,
+        (project.findProperty('expect') ?: 'true').toString()
+    ]
+    doFirst {
+        if (gradle.taskGraph.hasTask(':deploy')) {
+            throw new GradleException('Run ntProbe as a separate command after deploy.')
+        }
+    }
+}
+
+tasks.withType(JavaCompile) {
+    options.compilerArgs.add '-XDstringConcat=inline'
+}
